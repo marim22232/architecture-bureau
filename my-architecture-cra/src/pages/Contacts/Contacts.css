@@ -1,0 +1,285 @@
+/* Contacts.css */
+.contacts-page {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Hero секция */
+.contacts-hero {
+  background: linear-gradient(135deg, #1a3a4a 0%, #2c5a6e 100%);
+  padding: 100px 0;
+  text-align: center;
+}
+
+.hero-description {
+  max-width: 600px;
+  margin: 1rem auto 0;
+  opacity: 0.9;
+}
+
+/* Основной контент */
+.contacts-content {
+  padding: 80px 0;
+  background: #f8fafc;
+}
+
+.contacts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 50px;
+}
+
+/* Левая колонка - контакты */
+.contacts-info {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.info-card {
+  background: white;
+  border-radius: 24px;
+  padding: 28px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease;
+}
+
+.info-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+}
+
+.info-icon {
+  font-size: 2.5rem;
+  margin-bottom: 16px;
+}
+
+.info-card h4 {
+  margin-bottom: 12px;
+}
+
+.work-schedule {
+  margin-top: 12px;
+  display: block;
+  color: #6c8a9e;
+}
+
+.contact-link {
+  color: #2c5a6e;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.contact-link:hover {
+  color: #1a3a4a;
+  text-decoration: underline;
+}
+
+/* Правая колонка */
+.contacts-right {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.map-container {
+  background: #e2e8f0;
+  border-radius: 24px;
+  overflow: hidden;
+  height: 300px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.map-container iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* ============================================ */
+/* ДОБАВЛЕНЫ СТИЛИ ДЛЯ ФОРМЫ */
+/* ============================================ */
+.feedback-form {
+  background: white;
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.form-subtitle {
+  margin: 8px 0 24px;
+  opacity: 0.7;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Стили для полей формы (если ContactForm не даёт свои стили) */
+.contact-form .my-input,
+.contact-form .my-textarea,
+.contact-form .my-button {
+  width: 100%;
+}
+
+/* Секция "Как добраться" */
+.directions-section {
+  padding: 80px 0;
+  background: white;
+}
+
+.directions-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+  margin-top: 48px;
+}
+
+.direction-item {
+  text-align: center;
+  padding: 32px 24px;
+  background: #f8fafc;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+
+.direction-item:hover {
+  transform: translateY(-5px);
+  background: white;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.direction-icon {
+  font-size: 2.5rem;
+  margin-bottom: 16px;
+}
+
+.direction-item h4 {
+  margin-bottom: 12px;
+}
+
+/* CTA секция */
+.contacts-cta {
+  padding: 80px 0;
+  background: linear-gradient(135deg, #1a3a4a 0%, #2c5a6e 100%);
+}
+
+.cta-content h2 {
+  color: white;
+}
+
+.cta-buttons {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 32px;
+}
+
+.cta-buttons a {
+  text-decoration: none;
+}
+
+/* ============================================ */
+/* АДАПТИВНОСТЬ */
+/* ============================================ */
+@media (max-width: 992px) {
+  .contacts-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  
+  .directions-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .contacts-hero {
+    padding: 60px 0;
+  }
+  
+  .contacts-content {
+    padding: 50px 0;
+  }
+  
+  .directions-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .directions-section {
+    padding: 50px 0;
+  }
+  
+  .contacts-cta {
+    padding: 50px 0;
+  }
+  
+  .cta-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .info-card {
+    padding: 20px;
+  }
+  
+  .feedback-form {
+    padding: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .contacts-hero {
+    padding: 40px 0;
+  }
+  
+  .hero-description {
+    font-size: 0.9rem;
+  }
+  
+  .info-icon {
+    font-size: 2rem;
+  }
+  
+  .map-container {
+    height: 250px;
+  }
+  
+  .direction-item {
+    padding: 24px 16px;
+  }
+  
+  .feedback-form {
+    padding: 20px;
+  }
+}
+/* Стили для контактных ссылок */
+.contact-link {
+  color: var(--primary, #4B6473);
+  text-decoration: none;
+  transition: color 0.3s ease;
+  display: inline-block; /* ← важно! */
+  word-break: keep-all; /* ← предотвращает разрыв */
+  white-space: nowrap; /* ← текст в одну строку */
+}
+
+.contact-link:hover {
+  color: var(--accent, #A08972);
+  text-decoration: underline;
+}
+
+/* Для телефона и email */
+.info-card .contact-link {
+  font-size: 1rem;
+  font-weight: 500;
+}
+

@@ -1,0 +1,27 @@
+.about {
+  text-align: center;
+  /*margin: 150px 0 0 0;*/
+}
+.container-inner{
+  margin: 20px 0  0  0 ;
+}
+.office-button {
+  display: inline-block
+}
+/* Адаптив для мобильных */
+@media (max-width: 768px) {
+  .office-button .my-button-outline {
+    white-space: normal;
+    padding: 12px 20px;
+    font-size: 0.85rem;
+    min-width: 220px;
+  }
+}
+
+@media (max-width: 480px) {
+  .office-button .my-button-outline {
+    min-width: 180px;
+    padding: 10px 16px;
+    font-size: 0.75rem;
+  }
+}

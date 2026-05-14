@@ -1,0 +1,62 @@
+.my-button {
+    display: inline-block;
+    padding: 14px 30px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-family: 'Inter', sans-serif;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.my-button-primary {
+    background: #A08972;
+    color: #FFFFFF;
+}
+
+.my-button-primary:hover {
+    background: #4B6473;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.my-button-dark:hover {
+    background: #4B6473;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.my-button:active {
+    transform: translateY(0);
+}
+
+.my-button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+    pointer-events: none;
+}
+
+.my-button:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+@media (max-width: 768px) {
+    .my-button::before {
+        display: none;
+    }
+}

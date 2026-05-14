@@ -1,0 +1,29 @@
+.my-textarea {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    font-size: 1rem;
+    min-height: 120px;
+    font-family: 'Inter', sans-serif;
+    box-sizing: border-box;
+    resize: vertical;
+    background: rgba(255, 255, 255, 0.95);
+    transition: all 0.3s ease;
+}
+
+.my-textarea:hover {
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.my-textarea:focus {
+    outline: none;
+    border-color: #1F2428;
+    background: #FFFFFF;
+    box-shadow: 0 0 0 3px rgba(31, 36, 40, 0.1);
+    transform: translateY(-2px);
+}
+
+.my-textarea::placeholder {
+    color: #999;
+}

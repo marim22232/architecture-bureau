@@ -1,0 +1,143 @@
+/* my-architecture-cra/src/pages/adminn/components/UserEditModal.css */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 650px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    border-bottom: 1px solid #e0e0e0;
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 1;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+
+.close-btn:hover {
+    background: #f0f0f0;
+}
+
+.modal-body {
+    padding: 25px;
+}
+
+.form-section {
+    margin-bottom: 30px;
+}
+
+.form-section:last-child {
+    margin-bottom: 0;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: #2c3e50;
+    margin-bottom: 6px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.custom-select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    background: white;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.custom-select:focus {
+    outline: none;
+    border-color: #3a5a6a;
+}
+
+.info-message {
+    display: flex;
+    gap: 12px;
+    background: #e3f2fd;
+    padding: 15px;
+    border-radius: 10px;
+    color: #1976d2;
+    margin-top: 10px;
+}
+
+.modal-footer {
+    padding: 20px 25px;
+    border-top: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    position: sticky;
+    bottom: 0;
+    background: white;
+}
+
+@media (max-width: 600px) {
+    .modal-content {
+        width: 95%;
+        max-height: 95vh;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+    
+    .modal-header {
+        padding: 15px 20px;
+    }
+    
+    .modal-body {
+        padding: 20px;
+    }
+    
+    .modal-footer {
+        padding: 15px 20px;
+    }
+}

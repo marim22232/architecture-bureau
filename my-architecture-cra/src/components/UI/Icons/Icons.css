@@ -1,0 +1,27 @@
+/* src/components/UI/Icons/Icons.css */
+.icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+/* Коричневые оттенки для иконок */
+.icon-brown {
+    color: #8B4513;
+}
+
+.icon-accent {
+    color: #C4A484;
+}
+
+.icon-primary {
+    color: #3a5a6a;
+}
+
+/* Hover эффекты */
+.icon-hover:hover {
+    transform: scale(1.05);
+    opacity: 0.8;
+}

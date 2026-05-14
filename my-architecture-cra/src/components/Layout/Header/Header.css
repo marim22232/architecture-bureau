@@ -1,0 +1,788 @@
+/* Основные цвета из палитры */
+:root {
+  --dark: #1F2428;
+  --primary-dark: #3E5562;
+  --primary: #4B6473;
+  --accent-dark: #5B636B;
+  --light-blue: #9FB2BD;
+  --accent: #A08972;
+  --light-gray: #D3DAE0;
+  --beige: #EEEAE2;
+  --bg-light: #EEF2F5;
+  --bg-lighter: #F7F8FA;
+  --white: #FFFFFF;
+}
+
+.App-header {
+  background: var(--white);
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  gap: 1rem;
+}
+
+/* Логотип */
+.logo {
+  flex-shrink: 0;
+}
+
+.logo a {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.logo img {
+  height: 55px;
+  width: auto;
+  transition: transform 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+}
+
+.logo img:hover {
+  transform: scale(1.02);
+}
+
+/* Кнопка поиска */
+.search-wrapper {
+  margin: 0 auto;
+  flex-shrink: 0;
+}
+
+.search-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--light-gray);
+  padding: 0.5rem 1rem;
+  border-radius: 40px;
+  cursor: pointer;
+  color: var(--dark);
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.search-button:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--white);
+}
+
+.search-button span {
+  font-size: 0.9rem;
+}
+
+/* Кнопка-гамбургер */
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  z-index: 1001;
+  color: var(--dark);
+  flex-shrink: 0;
+}
+
+/* Десктопное меню */
+.desktop-menu {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.desktop-menu .menu-item {
+  color: var(--dark);
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  transition: color 0.3s;
+  position: relative;
+}
+
+.desktop-menu .menu-item:hover {
+  color: var(--accent);
+}
+
+.desktop-menu .dropdown {
+  position: relative;
+}
+
+.desktop-menu .dropdown span {
+  color: var(--dark);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  transition: color 0.3s;
+  display: inline-block;
+}
+
+.desktop-menu .dropdown span:hover {
+  color: var(--accent);
+}
+
+.desktop-menu .dropdown-content {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: var(--white);
+  min-width: 250px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  padding: 0.5rem 0;
+  z-index: 100;
+  margin-top: 0.5rem;
+}
+
+.desktop-menu .dropdown-content a {
+  color: var(--primary-dark);
+  text-decoration: none;
+  display: block;
+  padding: 0.8rem 1.5rem;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+}
+
+.desktop-menu .dropdown-content a:hover {
+  background: var(--bg-lighter);
+  color: var(--accent);
+  padding-left: 2rem;
+}
+
+.desktop-menu .dropdown:hover .dropdown-content {
+  display: block;
+}
+
+.btn-calc-link {
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+/* Эффект подчеркивания */
+.menu-item {
+  position: relative;
+}
+
+.menu-item::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--accent);
+  transition: width 0.3s ease;
+}
+
+.menu-item:hover::after {
+  width: 100%;
+}
+
+.btn-calc-link::after {
+  display: none;
+}
+
+/* ============================================ */
+/* БОКОВОЕ МЕНЮ (мобильное) */
+/* ============================================ */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(31, 36, 40, 0.5);
+  z-index: 999;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.side-menu {
+  position: fixed;
+  top: 0;
+  left: -300px;
+  width: 280px;
+  height: 100vh;
+  background: var(--white);
+  z-index: 1000;
+  transition: left 0.3s ease;
+  overflow-y: auto;
+  padding: 1.5rem 0;
+  box-shadow: 2px 0 20px rgba(0, 0, 0, 0.1);
+}
+
+.side-menu.open {
+  left: 0;
+}
+
+.close-menu {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  color: var(--dark);
+  cursor: pointer;
+  font-size: 1.5rem;
+  padding: 0.5rem;
+}
+
+.side-logo {
+  padding: 1rem 1.5rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--bg-lighter);
+  text-align: center;
+}
+
+.side-logo img {
+  max-width: 160px;
+  height: auto;
+}
+
+.side-menu .menu-item {
+  display: block;
+  padding: 1rem 1.5rem;
+  color: var(--dark);
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  border-bottom: 1px solid var(--bg-lighter);
+}
+
+.side-menu .menu-item:hover {
+  background: var(--bg-lighter);
+  color: var(--accent);
+  padding-left: 2rem;
+}
+
+.side-menu .dropdown {
+  border-bottom: 1px solid var(--bg-lighter);
+}
+
+.side-menu .dropdown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  color: var(--dark);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 1rem;
+}
+
+.side-menu .dropdown-header:hover {
+  background: var(--bg-lighter);
+  color: var(--accent);
+}
+
+.side-menu .dropdown-header svg {
+  transition: transform 0.3s;
+}
+
+.side-menu .dropdown-header.open svg {
+  transform: rotate(180deg);
+}
+
+.side-menu .dropdown-content {
+  display: none;
+  background: var(--bg-lighter);
+  padding: 0.5rem 0;
+}
+
+.side-menu .dropdown-content.open {
+  display: block;
+}
+
+.side-menu .dropdown-content a {
+  display: block;
+  padding: 0.75rem 1.5rem 0.75rem 2.5rem;
+  color: var(--primary-dark);
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+}
+
+.side-menu .dropdown-content a:hover {
+  background: var(--accent);
+  color: var(--white);
+  padding-left: 3rem;
+}
+
+/* ============================================ */
+/* МОДАЛЬНОЕ ОКНО */
+/* ============================================ */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.modal-content {
+  background: var(--white);
+  border-radius: 24px;
+  padding: 2rem;
+  max-width: 500px;
+  width: 90%;
+  position: relative;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--primary);
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* ============================================ */
+/* АДАПТИВНОСТЬ */
+/* ============================================ */
+/* ============================================ */
+/* АДАПТИВНОСТЬ */
+/* ============================================ */
+
+/* Ноутбуки и планшеты (до 1200px) — появляется бургер */
+@media (max-width: 1270px) {
+  .desktop-menu {
+    display: none;
+  }
+  
+  .hamburger {
+    display: block;
+  }
+  
+  .App-header {
+    padding: 0.8rem 1.5rem;
+  }
+  
+  .logo img {
+    height: 45px;
+  }
+  
+  .search-button span {
+    display: inline;
+    font-size: 0.85rem;
+  }
+  
+  .search-button {
+    padding: 0.5rem 1rem;
+  }
+}
+
+/* Планшеты (до 768px) */
+@media (max-width: 768px) {
+  .App-header {
+    padding: 0.8rem 1rem;
+  }
+  
+  .logo img {
+    height: 40px;
+  }
+  
+  .search-button span {
+    display: none; /* Скрываем текст, оставляем только иконку */
+  }
+  
+  .search-button {
+    padding: 0.5rem;
+  }
+  
+  .hamburger svg {
+    width: 26px;
+    height: 26px;
+  }
+}
+
+/* Маленькие телефоны (до 480px) */
+@media (max-width: 480px) {
+  .App-header {
+    padding: 0.6rem 0.8rem;
+  }
+  
+  .logo img {
+    height: 35px;
+  }
+  
+  .search-button {
+    padding: 0.4rem;
+  }
+  
+  .search-button svg {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .hamburger svg {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .modal-content {
+    padding: 1.5rem;
+    width: 95%;
+  }
+}
+
+/* Большие экраны (1400px+) */
+@media (min-width: 1400px) {
+  .App-header {
+    padding: 1.2rem 3rem;
+  }
+  
+  .logo img {
+    height: 65px;
+  }
+  
+  .desktop-menu {
+    gap: 2.5rem;
+  }
+  
+  .desktop-menu .menu-item,
+  .desktop-menu .dropdown span {
+    font-size: 1rem;
+  }
+}
+
+/* Стили для кнопки-ссылки (как menu-item) */
+.menu-item-link {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  color: var(--dark);
+  padding: 0.5rem 0;
+  transition: color 0.3s;
+  position: relative;
+}
+
+.menu-item-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--accent);
+  transition: width 0.3s ease;
+}
+
+.menu-item-link:hover::after {
+  width: 100%;
+}
+
+/* Для мобильного меню */
+.side-menu .menu-item-link {
+  display: block;
+  padding: 1rem 1.5rem;
+  color: var(--dark);
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  border-bottom: 1px solid var(--bg-lighter);
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-family: 'Inter', sans-serif;
+}
+
+.side-menu .menu-item-link:hover {
+  background: var(--bg-lighter);
+  color: var(--accent);
+  padding-left: 2rem;
+}
+
+/* Добавьте в Header.css */
+
+/* User menu styles */
+.user-menu {
+  position: relative;
+  margin-left: 1rem;
+}
+
+.user-avatar-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 40px;
+  transition: all 0.2s;
+}
+
+.user-avatar-btn:hover {
+  background: #f0f0f0;
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #3a5a6a;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.user-name {
+  font-size: 14px;
+  color: #333;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  min-width: 200px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s;
+  z-index: 100;
+}
+
+.user-menu:hover .user-dropdown {
+  opacity: 1;
+  visibility: visible;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  color: #333;
+  text-decoration: none;
+  transition: background 0.2s;
+  cursor: pointer;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-size: 14px;
+}
+
+.dropdown-item:hover {
+  background: #f5f5f5;
+}
+
+.dropdown-item.logout {
+  color: #e74c3c;
+  border-top: 1px solid #eee;
+}
+
+/* Side menu user info */
+.side-user-info {
+  padding: 20px;
+  text-align: center;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 16px;
+}
+
+.side-user-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #3a5a6a;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+  margin: 0 auto 12px;
+  text-transform: uppercase;
+}
+
+.side-user-email {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 16px;
+  word-break: break-all;
+}
+
+.side-profile-btn,
+.side-logout-btn {
+  width: 100%;
+  padding: 10px;
+  margin-top: 8px;
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.side-profile-btn:hover {
+  background: #f0f0f0;
+}
+
+.side-logout-btn {
+  color: #e74c3c;
+  border-color: #e74c3c;
+}
+
+.side-logout-btn:hover {
+  background: #e74c3c;
+  color: white;
+
+}
+
+/* Выпадающее меню пользователя */
+.user-menu {
+  position: relative;
+  display: inline-block;
+}
+
+.user-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  min-width: 220px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.user-dropdown-email {
+  padding: 12px 16px;
+  font-size: 13px;
+  color: #666;
+  border-bottom: 1px solid #eee;
+  background: #f8f9fa;
+  word-break: break-all;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  color: #333;
+  text-decoration: none;
+  transition: background 0.2s;
+  cursor: pointer;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-size: 14px;
+}
+
+.dropdown-item:hover {
+  background: #f5f5f5;
+}
+
+.dropdown-item.logout {
+  color: #e74c3c;
+  border-top: 1px solid #eee;
+}
+
+.dropdown-item.logout:hover {
+  background: #fee;
+}
+
+/* Добавь в конец Header.css */
+
+/* Модальное окно с ContactForm */
+.contact-modal {
+    max-width: 550px;
+    padding: 0 !important;
+}
+
+.contact-modal .contact-form-component {
+    padding: 0;
+    background: transparent;
+}
+
+.contact-modal .contact-form-component form {
+    padding: 0 24px 24px;
+}
+
+.contact-modal .typography-h2 {
+    color: var(--dark);
+    font-size: 24px;
+    margin-top: 20px;
+}
+
+.contact-modal .form-subtitle {
+    color: var(--accent-dark);
+    margin-bottom: 20px;
+}
+
+.contact-modal .my-input,
+.contact-modal .my-textarea {
+    background: var(--white);
+    border: 1px solid var(--beige);
+}
+
+.contact-modal .my-button-primary {
+    margin-top: 20px;
+    width: 100%;
+}

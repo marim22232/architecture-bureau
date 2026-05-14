@@ -1,0 +1,675 @@
+/* HistorySlider.css - Уменьшенная версия */
+.history-slider-section {
+    padding: 60px 0;
+    background: linear-gradient(135deg, #f8f9fc 0%, #ffffff 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Декоративные элементы */
+.history-slider-section::before {
+    content: '';
+    position: absolute;
+    top: -30%;
+    right: -10%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(67, 97, 238, 0.04) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.history-slider-section::after {
+    content: '';
+    position: absolute;
+    bottom: -20%;
+    left: -5%;
+    width: 250px;
+    height: 250px;
+    background: radial-gradient(circle, rgba(114, 9, 183, 0.02) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.section-header {
+    position: relative;
+    z-index: 2;
+    margin-bottom: 20px;
+}
+
+.section-badge {
+    display: inline-block;
+    margin-bottom: 8px;
+}
+
+.history-subtitle {
+    max-width: 500px;
+    margin: 0.5rem auto 0;
+    opacity: 0.7;
+    font-size: 0.9rem;
+}
+
+.slider-wrapper {
+    position: relative;
+    margin: 30px 0 25px;
+    padding: 10px 0;
+}
+
+.history-swiper {
+    padding: 20px 15px !important;
+}
+
+/* Карточка слайда - компактная */
+.history-card {
+    background: white;
+    border-radius: 24px;
+    padding: 24px 28px;
+    box-shadow: 0 10px 25px -8px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.history-card.active {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.1);
+    border-color: rgba(67, 97, 238, 0.1);
+}
+
+/* Градиентная линия сверху */
+.history-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(135deg, var(--light-blue) 0%, var(--primary) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.history-card.active::before {
+    opacity: 1;
+}
+
+/* Бейдж с годом - компактный */
+.history-year-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, var(--dark) 0%, var(--primary-dark) 50%, var(--primary) 100%);
+    padding: 6px 18px;
+    border-radius: 40px;
+    margin-bottom: 20px;
+    width: fit-content;
+    box-shadow: 0 4px 12px rgba(67, 97, 238, 0.2);
+    transition: all 0.3s ease;
+}
+
+.history-card.active .history-year-badge {
+    box-shadow: 0 6px 16px rgba(67, 97, 238, 0.25);
+    transform: scale(1.01);
+}
+
+.history-year-badge svg {
+    color: white;
+    font-size: 0.9rem;
+}
+
+.history-year-badge .typography {
+    margin: 0;
+    color: white !important;
+    letter-spacing: 0.5px;
+    font-size: 1.3rem !important;
+}
+
+/* Иконка - компактная */
+.history-icon {
+    font-size: 2.2rem;
+    margin-bottom: 12px;
+    display: inline-block;
+    background: linear-gradient(135deg, var(--dark) 0%, var(--primary-dark) 50%, var(--primary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    transition: all 0.3s ease;
+}
+
+.history-card.active .history-icon {
+    transform: scale(1.03);
+}
+
+/* Заголовок */
+.history-content h3 {
+    margin-bottom: 10px;
+}
+
+/* Описание - компактное */
+.history-description {
+    margin: 12px 0;
+    line-height: 1.5;
+    font-size: 0.9rem;
+    color: #4a5568;
+}
+
+/* Блок достижений - компактный */
+.history-achievements {
+    background: linear-gradient(135deg, #f7f9fc 0%, #f0f2f8 100%);
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin: 14px 0;
+}
+
+.history-achievements .typography:first-child {
+    margin-bottom: 8px;
+    display: block;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #A08972;
+}
+
+.history-achievements ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.history-achievements li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    padding: 2px 0;
+}
+
+.history-achievements li:last-child {
+    margin-bottom: 0;
+}
+
+.checkmark {
+    color: white;
+    background: linear-gradient(135deg, var(--dark) 0%, var(--primary-dark) 50%, var(--primary) 100%);
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    font-weight: bold;
+}
+
+/* Плейсхолдер изображения - компактный */
+.history-image-placeholder {
+    text-align: center;
+    margin-top: 14px;
+    padding: 14px;
+    background: linear-gradient(135deg, #f0f2f8 0%, #e8ecf4 100%);
+    border-radius: 18px;
+    transition: all 0.3s ease;
+}
+
+.history-image-placeholder span {
+    font-size: 2.5rem;
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.06));
+}
+
+/* Кастомные кнопки навигации - меньше */
+.swiper-button-prev-custom,
+.swiper-button-next-custom {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 38px;
+    height: 38px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.3s ease;
+    color: #A08972;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.swiper-button-prev-custom {
+    left: -15px;
+}
+
+.swiper-button-next-custom {
+    right: -15px;
+}
+
+.swiper-button-prev-custom:hover,
+.swiper-button-next-custom:hover {
+    background: linear-gradient(135deg, var(--dark) 0%, var(--primary-dark) 50%, var(--primary) 100%);
+    color: white;
+    border-color: transparent;
+    transform: translateY(-50%) scale(1.05);
+}
+
+/* Пагинация */
+.swiper-pagination {
+    position: relative;
+    margin-top: 20px;
+}
+
+.swiper-pagination-bullet {
+    width: 7px;
+    height: 7px;
+    background: #cbd5e1;
+    opacity: 1;
+    transition: all 0.3s ease;
+    margin: 0 4px !important;
+}
+
+.swiper-pagination-bullet-active {
+    background: linear-gradient(135deg, var(--dark) 0%, var(--primary-dark) 50%, var(--primary) 100%);
+    width: 20px;
+    border-radius: 4px;
+}
+
+/* Индикатор прогресса - компактный */
+.progress-indicator {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: 240px;
+    margin: 25px auto 0;
+    background: white;
+    padding: 4px 14px;
+    border-radius: 30px;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.04);
+    border: 1px solid #e2e8f0;
+}
+
+.progress-bar {
+    flex: 1;
+    height: 3px;
+    background: #e2e8f0;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(135deg, var(--dark) 0%, var(--primary-dark) 50%, var(--primary) 100%);
+    border-radius: 3px;
+    transition: width 0.4s ease;
+}
+
+.progress-indicator .typography {
+    font-size: 0.7rem !important;
+}
+
+/* ============================================ */
+/* НОУТБУКИ (992px - 1200px) */
+/* ============================================ */
+@media (max-width: 1200px) {
+    .history-slider-section {
+        padding: 50px 0;
+    }
+
+    .history-card {
+        padding: 22px 24px;
+        border-radius: 22px;
+    }
+
+    .history-year-badge {
+        padding: 5px 16px;
+        margin-bottom: 18px;
+    }
+
+    .history-year-badge svg {
+        font-size: 0.85rem;
+    }
+
+    .history-year-badge .typography {
+        font-size: 1.2rem !important;
+    }
+
+    .history-icon {
+        font-size: 2rem;
+    }
+
+    .history-description {
+        font-size: 0.85rem;
+        margin: 12px 0;
+    }
+
+    .history-achievements {
+        padding: 12px 14px;
+        margin: 12px 0;
+    }
+
+    .history-image-placeholder span {
+        font-size: 2.2rem;
+    }
+
+    .swiper-button-prev-custom,
+    .swiper-button-next-custom {
+        width: 34px;
+        height: 34px;
+        font-size: 0.85rem;
+    }
+
+    .swiper-button-prev-custom {
+        left: -12px;
+    }
+
+    .swiper-button-next-custom {
+        right: -12px;
+    }
+}
+
+/* ============================================ */
+/* ПЛАНШЕТЫ (768px - 992px) */
+/* ============================================ */
+@media (max-width: 992px) {
+    .history-slider-section {
+        padding: 45px 0;
+    }
+
+    .slider-wrapper {
+        margin: 25px 0 20px;
+    }
+
+    .history-swiper {
+        padding: 15px 12px !important;
+    }
+
+    .history-card {
+        padding: 20px 20px;
+        border-radius: 20px;
+    }
+
+    .history-year-badge {
+        padding: 5px 14px;
+        margin-bottom: 16px;
+    }
+
+    .history-year-badge .typography {
+        font-size: 1.1rem !important;
+    }
+
+    .history-icon {
+        font-size: 1.8rem;
+        margin-bottom: 10px;
+    }
+
+    .history-description {
+        font-size: 0.8rem;
+        margin: 10px 0;
+    }
+
+    .history-achievements {
+        padding: 10px 12px;
+        margin: 10px 0;
+        border-radius: 14px;
+    }
+
+    .history-achievements .typography:first-child {
+        font-size: 0.65rem;
+    }
+
+    .history-achievements li .typography {
+        font-size: 0.75rem;
+    }
+
+    .checkmark {
+        width: 14px;
+        height: 14px;
+        font-size: 0.55rem;
+    }
+
+    .history-image-placeholder {
+        padding: 12px;
+        margin-top: 12px;
+        border-radius: 16px;
+    }
+
+    .history-image-placeholder span {
+        font-size: 2rem;
+    }
+
+    .swiper-button-prev-custom,
+    .swiper-button-next-custom {
+        width: 30px;
+        height: 30px;
+        font-size: 0.8rem;
+    }
+
+    .progress-indicator {
+        max-width: 200px;
+        margin-top: 20px;
+        padding: 3px 12px;
+        gap: 10px;
+    }
+}
+
+/* ============================================ */
+/* ТЕЛЕФОНЫ (до 768px) */
+/* ============================================ */
+@media (max-width: 768px) {
+    .history-slider-section {
+        padding: 35px 0;
+    }
+
+    .section-header {
+        margin-bottom: 10px;
+    }
+
+    .history-subtitle {
+        font-size: 0.8rem;
+    }
+
+    .slider-wrapper {
+        margin: 20px 0 15px;
+        padding: 5px 0;
+    }
+
+    .history-swiper {
+        padding: 10px 8px !important;
+    }
+
+    .history-card {
+        padding: 18px 16px;
+        border-radius: 18px;
+    }
+
+    .history-year-badge {
+        padding: 4px 12px;
+        gap: 6px;
+        margin-bottom: 14px;
+    }
+
+    .history-year-badge .typography {
+        font-size: 1rem !important;
+    }
+
+    .history-year-badge svg {
+        font-size: 0.7rem;
+    }
+
+    .history-icon {
+        font-size: 1.6rem;
+        margin-bottom: 8px;
+    }
+
+    .history-description {
+        font-size: 0.75rem;
+        margin: 10px 0;
+        line-height: 1.5;
+    }
+
+    .history-achievements {
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 12px;
+    }
+
+    .history-achievements .typography:first-child {
+        font-size: 0.6rem;
+        margin-bottom: 6px;
+    }
+
+    .history-achievements li {
+        gap: 6px;
+        margin-bottom: 4px;
+    }
+
+    .history-achievements li .typography {
+        font-size: 0.7rem;
+    }
+
+    .checkmark {
+        width: 12px;
+        height: 12px;
+        font-size: 0.5rem;
+    }
+
+    .history-image-placeholder {
+        padding: 10px;
+        margin-top: 10px;
+        border-radius: 14px;
+    }
+
+    .history-image-placeholder span {
+        font-size: 1.8rem;
+    }
+
+    .swiper-button-prev-custom,
+    .swiper-button-next-custom {
+        display: none;
+    }
+
+    .swiper-pagination {
+        margin-top: 15px;
+    }
+
+    .swiper-pagination-bullet {
+        width: 5px;
+        height: 5px;
+        margin: 0 3px !important;
+    }
+
+    .swiper-pagination-bullet-active {
+        width: 16px;
+    }
+
+    .progress-indicator {
+        max-width: 180px;
+        margin-top: 20px;
+        padding: 2px 10px;
+        gap: 8px;
+    }
+
+    .progress-indicator .typography {
+        font-size: 0.6rem !important;
+    }
+
+    .progress-bar {
+        height: 2px;
+    }
+}
+
+/* ============================================ */
+/* МАЛЕНЬКИЕ ТЕЛЕФОНЫ (до 480px) */
+/* ============================================ */
+@media (max-width: 480px) {
+    .history-slider-section {
+        padding: 30px 0;
+    }
+
+    .history-card {
+        padding: 14px 14px;
+        border-radius: 16px;
+    }
+
+    .history-year-badge {
+        padding: 3px 10px;
+        margin-bottom: 12px;
+    }
+
+    .history-year-badge .typography {
+        font-size: 0.9rem !important;
+    }
+
+    .history-icon {
+        font-size: 1.4rem;
+        margin-bottom: 6px;
+    }
+
+    .history-description {
+        font-size: 0.7rem;
+        margin: 8px 0;
+    }
+
+    .history-achievements {
+        padding: 8px;
+        margin: 8px 0;
+        border-radius: 10px;
+    }
+
+    .history-achievements li .typography {
+        font-size: 0.65rem;
+    }
+
+    .checkmark {
+        width: 10px;
+        height: 10px;
+        font-size: 0.45rem;
+    }
+
+    .history-image-placeholder {
+        padding: 8px;
+        border-radius: 12px;
+    }
+
+    .history-image-placeholder span {
+        font-size: 1.5rem;
+    }
+
+    .progress-indicator {
+        max-width: 160px;
+        margin-top: 15px;
+        padding: 2px 8px;
+    }
+}
+
+/* ============================================ */
+/* БОЛЬШИЕ ЭКРАНЫ (1400px+) */
+/* ============================================ */
+@media (min-width: 1400px) {
+    .history-slider-section {
+        padding: 70px 0;
+    }
+
+    .history-card {
+        padding: 28px 32px;
+        border-radius: 26px;
+    }
+
+    .history-year-badge {
+        padding: 8px 22px;
+    }
+
+    .history-year-badge .typography {
+        font-size: 1.4rem !important;
+    }
+
+    .history-icon {
+        font-size: 2.5rem;
+    }
+
+    .history-description {
+        font-size: 0.95rem;
+    }
+}

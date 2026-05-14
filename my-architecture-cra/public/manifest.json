@@ -1,0 +1,9 @@
+{
+  "name": "Архитектурное бюро M&Y",
+  "short_name": "M&Y",
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#A08972",
+  "background_color": "#ffffff",
+  "icons": []
+}

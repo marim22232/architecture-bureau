@@ -1,0 +1,513 @@
+/* Office.css */
+.office-page {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.office-hero {
+ padding: 100px 0;
+  text-align: center;
+    position: relative;
+  padding: 120px 0;
+  overflow: hidden;
+
+  background: 
+    linear-gradient(rgba(26,58,74,0.7), rgba(44,90,110,0.7)),
+    url('/src/assets/images/фон.jpg') center/cover no-repeat;
+
+}
+
+.hero-description {
+  max-width: 600px;
+  margin: 1rem auto 0;
+  opacity: 0.9;
+}
+
+/* ============================================ */
+/* ОПИСАНИЕ */
+/* ============================================ */
+.office-description {
+  padding: 80px 0;
+  background: #ffffff;
+}
+
+.description-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.description-text {
+  margin-top: 1.5rem;
+  line-height: 1.8;
+  opacity: 0.8;
+}
+
+/* ============================================ */
+/* ГАЛЕРЕЯ 4 ФОТО */
+/* ============================================ */
+.office-gallery {
+  padding: 60px 0;
+  background: #f8fafc;
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 30px;
+}
+
+.gallery-item {
+  overflow: hidden;
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.gallery-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.gallery-image {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+}
+
+.gallery-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.gallery-item:hover .gallery-image img {
+  transform: scale(1.05);
+}
+
+.gallery-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+  padding: 20px;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+}
+
+.gallery-item:hover .gallery-overlay {
+  transform: translateY(0);
+}
+
+.gallery-overlay .typography-h4 {
+  margin-bottom: 5px;
+}
+
+/* ============================================ */
+/* ИНФОРМАЦИОННЫЕ КАРТОЧКИ */
+/* ============================================ */
+.office-info {
+  padding: 80px 0;
+  background: #ffffff;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+}
+
+.info-card {
+  text-align: center;
+  padding: 30px 20px;
+  background: #f8fafc;
+  border-radius: 24px;
+  transition: all 0.3s ease;
+}
+
+.info-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.info-icon {
+  font-size: 2.5rem;
+  margin-bottom: 16px;
+}
+
+.info-card .typography-h4 {
+  margin-bottom: 12px;
+}
+
+.info-link {
+  color: #2c5a6e;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.info-link:hover {
+  color: #1a3a4a;
+  text-decoration: underline;
+}
+
+/* ============================================ */
+/* КАРТА И ИНФОРМАЦИЯ - 2 КОЛОНКИ */
+/* ============================================ */
+.container h2{
+    margin-bottom: 50px;
+}
+.office-map {
+  padding: 80px 0;
+  background: #f8fafc;
+} 
+.map-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: start;
+}
+ 
+.map-column {
+  width: 100%;
+}
+
+.map-container {
+  background: #e2e8f0;
+  border-radius: 24px;
+  overflow: hidden;
+  height: 400px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.map-container iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* Правая колонка с информацией */
+.info-column {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Блок с контактами и режимом работы */
+.info-contacts {
+  background: white;
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.contact-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid #eef2f6;
+}
+
+.contact-item:last-child {
+  border-bottom: none;
+}
+
+.contact-icon {
+  font-size: 1.8rem;
+  min-width: 40px;
+  text-align: center;
+}
+
+.contact-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.contact-text strong {
+  color: #1a3a4a;
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+
+.contact-text span {
+  color: #4a6a7a;
+  font-size: 0.95rem;
+}
+
+.info-link {
+  color: #2c5a6e;
+  text-decoration: none;
+  transition: color 0.3s ease;
+  font-size: 0.95rem;
+}
+
+.info-link:hover {
+  color: #1a3a4a;
+  text-decoration: underline;
+}
+
+/* Блок с транспортом (как было, но без лишних ограничений) */
+.directions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: white;
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.direction {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.direction-icon {
+  font-size: 1.5rem;
+  min-width: 32px;
+  text-align: center;
+}
+
+.direction .typography-body {
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* ============================================ */
+/* АДАПТИВНОСТЬ */
+/* ============================================ */
+
+/* Планшеты */
+@media (max-width: 992px) {
+  .map-info-grid {
+    gap: 30px;
+  }
+  
+  .map-container {
+    height: 350px;
+  }
+  
+  .info-contacts,
+  .directions {
+    padding: 20px;
+  }
+}
+
+/* Мобильные устройства */
+@media (max-width: 768px) {
+  .office-map {
+    padding: 50px 0;
+  }
+  
+  .map-info-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+  
+  .map-container {
+    height: 300px;
+  }
+  
+  .info-contacts {
+    padding: 16px;
+  }
+  
+  .contact-icon {
+    font-size: 1.5rem;
+    min-width: 32px;
+  }
+  
+  .contact-text strong {
+    font-size: 0.9rem;
+  }
+  
+  .contact-text span,
+  .info-link {
+    font-size: 0.85rem;
+  }
+  
+  .directions {
+    padding: 16px;
+  }
+  
+  .direction {
+    gap: 10px;
+  }
+  
+  .direction-icon {
+    font-size: 1.2rem;
+    min-width: 28px;
+  }
+}
+
+/* Маленькие телефоны */
+@media (max-width: 480px) {
+  .map-container {
+    height: 250px;
+  }
+  
+  .contact-item {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 8px;
+  }
+  
+  .contact-text {
+    align-items: center;
+  }
+  
+  .direction {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+  
+  .direction .typography-body {
+    font-size: 0.85rem;
+  }
+}
+/* Планшеты */
+@media (max-width: 992px) {
+  .gallery-grid {
+    gap: 20px;
+  }
+  
+  .info-grid {
+    gap: 20px;
+  }
+  
+  .info-card {
+    padding: 25px 15px;
+  }
+}
+
+/* Мобильные */
+@media (max-width: 768px) {
+  .office-hero {
+    padding: 60px 0;
+  }
+  
+  .office-description {
+    padding: 50px 0;
+  }
+  
+  .office-gallery {
+    padding: 40px 0;
+  }
+  
+  .gallery-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .info-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .office-info {
+    padding: 50px 0;
+  }
+  
+  .office-cta {
+    padding: 50px 0;
+  }
+  
+  .cta-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .cta-buttons .my-button {
+    width: 100%;
+    max-width: 280px;
+  }
+  
+  .office-map {
+    padding: 50px 0;
+  }
+  
+  .map-container {
+    height: 300px;
+  }
+  
+  .direction {
+    padding: 10px 16px;
+  }
+  
+  .direction-icon {
+    font-size: 1.2rem;
+  }
+}
+
+/* Маленькие телефоны */
+@media (max-width: 480px) {
+  .office-hero {
+    padding: 40px 0;
+  }
+  
+  .hero-description {
+    font-size: 0.9rem;
+  }
+  
+  .description-text {
+    font-size: 0.9rem;
+  }
+  
+  .gallery-overlay {
+    padding: 12px;
+  }
+  
+  .gallery-overlay .typography-h4 {
+    font-size: 0.9rem;
+  }
+  
+  .gallery-overlay .typography-small {
+    font-size: 0.7rem;
+  }
+  
+  .map-container {
+    height: 250px;
+  }
+  
+  .direction {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+  
+  .direction .typography-body {
+    font-size: 0.8rem;
+  }
+}
+
+/* Большие экраны */
+@media (min-width: 1400px) {
+  .container {
+    max-width: 1300px;
+  }
+  
+  .gallery-grid {
+    gap: 35px;
+  }
+  
+  .info-grid {
+    gap: 35px;
+  }
+  
+  .map-container {
+    height: 450px;
+  }
+}
+

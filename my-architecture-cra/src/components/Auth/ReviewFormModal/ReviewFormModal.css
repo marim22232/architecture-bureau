@@ -1,0 +1,300 @@
+/* src/components/ReviewFormModal/ReviewFormModal.css */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s ease;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+}
+
+.modal-close:hover {
+    background-color: #f3f4f6;
+}
+
+.review-form {
+    padding: 24px;
+}
+
+.form-group {
+    margin-bottom: 24px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+}
+
+.form-select,
+.form-input,
+.form-textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.2s;
+}
+
+.form-select:focus,
+.form-input:focus,
+.form-textarea:focus {
+    outline: none;
+    border-color: #3a5a6a;
+    box-shadow: 0 0 0 3px rgba(58, 90, 106, 0.1);
+}
+
+.form-textarea {
+    resize: vertical;
+    font-family: inherit;
+}
+
+.form-hint {
+    margin-top: 4px;
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.rating-container {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.rating-stars {
+    display: flex;
+    gap: 8px;
+}
+
+.modal-star {
+    font-size: 32px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.modal-star:hover {
+    transform: scale(1.1);
+}
+
+.modal-star.filled {
+    color: #fbbf24;
+}
+
+.modal-star.empty {
+    color: #d1d5db;
+}
+
+.rating-label {
+    font-size: 14px;
+    color: #6b7280;
+    min-width: 60px;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.form-notice {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    padding: 12px;
+    background-color: #f9fafb;
+    border-radius: 8px;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+/* src/components/Auth/ReviewFormModal/ReviewFormModal.css */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-close-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 24px;
+    padding: 4px 8px;
+}
+
+.review-form {
+    padding: 24px;
+}
+
+.form-group {
+    margin-bottom: 24px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+}
+
+.form-select,
+.form-input,
+.form-textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+.form-textarea {
+    resize: vertical;
+    font-family: inherit;
+}
+
+.form-hint {
+    margin-top: 4px;
+}
+
+.form-static {
+    padding: 10px 12px;
+    background-color: #f3f4f6;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+.rating-container {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.rating-stars {
+    display: flex;
+    gap: 8px;
+}
+
+.modal-star {
+    font-size: 32px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.modal-star:hover {
+    transform: scale(1.1);
+}
+
+.modal-star.filled {
+    color: #fbbf24;
+}
+
+.modal-star.empty {
+    color: #d1d5db;
+}
+
+.rating-label {
+    min-width: 60px;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.form-notice {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    padding: 12px;
+    background-color: #f9fafb;
+    border-radius: 8px;
+}
+
+.notice-text {
+    flex: 1;
+}

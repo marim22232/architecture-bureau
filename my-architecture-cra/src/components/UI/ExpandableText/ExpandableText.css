@@ -1,0 +1,33 @@
+.expandable-text-container {
+  margin: 1.5rem 0;
+ text-align: center;
+}
+
+.expandable-text {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--primary, #4B6473);
+  margin-bottom: 1rem;
+  text-align:justify;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.read-more-btn {
+  background: none;
+  border: none;
+  color: var(--accent, #A08972);
+  font-weight: 500;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  transition: all 0.3s ease;
+  font-family: 'Inter', sans-serif;
+  display: inline-block;
+}
+
+.read-more-btn:hover {
+  color: var(--primary, #4B6473);
+  text-decoration: underline;
+}

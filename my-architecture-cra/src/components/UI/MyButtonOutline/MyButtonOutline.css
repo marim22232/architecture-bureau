@@ -1,0 +1,35 @@
+/* MyButtonOutline.css */
+.my-button-outline {
+  background: transparent;
+  color: var(--accent, #A08972);
+  border: 2px solid var(--accent, #A08972);
+  border-radius: 12px;
+  padding: 14px 15px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  font-family: 'Inter', sans-serif;
+  margin: 15px;
+}
+
+.my-button-outline:hover {
+  background: var(--accent, #A08972);
+  color: var(--white, #FFFFFF);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(160, 137, 114, 0.3);
+}
+
+.my-button-outline:active {
+  transform: translateY(0);
+}
+
+/* Адаптив */
+@media (max-width: 768px) {
+  .my-button-outline {
+    padding: 12px 24px;
+    font-size: 0.9rem;
+  }
+}

@@ -1,0 +1,28 @@
+.my-input {
+    width: 100%;
+    padding: 14px 16px;
+    margin-bottom: 15px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    font-size: 1rem;
+    background: rgba(255, 255, 255, 0.95);
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+}
+
+.my-input:hover {
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.my-input:focus {
+    outline: none;
+    border-color: #1F2428;
+    background: #FFFFFF;
+    box-shadow: 0 0 0 3px rgba(31, 36, 40, 0.1);
+    transform: translateY(-2px);
+}
+
+.my-input::placeholder {
+    color: #999;
+}

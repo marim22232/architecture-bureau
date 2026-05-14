@@ -1,0 +1,198 @@
+/* Контейнер слайдера */
+.projects-slider-container {
+    width: 100%;
+    padding: 2rem 0;
+    position: relative;
+}
+
+.projects-swiper {
+    padding: 1rem 0 3rem 0;
+}
+
+/* Стили слайда */
+.project-slide {
+    background: var(--white, #FFFFFF);
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.project-slide:hover {
+    transform: translateY(-10px);
+}
+
+/* Изображение */
+.project-image {
+    position: relative;
+    height: 250px;
+    overflow: hidden;
+}
+
+.project-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.project-slide:hover .project-image img {
+    transform: scale(1.05);
+}
+
+.project-overlay {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    z-index: 2;
+}
+
+.project-category {
+    background: var(--accent, #A08972);
+    color: var(--white, #FFFFFF);
+    padding: 0.3rem 1rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Информация */
+.project-info {
+    padding: 1.5rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.project-description {
+    margin: 0.5rem 0;
+    opacity: 0.8;
+    line-height: 1.5;
+}
+
+.project-features {
+    margin: 0.5rem 0;
+}
+
+.feature-tag {
+    display: inline-block;
+    background: var(--bg-light, #F7F8FA);
+    color: var(--primary, #4B6473);
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.project-link {
+    color: var(--accent, #A08972);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+    display: inline-block;
+    margin-top: auto;
+    padding-top: 1rem;
+}
+
+.project-link:hover {
+    color: var(--primary, #4B6473);
+    transform: translateX(5px);
+}
+
+/* Навигация Swiper */
+.swiper-button-next,
+.swiper-button-prev {
+    color: var(--accent, #A08972);
+    background: var(--white, #FFFFFF);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.swiper-button-next::after,
+.swiper-button-prev::after {
+    font-size: 1.2rem;
+}
+
+.swiper-pagination-bullet {
+    background: var(--light-gray, #D3DAE0);
+    opacity: 1;
+}
+
+.swiper-pagination-bullet-active {
+    background: var(--accent, #A08972);
+}
+
+/* Загрузка */
+.projects-loader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem;
+    gap: 1rem;
+}
+
+.loader {
+    width: 50px;
+    height: 50px;
+    border: 3px solid var(--light-gray, #D3DAE0);
+    border-top-color: var(--accent, #A08972);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Ошибка */
+.projects-error {
+    text-align: center;
+    padding: 3rem;
+}
+
+.retry-btn {
+    background: var(--accent, #A08972);
+    color: var(--white, #FFFFFF);
+    border: none;
+    padding: 0.5rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 1rem;
+    transition: all 0.3s;
+}
+
+.retry-btn:hover {
+    background: var(--primary, #4B6473);
+}
+
+/* Пустой список */
+.projects-empty {
+    text-align: center;
+    padding: 3rem;
+}
+
+/* Адаптив */
+@media (max-width: 768px) {
+    .project-image {
+        height: 200px;
+    }
+    
+    .project-info {
+        padding: 1rem;
+    }
+    
+    .swiper-button-next,
+    .swiper-button-prev {
+        display: none;
+    }
+}
+
