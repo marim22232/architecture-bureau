@@ -1,4 +1,3 @@
-// my-architecture-api/config/db.js
 import pg from 'pg';
 import dotenv from 'dotenv';
 
@@ -6,17 +5,36 @@ dotenv.config();
 
 const { Pool } = pg;
 
-const pool = new Pool({
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT || 5432,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    max: 20,
-    idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 5000, // увеличил до 5 секунд
-    ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
-});
+// Приоритет: DATABASE_URL если есть, иначе отдельные переменные
+let poolConfig;
+
+if (process.env.DATABASE_URL) {
+    // Используем DATABASE_URL (для продакшена на Render)
+    poolConfig = {
+        connectionString: process.env.DATABASE_URL,
+        ssl: {
+            rejectUnauthorized: false
+        },
+        max: 20,
+        idleTimeoutMillis: 30000,
+        connectionTimeoutMillis: 5000
+    };
+} else {
+    // Используем отдельные переменные (для локальной разработки)
+    poolConfig = {
+        host: process.env.DB_HOST || 'localhost',
+        port: process.env.DB_PORT || 5432,
+        user: process.env.DB_USER || 'postgres',
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_NAME,
+        max: 20,
+        idleTimeoutMillis: 30000,
+        connectionTimeoutMillis: 5000,
+        ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
+    };
+}
+
+const pool = new Pool(poolConfig);
 
 // Логирование запросов в development режиме
 if (process.env.NODE_ENV === 'development') {
