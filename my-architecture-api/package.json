@@ -1,0 +1,32 @@
+{
+  "name": "my-architecture-api",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "express-fileupload": "^1.5.2",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.2.1",
+    "mssql": "^12.2.0",
+    "nodemailer": "^8.0.5",
+    "pg": "^8.18.0",
+    "react-transition-group": "^4.4.5",
+    "tedious": "^19.2.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
