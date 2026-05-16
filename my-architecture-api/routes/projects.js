@@ -9,13 +9,18 @@ const router = Router();
 // ============================================
 // ПУБЛИЧНЫЕ МАРШРУТЫ
 // ============================================
-router.get('/', ProjectController.getAllWithFilters);
+
+// ✅ СНАЧАЛА КОНКРЕТНЫЕ МАРШРУТЫ
 router.get('/featured', ProjectController.getFeatured);
-router.get('/full/:slug', ProjectController.getFullProjectBySlug);
 router.get('/my-projects', authMiddleware, ProjectController.getMyProjects);
 router.get('/types', ProjectController.getTypes);
-router.get('/:slug', ProjectController.getBySlug);
+router.get('/full/:slug', ProjectController.getFullProjectBySlug);
 
+// ✅ ПОТОМ ДИНАМИЧЕСКИЕ (которые могут перехватить)
+router.get('/', ProjectController.getAllWithFilters);
+
+
+router.get('/:slug', ProjectController.getBySlug);  // ← это ДОЛЖНО БЫТЬ ПОСЛЕДНИМ!
 // ============================================
 // АДМИНСКИЕ МАРШРУТЫ
 // ============================================

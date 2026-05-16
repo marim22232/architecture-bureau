@@ -1,4 +1,4 @@
-// Header.jsx - исправленная модалка с ContactForm
+// Header.jsx - исправленная версия
 import React, { useState, useEffect } from 'react';
 import { FiMenu, FiX, FiChevronDown, FiSearch } from 'react-icons/fi';
 import './Header.css';
@@ -6,19 +6,18 @@ import logo from '../../../assets/images/logo.png';
 import Typography from '../../UI/Typography/Typography.jsx';
 import MyButton from '../../UI/MyButton/MyButton.jsx';
 import MyButtonOutline from '../../UI/MyButtonOutline/MyButtonOutline.jsx';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, NavLink } from 'react-router-dom';
 import { scrollToSection } from '../../../utils/scrollToSection.js';
 import Icons from '../../UI/Icons/Icons.jsx';
 import { authAPI } from '../../../services/api.js';
 import AuthModal from '../../Auth/AuthModal/AuthModal.jsx';
 import ProfileModal from '../../Auth/ProfileModal/ProfileModal.jsx';
-import ContactForm from '../../UI/ContactForm/ContactForm.jsx'; // ✅ Импорт ContactForm
+import ContactForm from '../../UI/ContactForm/ContactForm.jsx';
 import { useAuth } from '../../../hooks/useAuth.js';
 
 const Header = () => {
   const { logout, isAuthenticated, user, isAdmin } = useAuth();
   const navigate = useNavigate();
-
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [userData, setUserData] = useState(null);
@@ -28,7 +27,7 @@ const Header = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
 
-  // Получаем роль из localStorage (более надёжно)
+  // Получаем роль из localStorage
   const getUserRole = () => localStorage.getItem('userRole');
   const isAdminUser = getUserRole() === 'admin';
   const isManager = getUserRole() === 'manager';
@@ -181,14 +180,6 @@ const Header = () => {
   };
 
   const menuData = {
-    projects: {
-      title: 'Проекты',
-      links: [
-        { href: '/projects', label: 'Все проекты' },
-        { href: '/projects?status=built', label: 'Построенные' },
-        { href: '/projects?status=in_progress', label: 'В процессе' }
-      ]
-    },
     clients: {
       title: 'Клиентам',
       links: [
@@ -225,22 +216,10 @@ const Header = () => {
             <Typography variant="small" color="primary">О компании</Typography>
           </Link>
 
-         {/* <button onClick={scrollToServices} className="menu-item-link">
-            <Typography variant="small" color="primary">Возможности</Typography>
-          </button>*/}
-
-          <div className="dropdown">
-            <span className="menu-item">
-              <Typography variant="small" color="primary">{menuData.projects.title} ▼</Typography>
-            </span>
-            <div className="dropdown-content">
-              {menuData.projects.links.map((link, index) => (
-                <Link key={index} to={link.href} onClick={handleLinkClick}>
-                  <Typography variant="body" color="primary">{link.label}</Typography>
-                </Link>
-              ))}
-            </div>
-          </div>
+          {/* Ссылка Портфолио вместо Projects */}
+          <Link to="/projects" className="menu-item" onClick={handleLinkClick}>
+            <Typography variant="small" color="primary">Портфолио</Typography>
+          </Link>
 
           <div className="dropdown">
             <span className="menu-item">
@@ -295,6 +274,9 @@ const Header = () => {
                         </Link>
                         <Link to="/admin/contacts" className="dropdown-item" onClick={() => setIsUserDropdownOpen(false)}>
                           <Icons.Settings size={16} /> Запросы
+                        </Link>
+                        <Link to="/admin/reviews" className="dropdown-item" onClick={() => setIsUserDropdownOpen(false)}>
+                          <span>📝</span> Отзывы
                         </Link>
                       </>
                     )}
@@ -368,6 +350,9 @@ const Header = () => {
                 <Link to="/admin/contacts" className="dropdown-item" onClick={() => setIsMenuOpen(false)}>
                   <Icons.Settings size={16} /> Запросы
                 </Link>
+                <Link to="/admin/reviews" className="dropdown-item" onClick={() => setIsMenuOpen(false)}>
+                  <span>📝</span> Отзывы
+                </Link>
               </>
             )}
 
@@ -411,22 +396,10 @@ const Header = () => {
           <Typography variant="body" color="dark">Возможности</Typography>
         </button>
 
-        <div className="dropdown">
-          <div
-            className={`dropdown-header ${openDropdowns.projects ? 'open' : ''}`}
-            onClick={() => toggleDropdown('projects')}
-          >
-            <Typography variant="body" color="dark">{menuData.projects.title}</Typography>
-            <FiChevronDown />
-          </div>
-          <div className={`dropdown-content ${openDropdowns.projects ? 'open' : ''}`}>
-            {menuData.projects.links.map((link, index) => (
-              <Link key={index} to={link.href} onClick={handleLinkClick}>
-                <Typography variant="small" color="light">{link.label}</Typography>
-              </Link>
-            ))}
-          </div>
-        </div>
+        {/* Ссылка Портфолио вместо Projects dropdown */}
+        <Link to="/projects" className="menu-item" onClick={handleLinkClick}>
+          <Typography variant="body" color="dark">Портфолио</Typography>
+        </Link>
 
         <div className="dropdown">
           <div
@@ -456,7 +429,7 @@ const Header = () => {
         </Link>
       </div>
 
-      {/* ✅ Модальное окно с ContactForm */}
+      {/* Модальное окно с ContactForm */}
       {isModalOpen && (
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal-content contact-modal" onClick={(e) => e.stopPropagation()}>

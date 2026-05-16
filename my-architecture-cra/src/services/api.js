@@ -170,20 +170,6 @@ export const profileAPI = {
         return response.json();
     },
 
-    /* getMyProjects: async () => {
-         const token = getToken();
-         const userType = localStorage.getItem('userType');
-         
-         // ⭐ Выбираем маршрут в зависимости от типа пользователя
-         const url = userType === 'team' 
-             ? `${API_URL}/team/my-projects`   // для сотрудников
-             : `${API_URL}/projects/my-projects`; // для клиентов
-         
-         const response = await fetch(url, {
-             headers: { 'Authorization': `Bearer ${token}` }
-         });
-         return response.json();
-     }*/
     getMyProjects: async () => {
         const token = getToken();
         const userType = localStorage.getItem('userType');
@@ -619,6 +605,7 @@ export const getProjectForAdmin = async (id) => {
     });
     return response.json();
 };
+
 // ============================================
 // ADMIN API (УПРАВЛЕНИЕ АККАУНТАМИ)
 // ============================================
@@ -795,11 +782,12 @@ export const adminAPI = {
         return result;
     },
 };
+
 // Обновляем экспорт
 const api = {
     authAPI,
     profileAPI,
-    adminAPI,           // ← ⭐ ДОБАВИТЬ
+    adminAPI,
     getProjects,
     getAllProjects,
     getFullProjectBySlug,
@@ -814,11 +802,11 @@ const api = {
     getActiveTeam,
     getTeamMember,
     getTestimonials,
-    createTestimonial,      // ← добавить
-    checkTestimonialExists, // ← добавить
-    getMyTestimonials,      // ← добавить
-    updateMyTestimonial,    // ← добавить
-    deleteMyTestimonial,    // ← добавить
+    createTestimonial,
+    checkTestimonialExists,
+    getMyTestimonials,
+    updateMyTestimonial,
+    deleteMyTestimonial,
     getTestimonialsByProject,
     getPartners,
     getAwards,
@@ -835,4 +823,3 @@ const api = {
 };
 
 export default api;
-

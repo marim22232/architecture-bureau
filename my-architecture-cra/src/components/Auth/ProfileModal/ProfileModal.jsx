@@ -444,11 +444,6 @@ const ProfileModal = ({ isOpen, onClose, user, onUpdate }) => {
                 <button className="profile-modal-close" onClick={onClose}>✕</button>
                 
                 <div className="profile-modal-header">
-                    <div className="profile-modal-avatar">
-                        <span className="avatar-icon">
-                            {userType === 'team' ? '👨‍💼' : userType === 'client' ? '👤' : '👋'}
-                        </span>
-                    </div>
                     <Typography variant="h3" color="dark" weight="bold">
                         {userType === 'team' ? 'Профиль сотрудника' : 
                          userType === 'client' ? 'Профиль клиента' : 'Мой профиль'}

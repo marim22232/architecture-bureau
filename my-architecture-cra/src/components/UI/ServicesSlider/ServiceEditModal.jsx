@@ -7,9 +7,7 @@ const ServiceEditModal = ({ isOpen, service, onClose, onSave, onDelete }) => {
     title: '',
     description: '',
     price_range: '',
-    is_popular: false,
-    icon: '',
-    icon_path: ''
+    icon: ''
   });
   const [selectedFile, setSelectedFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -20,18 +18,16 @@ const ServiceEditModal = ({ isOpen, service, onClose, onSave, onDelete }) => {
         title: service.title || '',
         description: service.description || '',
         price_range: service.price_range || '',
-        is_popular: service.is_popular || false,
         icon: service.icon || '',
-        icon_path: service.icon_path || ''
       });
     }
   }, [service]);
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: value
     }));
   };
 
@@ -39,44 +35,19 @@ const ServiceEditModal = ({ isOpen, service, onClose, onSave, onDelete }) => {
     setSelectedFile(e.target.files[0]);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setIsLoading(true);
 
-    try {
-      let iconPath = formData.icon_path;
-      
-      // Если выбран новый файл, загружаем его
-      if (selectedFile) {
-        const uploadData = new FormData();
-        uploadData.append('icon', selectedFile);
-        
-        const uploadResponse = await fetch('/api/services/upload-icon', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          },
-          body: uploadData
-        });
-        
-        if (uploadResponse.ok) {
-          const uploadResult = await uploadResponse.json();
-          iconPath = uploadResult.path;
-        }
-      }
-      
-      const updatedService = {
-        ...formData,
-        icon_path: iconPath
-      };
-      
-      await onSave(updatedService);
-    } catch (error) {
-      console.error('Ошибка при сохранении:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  try {
+    // Просто сохраняем formData без загрузки файлов
+    await onSave(formData);
+  } catch (error) {
+    console.error('Ошибка при сохранении:', error);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   if (!isOpen) return null;
 
@@ -123,46 +94,25 @@ const ServiceEditModal = ({ isOpen, service, onClose, onSave, onDelete }) => {
           </div>
           
           <div className="form-group">
-            <label>
-              <input
-                type="checkbox"
-                name="is_popular"
-                checked={formData.is_popular}
-                onChange={handleChange}
-              />
-              Популярная услуга
-            </label>
-          </div>
-          
-          <div className="form-group">
-            <label>Иконка (эмодзи или текст)</label>
+            <label>Иконка (эмодзи)</label>
             <input
               type="text"
               name="icon"
               value={formData.icon}
               onChange={handleChange}
-              placeholder="🏛️ или название иконки"
+              placeholder="🏛️"
+              maxLength="2"
             />
           </div>
           
           <div className="form-group">
             <label>Изображение</label>
-            {formData.icon_path && (
-              <div className="current-image">
-                <img 
-                  src={`http://localhost:5000${formData.icon_path}`} 
-                  alt="Текущее изображение"
-                  style={{ maxWidth: '100px', marginBottom: '10px' }}
-                />
-                <p>Текущее изображение</p>
-              </div>
-            )}
             <input
               type="file"
               accept="image/*"
               onChange={handleFileChange}
             />
-            <small>Оставьте пустым, чтобы сохранить текущее изображение</small>
+            <small>Загрузите изображение для услуги (опционально)</small>
           </div>
           
           <div className="modal-actions">

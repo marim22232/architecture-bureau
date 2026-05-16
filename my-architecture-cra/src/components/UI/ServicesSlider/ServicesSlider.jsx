@@ -7,76 +7,87 @@ import { getServicesByCategorySlug } from '../../../services/api';
 import ServiceEditModal from './ServiceEditModal.jsx';
 import AddServiceModal from './AddServiceModal.jsx';
 
-// Импорт стилей Swiper
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-// Получаем роль из localStorage (более надёжно)
-  const getUserRole = () => localStorage.getItem('userRole');
-  const isAdminUser = getUserRole() === 'admin';
-  const isManager = getUserRole() === 'manager';
-  const isStaff = isAdminUser || isManager;
-const ServicesSlider = ({ isAdmin = false, onServicesUpdate }) => {
-  const [services, setServices] = useState({
-    architecture: [],
-    interior: [],
-    loading: true,
-    error: null
-  });
 
-  const [activeCategory, setActiveCategory] = useState('architecture');
+const getUserRole = () => localStorage.getItem('userRole');
+const isAdminUser = getUserRole() === 'admin';
+
+const ServicesSlider = ({ isAdmin = false, onServicesUpdate }) => {
+  const [services, setServices] = useState({});
+  const [categories, setCategories] = useState([]);
+  const [activeCategory, setActiveCategory] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [editingService, setEditingService] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-
-  const categories = [
-    { id: 'architecture', name: 'Архитектурные услуги', icon: '🏛️', slug: 'architecture' },
-    { id: 'interior', name: 'Дизайн интерьера', icon: '🪑', slug: 'interior' },
-  ];
-
-  const fetchAllServices = async () => {
-    setServices(prev => ({ ...prev, loading: true, error: null }));
+  const fetchCategories = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/api/services/categories', {
+        headers: {
+          'Authorization': token ? `Bearer ${token}` : {}
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setCategories(data);
+        if (data.length > 0) {
+          setActiveCategory(data[0].slug);
+        }
+      } else {
+        console.error('Ошибка загрузки категорий:', response.status);
+      }
+    } catch (error) {
+      console.error('Ошибка загрузки категорий:', error);
+    }
+  };
+   const fetchAllServices = async () => {
+    if (categories.length === 0) return;
+    
+    setLoading(true);
     
     try {
-      const [architectureRes, interiorRes] = await Promise.all([
-        getServicesByCategorySlug('architecture'),
-        getServicesByCategorySlug('interior')
-      ]);
-
-      const architectureData = Array.isArray(architectureRes) 
-        ? architectureRes 
-        : architectureRes.services || [];
+      const promises = categories.map(cat => 
+        getServicesByCategorySlug(cat.slug)
+      );
       
-      const interiorData = Array.isArray(interiorRes) 
-        ? interiorRes 
-        : interiorRes.services || [];
-
-      const newServices = {
-        architecture: architectureData,
-        interior: interiorData,
-        loading: false,
-        error: null
-      };
-
-      setServices(newServices);
+      const results = await Promise.all(promises);
+      
+      const servicesByCategory = {};
+      categories.forEach((cat, index) => {
+        const data = Array.isArray(results[index]) 
+          ? results[index] 
+          : results[index]?.services || [];
+        servicesByCategory[cat.slug] = data;
+      });
+      
+      setServices(servicesByCategory);
       
       if (onServicesUpdate) {
-        onServicesUpdate(newServices);
+        onServicesUpdate(servicesByCategory);
       }
     } catch (error) {
       console.error('Ошибка загрузки услуг:', error);
-      setServices(prev => ({
-        ...prev,
-        loading: false,
-        error: 'Не удалось загрузить услуги'
-      }));
+    } finally {
+      setLoading(false);
     }
   };
 
+  // Загружаем категории при монтировании
   useEffect(() => {
-    fetchAllServices();
-  }, [refreshTrigger]);
+    fetchCategories();
+  }, []);
+
+  // Загружаем услуги когда категории загружены или обновлён триггер
+  useEffect(() => {
+    if (categories.length > 0) {
+      fetchAllServices();
+    }
+  }, [categories, refreshTrigger]);
 
   const currentServices = services[activeCategory] || [];
 
@@ -109,6 +120,7 @@ const ServicesSlider = ({ isAdmin = false, onServicesUpdate }) => {
         refreshServices();
         setIsEditModalOpen(false);
         setEditingService(null);
+        alert('Услуга успешно обновлена');
       } else {
         const error = await response.json();
         console.error('Ошибка при сохранении:', error);
@@ -135,6 +147,7 @@ const ServicesSlider = ({ isAdmin = false, onServicesUpdate }) => {
           refreshServices();
           setIsEditModalOpen(false);
           setEditingService(null);
+          alert('Услуга удалена');
         } else {
           console.error('Ошибка при удалении');
           alert('Ошибка при удалении услуги');
@@ -173,7 +186,16 @@ const ServicesSlider = ({ isAdmin = false, onServicesUpdate }) => {
     }
   };
 
-  if (services.loading) {
+  // Получаем иконку для категории
+  const getCategoryIcon = (slug) => {
+    const icons = {
+      'architecture': '🏛️',
+      'interior': '🪑'
+    };
+    return icons[slug] || '📁';
+  };
+
+  if (loading || categories.length === 0) {
     return (
       <div className="loading-spinner">
         <div className="spinner"></div>
@@ -181,29 +203,18 @@ const ServicesSlider = ({ isAdmin = false, onServicesUpdate }) => {
     );
   }
 
-  if (services.error) {
-    return (
-      <div className="services-error">
-        <Typography variant="body" color="primary">{services.error}</Typography>
-        <button onClick={fetchAllServices} className="retry-btn">
-          Попробовать снова
-        </button>
-      </div>
-    );
-  }
-
   return (
     <>
       <div className="services-slider-container">
-        {/* Кнопки категорий */}
+        {/* Кнопки категорий из БД */}
         <div className="services-categories">
           {categories.map(category => (
             <button
               key={category.id}
-              className={`category-btn ${activeCategory === category.id ? 'active' : ''}`}
-              onClick={() => setActiveCategory(category.id)}
+              className={`category-btn ${activeCategory === category.slug ? 'active' : ''}`}
+              onClick={() => setActiveCategory(category.slug)}
             >
-              <span className="category-icon">{category.icon}</span>
+              <span className="category-icon">{getCategoryIcon(category.slug)}</span>
               <span className="category-name">{category.name}</span>
             </button>
           ))}
@@ -279,10 +290,10 @@ const ServicesSlider = ({ isAdmin = false, onServicesUpdate }) => {
                       <Typography variant="small" color="primary" className="service-description">
                         {service.description}
                       </Typography>
-                      {service.price_range && (
+                      {(service.price_range || service.price_per_sqm) && (
                         <div className="service-price">
                           <Typography variant="small" color="accent" weight="bold">
-                            {service.price_range}
+                            {service.price_range || `от ${service.price_per_sqm} ₽/м²`}
                           </Typography>
                         </div>
                       )}

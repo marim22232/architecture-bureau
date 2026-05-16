@@ -543,9 +543,10 @@ const AuthModal = ({ isOpen, onClose, onSuccess, defaultMode = 'login' }) => {
                         </div>
                     )}
 
-                    {errors.login && <span className="error-text" style={{ display: 'block', textAlign: 'center' }}>{errors.login}</span>}
-                    {errors.general && <span className="error-text" style={{ display: 'block', textAlign: 'center' }}>{errors.general}</span>}
-
+                    {/*errors.login && <span className="error-text" style={{ display: 'block', textAlign: 'center' }}>{errors.login}</span>}
+                    {errors.general && <span className="error-text" style={{ display: 'block', textAlign: 'center' }}>{errors.general}</span>*/}
+{errors.login && <span className="error-text">{typeof errors.login === 'string' ? errors.login : JSON.stringify(errors.login)}</span>}
+{errors.general && <span className="error-text">{typeof errors.general === 'string' ? errors.general : errors.general?.message || 'Произошла ошибка'}</span>}
                     <MyButton type="submit" variant="primary" style={{ width: '100%', padding: '12px', fontSize: '15px' }} disabled={isLoading}>
                         {isLoading ? 'Загрузка...' : (isLogin ? 'Войти' : 'Зарегистрироваться')}
                     </MyButton>

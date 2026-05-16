@@ -7,7 +7,6 @@ const AddServiceModal = ({ isOpen, onClose, onSave, categories }) => {
     title: '',
     description: '',
     price_range: '',
-    is_popular: false,
     icon: '',
     category_id: null,
     category_slug: 'architecture'
@@ -28,55 +27,41 @@ const AddServiceModal = ({ isOpen, onClose, onSave, categories }) => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
+  e.preventDefault();
+  setIsLoading(true);
 
-    try {
-      let iconPath = null;
-      
-      // Если выбран файл, загружаем его
-      if (selectedFile) {
-        const uploadData = new FormData();
-        uploadData.append('icon', selectedFile);
-        
-        const token = localStorage.getItem('token');
-        const uploadResponse = await fetch('http://localhost:5000/api/services/upload-icon', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          },
-          body: uploadData
-        });
-        
-        if (uploadResponse.ok) {
-          const uploadResult = await uploadResponse.json();
-          iconPath = uploadResult.path;
-        }
-      }
-      
-      const newService = {
-        ...formData,
-        icon_path: iconPath
-      };
-      
-      await onSave(newService);
-      // Сброс формы после успешного сохранения
-      setFormData({
-        title: '',
-        description: '',
-        price_range: '',
-        is_popular: false,
-        icon: '',
-        category_id: null,
-        category_slug: 'architecture'
-      });
-      setSelectedFile(null);
-    } catch (error) {
-      console.error('Ошибка при создании:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  try {
+    // Находим выбранную категорию и получаем её ID
+    const selectedCategory = categories.find(cat => cat.slug === formData.category_slug);
+    
+    // Подготавливаем данные с правильным category_id (число, а не строка!)
+    const newService = {
+      title: formData.title,
+      description: formData.description,
+      price_range: formData.price_range,
+      icon: formData.icon,
+      category_id: selectedCategory?.id || null  // ← должно быть число (1 или 2)
+    };
+    
+    console.log('Отправляем данные:', newService); // Проверьте в консоли
+    await onSave(newService);
+    
+    // Сброс формы
+    setFormData({
+      title: '',
+      description: '',
+      price_range: '', 
+      icon: '',
+      category_id: null,
+      category_slug: 'architecture'
+    });
+    setSelectedFile(null);
+  } catch (error) {
+    console.error('Ошибка при создании:', error);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   if (!isOpen) return null;
 
@@ -87,13 +72,13 @@ const AddServiceModal = ({ isOpen, onClose, onSave, categories }) => {
           <Typography variant="h3" weight="bold">Добавление новой услуги</Typography>
           <button className="modal-close" onClick={onClose}>×</button>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="edit-form">
           <div className="form-group">
             <label>Категория *</label>
             <select
               name="category_slug"
-              value={formData.category_slug}
+              value={formData.category_slug}  // ← было category_id, исправьте на category_slug
               onChange={handleChange}
               required
             >
@@ -104,7 +89,7 @@ const AddServiceModal = ({ isOpen, onClose, onSave, categories }) => {
               ))}
             </select>
           </div>
-          
+
           <div className="form-group">
             <label>Название услуги *</label>
             <input
@@ -116,7 +101,7 @@ const AddServiceModal = ({ isOpen, onClose, onSave, categories }) => {
               placeholder="Например: Архитектурно-планировочная концепция"
             />
           </div>
-          
+
           <div className="form-group">
             <label>Описание *</label>
             <textarea
@@ -128,7 +113,7 @@ const AddServiceModal = ({ isOpen, onClose, onSave, categories }) => {
               placeholder="Краткое описание услуги"
             />
           </div>
-          
+
           <div className="form-group">
             <label>Ценовой диапазон</label>
             <input
@@ -139,19 +124,9 @@ const AddServiceModal = ({ isOpen, onClose, onSave, categories }) => {
               placeholder="например: от 50 000 ₽ или договорная"
             />
           </div>
-          
-          <div className="form-group">
-            <label>
-              <input
-                type="checkbox"
-                name="is_popular"
-                checked={formData.is_popular}
-                onChange={handleChange}
-              />
-              Отметить как популярную услугу
-            </label>
-          </div>
-          
+
+
+
           <div className="form-group">
             <label>Иконка (эмодзи)</label>
             <input
@@ -164,7 +139,7 @@ const AddServiceModal = ({ isOpen, onClose, onSave, categories }) => {
             />
             <small>Можно использовать эмодзи: 🏛️ 🪑 📐 🎨 💰 и т.д.</small>
           </div>
-          
+
           <div className="form-group">
             <label>Изображение</label>
             <input
@@ -174,7 +149,7 @@ const AddServiceModal = ({ isOpen, onClose, onSave, categories }) => {
             />
             <small>Загрузите изображение для услуги (опционально)</small>
           </div>
-          
+
           <div className="modal-actions">
             <button type="button" className="btn-cancel" onClick={onClose}>
               Отмена

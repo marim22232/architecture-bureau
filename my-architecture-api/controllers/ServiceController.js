@@ -1,21 +1,21 @@
 import ServiceService from "../services/ServiceService.js";
-class ServiceController  {
-        async create(req, res) {
+class ServiceController {
+    async create(req, res) {
         try {
             let iconPath = null;
             let iconData = null;
-            
+
             // Проверяем, есть ли загруженный файл
             if (req.files && req.files.icon) {
                 const icon = req.files.icon;
                 const fileName = Date.now() + '_' + icon.name.replace(/\s/g, '_');
                 const uploadPath = 'uploads/' + fileName;
-                
+
                 // Сохраняем файл
                 await icon.mv(uploadPath);
                 iconPath = `/uploads/${fileName}`;
             }
-            
+
             // Проверяем, пришли ли данные иконки как JSON
             if (req.body.icon && typeof req.body.icon === 'string') {
                 try {
@@ -24,20 +24,18 @@ class ServiceController  {
                     iconData = req.body.icon;
                 }
             }
-            
-            // Подготавливаем данные для сервиса
+
             const serviceData = {
                 title: req.body.title,
                 description: req.body.description,
                 icon: iconData || req.body.icon || null,
                 price_range: req.body.price_range,
-                is_popular: req.body.is_popular === 'true' || req.body.is_popular === true,
+                category_id: req.body.category_id,  // ← ДОБАВИТЬ ЭТУ СТРОКУ!
                 is_active: req.body.is_active === 'false' ? false : true,
-                icon_path: iconPath
             };
-            
-            const result = await  ServiceService.create(serviceData, req.pool);
-            
+
+            const result = await ServiceService.create(serviceData, req.pool);
+
             if (result.success) {
                 res.status(201).json({
                     message: result.message,
@@ -54,8 +52,8 @@ class ServiceController  {
 
     async getAll(req, res) {
         try {
-            const result = await  ServiceService.getAll(req.pool);
-            
+            const result = await ServiceService.getAll(req.pool);
+
             if (result.success) {
                 res.json(result.services);
             } else {
@@ -64,13 +62,13 @@ class ServiceController  {
         } catch (error) {
             console.error('Ошибка в контроллере при получении всех:', error);
             res.status(500).json({ error: error.message });
-        }   
+        }
     }
 
     async getOne(req, res) {
         try {
-            const result = await  ServiceService.getOne(req.params.id, req.pool);
-            
+            const result = await ServiceService.getOne(req.params.id, req.pool);
+
             if (result.success) {
                 res.json(result.service);
             } else {
@@ -86,18 +84,18 @@ class ServiceController  {
         try {
             let iconPath = null;
             let iconData = null;
-            
+
             // Проверяем, есть ли новый загруженный файл
             if (req.files && req.files.icon) {
                 const icon = req.files.icon;
                 const fileName = Date.now() + '_' + icon.name.replace(/\s/g, '_');
                 const uploadPath = 'uploads/' + fileName;
-                
+
                 // Сохраняем файл
                 await icon.mv(uploadPath);
                 iconPath = `/uploads/${fileName}`;
             }
-            
+
             // Проверяем, пришли ли данные иконки как JSON
             if (req.body.icon && typeof req.body.icon === 'string') {
                 try {
@@ -106,25 +104,23 @@ class ServiceController  {
                     iconData = req.body.icon;
                 }
             }
-            
+
             // Подготавливаем данные для обновления
             const updateData = {
                 title: req.body.title,
                 description: req.body.description,
                 icon: iconData || req.body.icon,
                 price_range: req.body.price_range,
-                is_popular: req.body.is_popular,
                 is_active: req.body.is_active,
-                icon_path: iconPath
             };
-            
+
             // Удаляем undefined поля
-            Object.keys(updateData).forEach(key => 
+            Object.keys(updateData).forEach(key =>
                 updateData[key] === undefined && delete updateData[key]
             );
-            
-            const result = await  ServiceService.update(req.params.id, updateData, req.pool);
-            
+
+            const result = await ServiceService.update(req.params.id, updateData, req.pool);
+
             if (result.success) {
                 res.json({
                     message: result.message,
@@ -141,11 +137,11 @@ class ServiceController  {
 
     async delete(req, res) {
         try {
-            const result = await  ServiceService.delete(req.params.id, req.pool);
-            
+            const result = await ServiceService.delete(req.params.id, req.pool);
+
             if (result.success) {
-                res.json({                 
-                    message: result.message, 
+                res.json({
+                    message: result.message,
                     service: result.service
                 });
             } else {
@@ -159,7 +155,7 @@ class ServiceController  {
 
     async getPopular(req, res) {
         try {
-            const result = await  ServiceService.getPopular(req.pool);
+            const result = await ServiceService.getPopular(req.pool);
 
             if (result.success) {
                 res.json(result.services);
@@ -186,8 +182,8 @@ class ServiceController  {
             // Сохраняем файл
             await icon.mv(uploadPath);
 
-            res.json({ 
-                message: 'Файл успешно загружен', 
+            res.json({
+                message: 'Файл успешно загружен',
                 fileName: fileName,
                 path: `/uploads/${fileName}`
             });
@@ -196,11 +192,11 @@ class ServiceController  {
             res.status(500).json({ error: error.message });
         }
     }
-        async getByCategorySlug(req, res) {
+    async getByCategorySlug(req, res) {
         try {
             const { slug } = req.params;
             const result = await ServiceService.getByCategorySlug(slug, req.pool);
-            
+
             if (result.success) {
                 res.json(result.services);
             } else {
@@ -212,6 +208,20 @@ class ServiceController  {
         }
 
     }
+    async getCategories(req, res) {
+  try {
+    console.log('📡 getCategories вызван');
+    const result = await req.pool.query(
+      'SELECT id, name, slug FROM service_categories ORDER BY id'
+    );
+    console.log('✅ Найдено категорий:', result.rows.length);
+    res.json(result.rows);
+  } catch (error) {
+    console.error('❌ Ошибка получения категорий:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
 }
 
 export default new ServiceController();

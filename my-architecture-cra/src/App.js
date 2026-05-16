@@ -22,6 +22,8 @@ import ProjectsList from './pages/adminn/ProjectsList';
 import ProjectsCreatePage from './pages/adminn/ProjectsCreatePage'; // ⭐ ДОБАВЬТЕ ЭТОТ ИМПОРТ
 import AdminAccounts from './pages/adminn/AdminAccounts.jsx';
 import ResetPasswordPage from './pages/ResetPasswordPage/ResetPasswordPage';
+import AdminReviews from './pages/adminn/AdminReviews/AdminReviews.jsx';
+
 
 function App() {
   return (
@@ -56,6 +58,8 @@ function App() {
           <Route path="/admin" element={<ProjectsList />} />
           <Route path="/admin/create" element={<ProjectForm />} />
           <Route path="/admin/edit/:id" element={<ProjectsEditPage />} />
+          <Route path="/admin/reviews" element={<AdminReviews />} />
+        <Route path="/admin/reviews" element={<AdminReviews />} />
         </Routes>
       </main>
       <Footer />

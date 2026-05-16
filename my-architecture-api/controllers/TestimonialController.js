@@ -242,27 +242,27 @@ class TestimonialController {
             const { id } = req.params;
             const userEmail = req.user?.email;
             const { text, rating } = req.body;
-            
+
             if (!id || !text) {
                 return res.status(400).json({ error: 'Неверные параметры' });
             }
-            
+
             // Проверяем, принадлежит ли отзыв этому клиенту
             const checkResult = await req.pool.query(
                 `SELECT id, client_email FROM testimonials WHERE id = $1`,
                 [id]
             );
-            
+
             if (checkResult.rows.length === 0) {
                 return res.status(404).json({ error: 'Отзыв не найден' });
             }
-            
+
             const testimonial = checkResult.rows[0];
-            
+
             if (testimonial.client_email !== userEmail) {
                 return res.status(403).json({ error: 'Вы можете редактировать только свои отзывы' });
             }
-            
+
             // Обновляем отзыв
             const result = await req.pool.query(
                 `UPDATE testimonials 
@@ -270,7 +270,7 @@ class TestimonialController {
                  WHERE id = $3 RETURNING *`,
                 [text, rating, id]
             );
-            
+
             res.json({
                 success: true,
                 message: 'Отзыв успешно обновлен',
@@ -288,25 +288,25 @@ class TestimonialController {
             console.log('🗑️ deleteMyTestimonial вызван');
             const { id } = req.params;
             const userEmail = req.user?.email;
-            
+
             // Проверяем, принадлежит ли отзыв этому клиенту
             const checkResult = await req.pool.query(
                 `SELECT id, client_email FROM testimonials WHERE id = $1`,
                 [id]
             );
-            
+
             if (checkResult.rows.length === 0) {
                 return res.status(404).json({ error: 'Отзыв не найден' });
             }
-            
+
             const testimonial = checkResult.rows[0];
-            
+
             if (testimonial.client_email !== userEmail) {
                 return res.status(403).json({ error: 'Вы можете удалять только свои отзывы' });
             }
-            
+
             await req.pool.query(`DELETE FROM testimonials WHERE id = $1`, [id]);
-            
+
             res.json({
                 success: true,
                 message: 'Отзыв успешно удален'
@@ -316,6 +316,22 @@ class TestimonialController {
             res.status(500).json({ error: error.message });
         }
     }
+    async getAllForAdmin(req, res) {
+    console.log('✅ getAllForAdmin вызван!');
+    try {
+        const result = await req.pool.query(`
+            SELECT t.*, p.title as project_title, p.slug as project_slug 
+            FROM testimonials t
+            LEFT JOIN projects p ON t.project_id = p.id
+            ORDER BY t.date DESC
+        `);
+        console.log(`📊 Найдено отзывов: ${result.rows.length}`);
+        res.json(result.rows);
+    } catch (error) {
+        console.error('❌ Ошибка при получении всех отзывов для админа:', error);
+        res.status(500).json({ error: error.message });
+    }
+}
 }
 
 export default new TestimonialController();
