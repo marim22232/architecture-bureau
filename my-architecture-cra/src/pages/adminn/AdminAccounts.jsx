@@ -2,13 +2,17 @@
 import React, { useState, useEffect } from 'react';
 import { adminAPI } from '../../services/api';
 import MyButton from '../../components/UI/MyButton/MyButton';
+import Icons from '../../components/UI/Icons/Icons.jsx'; // ✅ Добавить импорт иконок
 import UserEditModal from './components/UserEditModal';
 import CreateClientModal from './components/CreateClientModal';
 import SecureDataModal from './components/SecureDataModal';
 import FillSecureDataModal from './components/FillSecureDataModal';
+import { useModal } from '../../hooks/useModal';
 import './AdminAccounts.css';
 
 const AdminAccounts = () => {
+    const { showAlert, AlertModalComponent } = useModal();
+    
     const [showFillModal, setShowFillModal] = useState(false);
     const [selectedFillAccount, setSelectedFillAccount] = useState(null);
     const [accounts, setAccounts] = useState([]);
@@ -99,21 +103,21 @@ const AdminAccounts = () => {
             await loadAccounts();
             setShowEditModal(false);
             setSelectedAccount(null);
-            alert('Данные успешно обновлены');
+            showAlert('Данные успешно обновлены');
         } catch (error) {
             console.error('Ошибка сохранения:', error);
-            alert('Ошибка при сохранении');
+            showAlert('Ошибка при сохранении');
         }
     };
 
     const getTypeBadge = (account) => {
         if (account.profile?.type === 'client') {
-            return <span className="badge client">👤 Клиент</span>;
+            return <span className="badge client"><Icons.User size={14} /> Клиент</span>;
         }
         if (account.profile?.type === 'team') {
-            return <span className="badge team">👨‍💼 Сотрудник</span>;
+            return <span className="badge team"><Icons.Users size={14} /> Сотрудник</span>;
         }
-        return <span className="badge user">👋 Пользователь</span>;
+        return <span className="badge user"><Icons.User size={14} /> Пользователь</span>;
     };
 
     const getClientFullName = (profile) => {
@@ -158,7 +162,8 @@ const AdminAccounts = () => {
         return (
             <div className="admin-accounts">
                 <div className="error-message">
-                    <h3>❌ Ошибка загрузки</h3>
+                    <Icons.Info size={24} color="#dc2626" />
+                    <h3>Ошибка загрузки</h3>
                     <p>{error}</p>
                     <button onClick={() => loadAccounts()}>Повторить</button>
                 </div>
@@ -169,9 +174,9 @@ const AdminAccounts = () => {
     return (
         <div className="admin-accounts">
             <div className="accounts-header">
-                <h1>👥 Управление аккаунтами</h1>
+                <h1><Icons.Users size={28} style={{ marginRight: '12px' }} /> Управление аккаунтами</h1>
                 <MyButton variant="primary" onClick={() => setShowCreateModal(true)}>
-                    + Создать клиента
+                    <Icons.Plus size={18} style={{ marginRight: '8px' }} /> Создать клиента
                 </MyButton>
             </div>
 
@@ -181,20 +186,21 @@ const AdminAccounts = () => {
                         Все ({counts.all})
                     </button>
                     <button className={filterType === 'client' ? 'active' : ''} onClick={() => setFilterType('client')}>
-                        Клиенты ({counts.client})
+                        <Icons.User size={14} /> Клиенты ({counts.client})
                     </button>
                     <button className={filterType === 'team' ? 'active' : ''} onClick={() => setFilterType('team')}>
-                        Сотрудники ({counts.team})
+                        <Icons.Users size={14} /> Сотрудники ({counts.team})
                     </button>
                     <button className={filterType === 'user' ? 'active' : ''} onClick={() => setFilterType('user')}>
-                        Пользователи ({counts.user})
+                        <Icons.User size={14} /> Пользователи ({counts.user})
                     </button>
                 </div>
 
                 <div className="search-box">
+                    <Icons.Search size={18} color="#999" />
                     <input
                         type="text"
-                        placeholder="🔍 Поиск по email, имени, компании..."
+                        placeholder="Поиск по email, имени, компании..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -226,26 +232,37 @@ const AdminAccounts = () => {
                                             <strong>{getDisplayName(account)}</strong>
                                         </div>
                                         {account.profile?.type === 'client' && account.profile.companyName && (
-                                            <div className="company-name">🏢 {account.profile.companyName}</div>
+                                            <div className="company-name">
+                                                <Icons.Building size={12} /> {account.profile.companyName}
+                                            </div>
                                         )}
                                         {account.profile?.type === 'team' && account.profile.position && (
-                                            <div className="position-name">📌 {account.profile.position}</div>
+                                            <div className="position-name">
+                                                <Icons.Briefcase size={12} /> {account.profile.position}
+                                            </div>
                                         )}
                                         {account.profile?.type === 'team' && account.profile.specialization && (
-                                            <div className="specialization-name">🎯 {account.profile.specialization}</div>
+                                            <div className="specialization-name">
+                                                🎯 {account.profile.specialization}
+                                            </div>
                                         )}
                                         {account.profile?.type === 'team' && account.profile.bio && (
                                             <div className="bio-preview">
-                                                📝 {account.profile.bio.length > 60
+                                                <Icons.MessageIcon size={12} /> {account.profile.bio.length > 60
                                                     ? account.profile.bio.substring(0, 60) + '...'
                                                     : account.profile.bio}
                                             </div>
                                         )}
                                     </td>
-                                    <td>{account.email}</td>
+                                    <td>
+                                        <Icons.Email size={14} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+                                        {account.email}
+                                    </td>
                                     <td className="phone-cell">
                                         {account.profile?.phone ? (
-                                            <span className="phone-number">📞 {account.profile.phone}</span>
+                                            <span className="phone-number">
+                                                <Icons.Phone size={14} style={{ marginRight: '6px' }} /> {account.profile.phone}
+                                            </span>
                                         ) : (
                                             <span className="text-muted">—</span>
                                         )}
@@ -261,7 +278,9 @@ const AdminAccounts = () => {
                                                 {account.isActive ? '✅ Активен' : '❌ Заблокирован'}
                                             </span>
                                             {!account.isEmailVerified && (
-                                                <span className="status unverified">📧 Не подтверждён</span>
+                                                <span className="status unverified">
+                                                    <Icons.Email size={12} /> Не подтверждён
+                                                </span>
                                             )}
                                         </div>
                                     </td>
@@ -272,17 +291,18 @@ const AdminAccounts = () => {
                                                 onClick={() => handleViewSecureData(account)}
                                                 title="Просмотреть личные данные"
                                             >
-                                                🔒 Личные данные
+                                                <Icons.Lock size={14} /> Личные данные
                                             </button>
-                                            <button className="edit-btn" onClick={() => handleEdit(account)}>
-                                                ✏️ Редактировать
-                                            </button>
+                                           
                                             <button
                                                 className="secure-fill-btn"
                                                 onClick={() => handleFillSecureData(account)}
                                                 title="Заполнить конфиденциальные данные"
                                             >
-                                                📝 Заполнить данные
+                                                <Icons.Edit size={14} /> Заполнить данные
+                                            </button>
+                                             <button className="edit-btn" onClick={() => handleEdit(account)}>
+                                                <Icons.Edit size={14} /> Редактировать аккаунт
                                             </button>
                                         </div>
                                     </td>
@@ -293,6 +313,7 @@ const AdminAccounts = () => {
 
                     {accounts.length === 0 && !loading && (
                         <div className="no-results">
+                            <Icons.Users size={48} color="#ccc" />
                             <p>Ничего не найдено</p>
                         </div>
                     )}
@@ -317,10 +338,10 @@ const AdminAccounts = () => {
                             await adminAPI.createClient(data);
                             await loadAccounts();
                             setShowCreateModal(false);
-                            alert('Клиент успешно создан');
+                            showAlert('Клиент успешно создан');
                         } catch (error) {
                             console.error('Ошибка создания:', error);
-                            alert('Ошибка при создании клиента');
+                            showAlert('Ошибка при создании клиента');
                         }
                     }}
                     onClose={() => setShowCreateModal(false)}
@@ -340,30 +361,44 @@ const AdminAccounts = () => {
             )}
 
             {showFillModal && selectedFillAccount && (
-                <FillSecureDataModal
-                    isOpen={showFillModal}
-                    onClose={() => {
-                        setShowFillModal(false);
-                        setSelectedFillAccount(null);
-                    }}
-                    account={selectedFillAccount}
-                    onSave={async (id, data) => {
-                        try {
-                            if (selectedFillAccount.profile?.type === 'team') {
-                                await adminAPI.createTeamSecureData(id, data);
-                            } else {
-                                await adminAPI.createClientSecureData(id, data);
-                            }
-                            alert('Данные успешно сохранены!');
-                            await loadAccounts();
-                        } catch (error) {
-                            console.error('Ошибка сохранения:', error);
-                            alert('Ошибка при сохранении данных: ' + error.message);
-                            throw error;
-                        }
-                    }}
-                />
-            )}
+    <FillSecureDataModal
+        isOpen={showFillModal}
+        onClose={() => {
+            setShowFillModal(false);
+            setSelectedFillAccount(null);
+        }}
+        account={selectedFillAccount}
+        onSave={async (id, data, hasExistingData) => {  // ✅ добавить hasExistingData
+            try {
+                if (selectedFillAccount.profile?.type === 'team') {
+                    if (hasExistingData) {
+                        // ✅ Обновление существующих данных
+                        await adminAPI.updateTeamSecureData(id, data);
+                    } else {
+                        // ✅ Создание новых данных
+                        await adminAPI.createTeamSecureData(id, data);
+                    }
+                } else {
+                    if (hasExistingData) {
+                        // ✅ Обновление существующих данных
+                        await adminAPI.updateClientSecureData(id, data);
+                    } else {
+                        // ✅ Создание новых данных
+                        await adminAPI.createClientSecureData(id, data);
+                    }
+                }
+                showAlert('Данные успешно сохранены!');
+                await loadAccounts();
+            } catch (error) {
+                console.error('Ошибка сохранения:', error);
+                showAlert('Ошибка при сохранении данных: ' + error.message);
+                throw error;
+            }
+        }}
+    />
+)}
+
+            <AlertModalComponent />
         </div>
     );
 };

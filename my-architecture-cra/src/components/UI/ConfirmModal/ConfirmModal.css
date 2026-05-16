@@ -1,0 +1,74 @@
+/* components/UI/ConfirmModal/ConfirmModal.css */
+.confirm-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+}
+
+.confirm-modal {
+    background: white;
+    border-radius: 16px;
+    max-width: 400px;
+    width: 90%;
+    padding: 24px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    animation: modalFadeIn 0.2s ease;
+    text-align: center;
+}
+
+.confirm-title {
+    margin: 0 0 16px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+}
+
+.confirm-message {
+    margin: 0 0 24px 0;
+    font-size: 16px;
+    color: #555;
+    line-height: 1.5;
+}
+
+.confirm-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+}
+
+.confirm-btn-cancel {
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    background: #f0f0f0;
+    color: #666;
+    transition: all 0.2s;
+}
+
+.confirm-btn-cancel:hover {
+    background: #e0e0e0;
+}
+
+.confirm-btn-ok {
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    background: #dc2626;
+    color: white;
+    transition: all 0.2s;
+}
+
+.confirm-btn-ok:hover {
+    background: #b91c1c;
+}

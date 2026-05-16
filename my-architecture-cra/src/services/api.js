@@ -3,32 +3,27 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 const getToken = () => localStorage.getItem('token');
 
-// ============================================
-// AUTH API
-// ============================================
 export const authAPI = {
-    login: async (credentials) => {
-        const response = await fetch(`${API_URL}/auth/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(credentials)
-        });
-
-        const data = await response.json();
-        console.log('🔐 authAPI.login response:', data);
-
-        return data; // Должен вернуть { success, token, user }
-    },
+    // Регистрация
     register: async (data) => {
         const response = await fetch(`${API_URL}/auth/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                email: data.email,
-                password: data.password
-            })
+            body: JSON.stringify({ email: data.email, password: data.password })
         });
         return response.json();
+    },
+
+    // Вход (один метод, без дублирования)
+    login: async (credentials) => {
+        const response = await fetch(`${API_URL}/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: credentials.email, password: credentials.password })
+        });
+        const data = await response.json();
+        console.log('🔐 authAPI.login response:', data);
+        return data;
     },
 
     // Подтверждение email
@@ -36,23 +31,7 @@ export const authAPI = {
         const response = await fetch(`${API_URL}/auth/verify`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                email: data.email,
-                code: data.code
-            })
-        });
-        return response.json();
-    },
-
-    // Вход
-    login: async (data) => {
-        const response = await fetch(`${API_URL}/auth/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                email: data.email,
-                password: data.password
-            })
+            body: JSON.stringify({ email: data.email, code: data.code })
         });
         return response.json();
     },
@@ -61,9 +40,7 @@ export const authAPI = {
     logout: async () => {
         const response = await fetch(`${API_URL}/auth/logout`, {
             method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${getToken()}`
-            }
+            headers: { 'Authorization': `Bearer ${getToken()}` }
         });
         return response.json();
     },
@@ -78,13 +55,10 @@ export const authAPI = {
                 'Authorization': `Bearer ${token}`
             }
         });
-
-        if (!response.ok) {
-            throw new Error('Ошибка получения пользователя');
-        }
-
+        if (!response.ok) throw new Error('Ошибка получения пользователя');
         return response.json();
     },
+
     // Сброс пароля
     resetPassword: async (data) => {
         const response = await fetch(`${API_URL}/auth/reset-password`, {
@@ -104,17 +78,7 @@ export const authAPI = {
         });
         return response.json();
     },
-    // В authAPI
-    resetPassword: async (data) => {
-        const response = await fetch(`${API_URL}/auth/reset-password`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
-        return response.json();
-    },
 };
-
 // ============================================
 // PROFILE API (НОВЫЙ)
 // ============================================
@@ -228,9 +192,10 @@ export const getServicesByCategorySlug = async (slug) => {
     return response.json();
 };
 // Добавьте в ваш файл api.js
+// ✅ Правильно
 export const updateService = async (id, serviceData, token) => {
   try {
-    const response = await fetch(`http://localhost:5000/api/services/${id}`, {
+    const response = await fetch(`${API_URL}/services/${id}`, {  // <-- используем API_URL
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -252,7 +217,7 @@ export const updateService = async (id, serviceData, token) => {
 
 export const deleteService = async (id, token) => {
   try {
-    const response = await fetch(`http://localhost:5000/api/services/${id}`, {
+    const response = await fetch(`${API_URL}/services/${id}`, {  // <-- используем API_URL
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`
@@ -605,7 +570,6 @@ export const getProjectForAdmin = async (id) => {
     });
     return response.json();
 };
-
 // ============================================
 // ADMIN API (УПРАВЛЕНИЕ АККАУНТАМИ)
 // ============================================
@@ -632,15 +596,11 @@ export const adminAPI = {
 
         try {
             const response = await fetch(url, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+                headers: { 'Authorization': `Bearer ${token}` }
             });
             console.log('📡 adminAPI.getAccounts - статус:', response.status);
-
             const data = await response.json();
             console.log('📡 adminAPI.getAccounts - данные:', data);
-
             return data;
         } catch (error) {
             console.error('❌ adminAPI.getAccounts - ошибка:', error);
@@ -652,9 +612,7 @@ export const adminAPI = {
     getAccount: async (id) => {
         const token = getToken();
         const response = await fetch(`${API_URL}/admin/accounts/${id}`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
+            headers: { 'Authorization': `Bearer ${token}` }
         });
         return response.json();
     },
@@ -721,9 +679,7 @@ export const adminAPI = {
         console.log('🔐 getTeamSecureData вызван:', { teamId, name });
 
         const response = await fetch(`${API_URL}/admin/team-secure/${teamId}?name=${encodeURIComponent(name || '')}`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
+            headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await response.json();
         console.log('📦 getTeamSecureData ответ:', data);
@@ -736,17 +692,14 @@ export const adminAPI = {
         console.log('🔐 getClientSecureData вызван:', { clientId, name });
 
         const response = await fetch(`${API_URL}/admin/client-secure/${clientId}?name=${encodeURIComponent(name || '')}`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
+            headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await response.json();
         console.log('📦 getClientSecureData ответ:', data);
         return data;
     },
-    // В adminAPI, после getClientSecureData, добавь:
 
-    // Создать/обновить приватные данные сотрудника
+    // Создать приватные данные сотрудника
     createTeamSecureData: async (teamId, data) => {
         const token = getToken();
         console.log('📝 createTeamSecureData вызван:', { teamId, data });
@@ -764,7 +717,7 @@ export const adminAPI = {
         return result;
     },
 
-    // Создать/обновить приватные данные клиента
+    // Создать приватные данные клиента
     createClientSecureData: async (clientId, data) => {
         const token = getToken();
         console.log('📝 createClientSecureData вызван:', { clientId, data });
@@ -781,13 +734,41 @@ export const adminAPI = {
         console.log('📦 createClientSecureData ответ:', result);
         return result;
     },
+
+    // ✅ Обновление данных сотрудника
+    updateTeamSecureData: async (teamId, data) => {
+        const token = getToken();
+        const response = await fetch(`${API_URL}/admin/team-secure/${teamId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(data)
+        });
+        return response.json();
+    },
+
+    // ✅ Обновление данных клиента
+    updateClientSecureData: async (clientId, data) => {
+        const token = getToken();
+        const response = await fetch(`${API_URL}/admin/client-secure/${clientId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(data)
+        });
+        return response.json();
+    },
 };
 
-// Обновляем экспорт
-const api = {
+export default {
     authAPI,
     profileAPI,
     adminAPI,
+    projectsAPI,
     getProjects,
     getAllProjects,
     getFullProjectBySlug,
@@ -798,6 +779,8 @@ const api = {
     getPopularServices,
     getServicesByCategory,
     getServicesByCategorySlug,
+    updateService,
+    deleteService,
     getTeam,
     getActiveTeam,
     getTeamMember,
@@ -819,7 +802,5 @@ const api = {
     createClient,
     createFullProject,
     updateFullProject,
-    getProjectForAdmin
+    getProjectForAdmin,
 };
-
-export default api;

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './AdminContacts.css';
-
+import { useModal } from '../../hooks/useModal.js';
 // Ваши компоненты
 import Typography from '../../components/UI/Typography/Typography.jsx';
 import MyButton from '../../components/UI/MyButton/MyButton.jsx';
@@ -15,8 +15,8 @@ const AdminContacts = () => {
     const [filter, setFilter] = useState('all');
     const [selectedContact, setSelectedContact] = useState(null);
     const navigate = useNavigate();
+    const { showConfirm, showAlert, ConfirmModalComponent, AlertModalComponent } = useModal();
 
-    // Проверка админа
     useEffect(() => {
         const token = localStorage.getItem('token');
         const userRole = localStorage.getItem('userRole');
@@ -38,7 +38,7 @@ const AdminContacts = () => {
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5000/api/contacts', {
+            const response = await fetch('/api/contacts', {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -60,7 +60,7 @@ const AdminContacts = () => {
     const updateStatus = async (id, newStatus) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:5000/api/contacts/${id}/status`, {
+            const response = await fetch(`/api/contacts/${id}/status`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -78,23 +78,24 @@ const AdminContacts = () => {
     };
 
     const deleteContact = async (id) => {
-        if (!window.confirm('Удалить эту заявку?')) return;
+        showConfirm('Вы уверены, что хотите удалить эту заявку?', async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`/api/contacts/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
 
-        try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:5000/api/contacts/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`
+                if (response.ok) {
+                    loadContacts();
+                    showAlert('Заявка успешно удалена');
+                } else {
+                    showAlert('Ошибка при удалении заявки');
                 }
-            });
-
-            if (response.ok) {
-                loadContacts();
+            } catch (error) {
+                showAlert('Произошла ошибка при удалении');
             }
-        } catch (error) {
-            console.error('Ошибка удаления:', error);
-        }
+        });
     };
 
     const getStatusText = (status) => {
@@ -108,10 +109,10 @@ const AdminContacts = () => {
 
     const getStatusIcon = (status) => {
         switch (status) {
-            case 'new': return '🟡';
-            case 'in_progress': return '🔵';
-            case 'completed': return '✅';
-            default: return '📋';
+            case 'new': return <Icons.Clock size={16} color="#ffc107" />;
+            case 'in_progress': return <Icons.Settings size={16} color="#17a2b8" />;
+            case 'completed': return <Icons.Check size={16} color="#28a745" />;
+            default: return <Icons.File size={16} />;
         }
     };
 
@@ -146,9 +147,11 @@ const AdminContacts = () => {
     return (
         <div className="admin-contacts">
             <div className="admin-header">
-                <Typography variant="h1" color="dark">📋 Заявки клиентов</Typography>
+                <Typography variant="h1" color="dark">
+                    <Icons.MessageIcon size={28} style={{ marginRight: '12px', verticalAlign: 'middle' }} />
+                    Заявки клиентов
+                </Typography>
 
-                {/* Статистика */}
                 <div className="stats-cards">
                     <div className="stat-card">
                         <div className="stat-value">{stats.total}</div>
@@ -156,36 +159,40 @@ const AdminContacts = () => {
                     </div>
                     <div className="stat-card new">
                         <div className="stat-value">{stats.new}</div>
-                        <Typography variant="small" color="default">Новые</Typography>
+                        <Typography variant="small" color="default">
+                            <Icons.Clock size={12} /> Новые
+                        </Typography>
                     </div>
                     <div className="stat-card in-progress">
                         <div className="stat-value">{stats.in_progress}</div>
-                        <Typography variant="small" color="default">В работе</Typography>
+                        <Typography variant="small" color="default">
+                            <Icons.Settings size={12} /> В работе
+                        </Typography>
                     </div>
                     <div className="stat-card completed">
                         <div className="stat-value">{stats.completed}</div>
-                        <Typography variant="small" color="default">Завершены</Typography>
+                        <Typography variant="small" color="default">
+                            <Icons.Check size={12} /> Завершены
+                        </Typography>
                     </div>
                 </div>
 
-                {/* Фильтры */}
                 <div className="filter-buttons">
                     <button className={filter === 'all' ? 'active' : ''} onClick={() => setFilter('all')}>
                         Все ({stats.total})
                     </button>
                     <button className={filter === 'new' ? 'active' : ''} onClick={() => setFilter('new')}>
-                        🟡 Новые ({stats.new})
+                        <Icons.Clock size={14} /> Новые ({stats.new})
                     </button>
                     <button className={filter === 'in_progress' ? 'active' : ''} onClick={() => setFilter('in_progress')}>
-                        🔵 В работе ({stats.in_progress})
+                        <Icons.Settings size={14} /> В работе ({stats.in_progress})
                     </button>
                     <button className={filter === 'completed' ? 'active' : ''} onClick={() => setFilter('completed')}>
-                        ✅ Завершены ({stats.completed})
+                        <Icons.Check size={14} /> Завершены ({stats.completed})
                     </button>
                 </div>
             </div>
 
-            {/* Таблица заявок */}
             <div className="contacts-table-container">
                 <table className="contacts-table">
                     <thead>
@@ -215,12 +222,12 @@ const AdminContacts = () => {
                                 </td>
                                 <td>
                                     <Typography variant="small" color="default">
-                                        {contact.phone}
+                                        <Icons.Phone size={12} style={{ marginRight: '4px' }} /> {contact.phone}
                                     </Typography>
                                 </td>
                                 <td>
                                     <Typography variant="small" color="default">
-                                        {contact.email || '-'}
+                                        <Icons.Email size={12} style={{ marginRight: '4px' }} /> {contact.email || '-'}
                                     </Typography>
                                 </td>
                                 <td>
@@ -246,17 +253,23 @@ const AdminContacts = () => {
                                             cursor: 'pointer'
                                         }}
                                     >
-                                        <option value="new">🟡 Новая</option>
-                                        <option value="in_progress">🔵 В работе</option>
-                                        <option value="completed">✅ Завершена</option>
+                                        <option value="new">
+                                            <Icons.Clock size={12} /> Новая
+                                        </option>
+                                        <option value="in_progress">
+                                            <Icons.Settings size={12} /> В работе
+                                        </option>
+                                        <option value="completed">
+                                            <Icons.Check size={12} /> Завершена
+                                        </option>
                                     </select>
-                                </td>
+                                 </td>
                                 <td className="actions-cell">
-                                    <button className="view-btn" onClick={() => setSelectedContact(contact)}>
-                                        👁️
+                                    <button className="view-btn" onClick={() => setSelectedContact(contact)} title="Просмотреть">
+                                        <Icons.Eye size={16} />
                                     </button>
-                                    <button className="delete-btn" onClick={() => deleteContact(contact.id)}>
-                                        🗑️
+                                    <button className="delete-btn" onClick={() => deleteContact(contact.id)} title="Удалить">
+                                        <Icons.Trash size={16} />
                                     </button>
                                 </td>
                             </tr>
@@ -265,7 +278,6 @@ const AdminContacts = () => {
                 </table>
             </div>
 
-            {/* Модальное окно с деталями */}
             {selectedContact && (
                 <div className="modal-overlay" onClick={() => setSelectedContact(null)}>
                     <div className="modal-details" onClick={(e) => e.stopPropagation()}>
@@ -391,6 +403,8 @@ const AdminContacts = () => {
                     </div>
                 </div>
             )}
+            <ConfirmModalComponent />
+            <AlertModalComponent />
         </div>
     );
 };

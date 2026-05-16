@@ -1,0 +1,87 @@
+/* src/components/UI/Toast/Toast.css */
+.toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    z-index: 10001;
+    animation: slideIn 0.3s ease;
+    min-width: 280px;
+    max-width: 400px;
+    border-left: 4px solid;
+}
+
+.toast-success {
+    border-left-color: #28a745;
+    background: #f0fdf4;
+}
+
+.toast-error {
+    border-left-color: #dc3545;
+    background: #fef2f2;
+}
+
+.toast-warning {
+    border-left-color: #ffc107;
+    background: #fffbeb;
+}
+
+.toast-info {
+    border-left-color: #17a2b8;
+    background: #f0f9ff;
+}
+
+.toast-icon {
+    font-size: 20px;
+}
+
+.toast-message {
+    flex: 1;
+    font-size: 14px;
+    color: #333;
+    line-height: 1.4;
+}
+
+.toast-close {
+    background: none;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    color: #999;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+}
+
+.toast-close:hover {
+    color: #333;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Для мобильных устройств */
+@media (max-width: 768px) {
+    .toast {
+        bottom: 16px;
+        right: 16px;
+        left: 16px;
+        min-width: auto;
+    }
+}

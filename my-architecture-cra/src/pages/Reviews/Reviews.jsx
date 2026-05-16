@@ -19,14 +19,13 @@ const Reviews = () => {
     const [userInfo, setUserInfo] = useState(null);
     const [hasExistingReview, setHasExistingReview] = useState(false);
     const [authChecked, setAuthChecked] = useState(false);
-    const [editingReview, setEditingReview] = useState(null); // ⭐ ДОБАВИТЬ
+    const [editingReview, setEditingReview] = useState(null);
 
     useEffect(() => {
         loadReviews();
         checkAuthAndLoadProjects();
     }, []);
 
-    // ⭐ Обработчик обновления отзыва
     const handleUpdateReview = async (data, isEditing) => {
         if (!isEditing) return;
         
@@ -37,7 +36,7 @@ const Reviews = () => {
         
         if (result.success) {
             alert('Отзыв успешно обновлен');
-            loadReviews(); // Обновить список
+            loadReviews();
             setEditingReview(null);
         } else {
             alert(result.error || 'Ошибка при обновлении отзыва');
@@ -45,7 +44,6 @@ const Reviews = () => {
         }
     };
 
-    // ⭐ Обработчик удаления отзыва
     const handleDeleteReview = async (reviewId) => {
         if (!window.confirm('Вы уверены, что хотите удалить свой отзыв?')) return;
         
@@ -71,7 +69,8 @@ const Reviews = () => {
             }
 
             console.log('📡 2. Запрос /api/auth/me');
-            const userResponse = await fetch('http://localhost:5000/api/auth/me', {
+            // Убираем localhost
+            const userResponse = await fetch('/api/auth/me', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
@@ -101,10 +100,11 @@ const Reviews = () => {
         try {
             console.log('📡 3. Запрос проектов клиента');
             
+            // Убираем localhost
             const endpoints = [
-                'http://localhost:5000/api/projects/my-projects',
-                'http://localhost:5000/api/clients/my-projects',
-                'http://localhost:5000/api/projects/client'
+                '/api/projects/my-projects',
+                '/api/clients/my-projects',
+                '/api/projects/client'
             ];
             
             let projectsData = null;
@@ -153,7 +153,8 @@ const Reviews = () => {
 
     const checkExistingReviews = async (token) => {
         try {
-            const response = await fetch('http://localhost:5000/api/testimonials/my', {
+            // Убираем localhost
+            const response = await fetch('/api/testimonials/my', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             
@@ -171,7 +172,8 @@ const Reviews = () => {
     const loadReviews = async () => {
         setLoading(true);
         try {
-            const response = await fetch('http://localhost:5000/api/testimonials?published=true');
+            // Убираем localhost
+            const response = await fetch('/api/testimonials?published=true');
             
             if (response.ok) {
                 let data = await response.json();
@@ -194,7 +196,8 @@ const Reviews = () => {
     const handleAddReview = async (reviewData) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5000/api/testimonials', {
+            // Убираем localhost
+            const response = await fetch('/api/testimonials', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -213,7 +216,7 @@ const Reviews = () => {
                 alert(result.message);
                 setIsModalOpen(false);
                 setHasExistingReview(true);
-                loadReviews(); // Обновить список отзывов
+                loadReviews();
             } else {
                 alert(result.error || 'Ошибка при добавлении отзыва');
             }
@@ -355,7 +358,6 @@ const Reviews = () => {
                                     <h4>{review.client_name}</h4>
                                     <div className="review-rating">{getRatingStars(review.rating)}</div>
                                 </div>
-                                {/* ⭐ Кнопки редактирования/удаления для своих отзывов */}
                                 {isAuthenticated && userInfo?.email === review.client_email && (
                                     <div style={{ display: 'flex', gap: '8px', marginLeft: 'auto' }}>
                                         <button
@@ -378,7 +380,6 @@ const Reviews = () => {
                             <div className="review-content">
                                 <p>{review.text}</p>
                             </div>
-                            {/* ⭐ Ссылка на проект */}
                             {review.project_slug && (
                                 <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #eee' }}>
                                     <a 
@@ -402,7 +403,6 @@ const Reviews = () => {
                 )}
             </div>
 
-            {/* Модалка создания отзыва */}
             <ReviewFormModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
@@ -415,7 +415,6 @@ const Reviews = () => {
                 }}
             />
 
-            {/* ⭐ Модалка редактирования отзыва */}
             <ReviewFormModal
                 isOpen={!!editingReview}
                 onClose={() => setEditingReview(null)}

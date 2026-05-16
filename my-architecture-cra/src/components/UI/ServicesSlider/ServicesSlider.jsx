@@ -6,7 +6,9 @@ import Typography from '../../UI/Typography/Typography.jsx';
 import { getServicesByCategorySlug } from '../../../services/api';
 import ServiceEditModal from './ServiceEditModal.jsx';
 import AddServiceModal from './AddServiceModal.jsx';
-
+import { useModal } from '../../../hooks/useModal'; // ✅ Добавить импорт
+import Icons from '../../UI/Icons/Icons.jsx'; // ✅ Добавить импорт иконок
+import ConfirmModal from '../ConfirmModal/ConfirmModal.jsx';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
@@ -14,7 +16,12 @@ import 'swiper/css/pagination';
 const getUserRole = () => localStorage.getItem('userRole');
 const isAdminUser = getUserRole() === 'admin';
 
+// Базовый URL для API
+const API_BASE_URL = process.env.REACT_APP_API_URL || '';
+
 const ServicesSlider = ({ isAdmin = false, onServicesUpdate }) => {
+  const { showConfirm, showAlert, ConfirmModalComponent, AlertModalComponent } = useModal(); // ✅ Добавить
+  
   const [services, setServices] = useState({});
   const [categories, setCategories] = useState([]);
   const [activeCategory, setActiveCategory] = useState(null);
@@ -23,10 +30,12 @@ const ServicesSlider = ({ isAdmin = false, onServicesUpdate }) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [serviceToDelete, setServiceToDelete] = useState(null); // ✅ Для confirm модалки
+
   const fetchCategories = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/services/categories', {
+      const response = await fetch('/api/services/categories', {
         headers: {
           'Authorization': token ? `Bearer ${token}` : {}
         }
@@ -45,7 +54,8 @@ const ServicesSlider = ({ isAdmin = false, onServicesUpdate }) => {
       console.error('Ошибка загрузки категорий:', error);
     }
   };
-   const fetchAllServices = async () => {
+
+  const fetchAllServices = async () => {
     if (categories.length === 0) return;
     
     setLoading(true);
@@ -72,17 +82,16 @@ const ServicesSlider = ({ isAdmin = false, onServicesUpdate }) => {
       }
     } catch (error) {
       console.error('Ошибка загрузки услуг:', error);
+      showAlert('Ошибка при загрузке услуг', 'Ошибка');
     } finally {
       setLoading(false);
     }
   };
 
-  // Загружаем категории при монтировании
   useEffect(() => {
     fetchCategories();
   }, []);
 
-  // Загружаем услуги когда категории загружены или обновлён триггер
   useEffect(() => {
     if (categories.length > 0) {
       fetchAllServices();
@@ -107,7 +116,7 @@ const ServicesSlider = ({ isAdmin = false, onServicesUpdate }) => {
   const handleSaveService = async (updatedService) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/services/${updatedService.id}`, {
+      const response = await fetch(`/api/services/${updatedService.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -120,49 +129,54 @@ const ServicesSlider = ({ isAdmin = false, onServicesUpdate }) => {
         refreshServices();
         setIsEditModalOpen(false);
         setEditingService(null);
-        alert('Услуга успешно обновлена');
+        showAlert('Услуга успешно обновлена');
       } else {
         const error = await response.json();
         console.error('Ошибка при сохранении:', error);
-        alert('Ошибка при сохранении услуги');
+        showAlert('Ошибка при сохранении услуги', 'Ошибка');
       }
     } catch (error) {
       console.error('Ошибка:', error);
-      alert('Ошибка при сохранении услуги');
+      showAlert('Ошибка при сохранении услуги', 'Ошибка');
     }
   };
 
   const handleDeleteService = async (serviceId) => {
-    if (window.confirm('Вы уверены, что хотите удалить эту услугу?')) {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:5000/api/services/${serviceId}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
+    setServiceToDelete(serviceId);
+  };
 
-        if (response.ok) {
-          refreshServices();
-          setIsEditModalOpen(false);
-          setEditingService(null);
-          alert('Услуга удалена');
-        } else {
-          console.error('Ошибка при удалении');
-          alert('Ошибка при удалении услуги');
+  const confirmDelete = async () => {
+    const serviceId = serviceToDelete;
+    setServiceToDelete(null);
+    
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/services/${serviceId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
         }
-      } catch (error) {
-        console.error('Ошибка:', error);
-        alert('Ошибка при удалении услуги');
+      });
+
+      if (response.ok) {
+        refreshServices();
+        setIsEditModalOpen(false);
+        setEditingService(null);
+        showAlert('Услуга удалена');
+      } else {
+        console.error('Ошибка при удалении');
+        showAlert('Ошибка при удалении услуги', 'Ошибка');
       }
+    } catch (error) {
+      console.error('Ошибка:', error);
+      showAlert('Ошибка при удалении услуги', 'Ошибка');
     }
   };
 
   const handleCreateService = async (newService) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/services', {
+      const response = await fetch('/api/services', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -174,19 +188,31 @@ const ServicesSlider = ({ isAdmin = false, onServicesUpdate }) => {
       if (response.ok) {
         refreshServices();
         setIsAddModalOpen(false);
-        alert('Услуга успешно добавлена');
+        showAlert('Услуга успешно добавлена');
       } else {
         const error = await response.json();
         console.error('Ошибка при создании:', error);
-        alert('Ошибка при создании услуги');
+        showAlert('Ошибка при создании услуги', 'Ошибка');
       }
     } catch (error) {
       console.error('Ошибка:', error);
-      alert('Ошибка при создании услуги');
+      showAlert('Ошибка при создании услуги', 'Ошибка');
     }
   };
 
-  // Получаем иконку для категории
+  const getImageUrl = (service) => {
+    if (service.icon_path) {
+      return service.icon_path.startsWith('http') 
+        ? service.icon_path 
+        : `${API_BASE_URL}${service.icon_path}`;
+    } else if (service.icon && !service.icon.match(/^[🏛️🪑📦🎨💰📋🛒👨‍💻👩‍🎨⚡📄🏗️🌟🏆📈🏅🎨💚]/)) {
+      return service.icon.startsWith('http') 
+        ? service.icon 
+        : `${API_BASE_URL}/${service.icon}`;
+    }
+    return null;
+  };
+
   const getCategoryIcon = (slug) => {
     const icons = {
       'architecture': '🏛️',
@@ -206,7 +232,6 @@ const ServicesSlider = ({ isAdmin = false, onServicesUpdate }) => {
   return (
     <>
       <div className="services-slider-container">
-        {/* Кнопки категорий из БД */}
         <div className="services-categories">
           {categories.map(category => (
             <button
@@ -219,16 +244,16 @@ const ServicesSlider = ({ isAdmin = false, onServicesUpdate }) => {
             </button>
           ))}
           
-          {/* Кнопка добавления услуги (только для админа) */}
           {isAdminUser && (
             <button className="category-btn add-service-btn" onClick={handleAddClick}>
-              <span className="category-icon">➕</span>
+              <span className="category-icon">
+                <Icons.Plus size={18} />
+              </span>
               <span className="category-name">Добавить услугу</span>
             </button>
           )}
         </div>
 
-        {/* Слайдер услуг */}
         {currentServices.length > 0 ? (
           <div className="services-slider-wrapper">
             <Swiper
@@ -246,13 +271,7 @@ const ServicesSlider = ({ isAdmin = false, onServicesUpdate }) => {
               className="services-swiper"
             >
               {currentServices.map((service) => {
-                let imageSrc = null;
-                
-                if (service.icon_path) {
-                  imageSrc = `http://localhost:5000${service.icon_path}`;
-                } else if (service.icon && !service.icon.match(/^[🏛️🪑📦🎨💰📋🛒👨‍💻👩‍🎨⚡📄🏗️🌟🏆📈🏅🎨💚]/)) {
-                  imageSrc = `http://localhost:5000/${service.icon}`;
-                }
+                const imageUrl = getImageUrl(service);
                 
                 return (
                   <SwiperSlide key={service.id}>
@@ -264,18 +283,25 @@ const ServicesSlider = ({ isAdmin = false, onServicesUpdate }) => {
                             onClick={() => handleEditClick(service)}
                             title="Редактировать услугу"
                           >
-                            ✏️
+                            <Icons.Edit size={16} />
+                          </button>
+                          <button 
+                            className="admin-delete-btn"
+                            onClick={() => handleDeleteService(service.id)}
+                            title="Удалить услугу"
+                          >
+                            <Icons.Trash size={16} />
                           </button>
                         </div>
                       )}
                       <div className="service-image">
-                        {imageSrc ? (
+                        {imageUrl ? (
                           <img 
-                            src={imageSrc}
+                            src={imageUrl}
                             alt={service.title}
                             className="service-img"
                             onError={(e) => {
-                              console.error('Ошибка загрузки изображения:', imageSrc);
+                              console.error('Ошибка загрузки изображения:', imageUrl);
                               e.target.style.display = 'none';
                               e.target.parentElement.innerHTML = '<span class="service-fallback">📦</span>';
                             }}
@@ -310,14 +336,13 @@ const ServicesSlider = ({ isAdmin = false, onServicesUpdate }) => {
             </Typography>
             {isAdminUser && (
               <button onClick={handleAddClick} className="add-first-btn">
-                Добавить первую услугу
+                <Icons.Plus size={16} /> Добавить первую услугу
               </button>
             )}
           </div>
         )}
       </div>
 
-      {/* Модальное окно редактирования */}
       <ServiceEditModal
         isOpen={isEditModalOpen}
         service={editingService}
@@ -326,15 +351,27 @@ const ServicesSlider = ({ isAdmin = false, onServicesUpdate }) => {
           setEditingService(null);
         }}
         onSave={handleSaveService}
-        onDelete={handleDeleteService}
+        onDelete={() => setServiceToDelete(editingService?.id)}
       />
 
-      {/* Модальное окно добавления */}
       <AddServiceModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onSave={handleCreateService}
         categories={categories}
+      />
+
+      {/* ✅ Кастомные модальные окна */}
+      <ConfirmModalComponent />
+      <AlertModalComponent />
+      
+      {/* ✅ Confirm модалка для удаления */}
+      <ConfirmModal
+        isOpen={serviceToDelete !== null}
+        onClose={() => setServiceToDelete(null)}
+        onConfirm={confirmDelete}
+        title="Подтверждение удаления"
+        message="Вы уверены, что хотите удалить эту услугу? Это действие нельзя отменить."
       />
     </>
   );

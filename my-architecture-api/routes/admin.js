@@ -1,3 +1,4 @@
+// my-architecture-api/routes/admin.js
 import { Router } from 'express';
 import { authMiddleware, adminOnly } from '../middleware/auth.js';
 import AdminController from '../controllers/AdminController.js';
@@ -19,11 +20,14 @@ router.post('/clients', AdminController.createClient);
 // Управление сотрудниками
 router.put('/team/:teamId', AdminController.updateTeam);
 
-// Защищённые данные сотрудников (только для админов)
+// ✅ Защищённые данные сотрудников
 router.get('/team-secure/:teamId', AdminController.getTeamSecureData);
-
-// Защищённые данные клиентов (только для админов)
-router.get('/client-secure/:clientId', AdminController.getClientSecureData);
 router.post('/team-secure/:teamId', AdminController.createTeamSecureData);
+router.put('/team-secure/:teamId', AdminController.updateTeamSecureData);  // ← ДОБАВИТЬ ЭТОТ
+
+// ✅ Защищённые данные клиентов
+router.get('/client-secure/:clientId', AdminController.getClientSecureData);
 router.post('/client-secure/:clientId', AdminController.createClientSecureData);
+router.put('/client-secure/:clientId', AdminController.updateClientSecureData);  // ← ДОБАВИТЬ ЭТОТ
+
 export default router;

@@ -1,0 +1,69 @@
+/* components/UI/AlertModal/AlertModal.css */
+.alert-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+}
+
+.alert-modal {
+    background: white;
+    border-radius: 16px;
+    max-width: 400px;
+    width: 90%;
+    padding: 24px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    animation: modalFadeIn 0.2s ease;
+    text-align: center;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.alert-title {
+    margin: 0 0 16px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+}
+
+.alert-message {
+    margin: 0 0 24px 0;
+    font-size: 16px;
+    color: #555;
+    line-height: 1.5;
+}
+
+.alert-buttons {
+    display: flex;
+    justify-content: center;
+}
+
+.alert-btn-ok {
+    padding: 10px 32px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    background: #3a5a6a;
+    color: white;
+    transition: all 0.2s;
+}
+
+.alert-btn-ok:hover {
+    background: #2c4654;
+}

@@ -21,16 +21,24 @@ class ProjectController {
                 } catch (err) {
                     console.error('Ошибка создания клиента:', err);
                     console.log('📌 raw client_id from frontend:', req.body.client_id);
-console.log('📌 cleaned client_id:', clientId);
-console.log('📌 project_type_id:', projectTypeId);
+                    console.log('📌 cleaned client_id:', clientId);
+                    console.log('📌 project_type_id:', projectTypeId);
                 }
             } else if (req.body.client_id && req.body.client_id !== '') {
                 // ⭐ ОЧИЩАЕМ client_id от фигурных скобок и лишних символов
                 let rawClientId = req.body.client_id;
-                // Удаляем фигурные скобки, если они есть
-                let cleanClientId = rawClientId.replace(/[{}]/g, '');
-                // Удаляем пробелы
-                cleanClientId = cleanClientId.trim();
+
+                // Если массив - берём первый элемент
+                if (Array.isArray(rawClientId)) {
+                    rawClientId = rawClientId[0];
+                    console.log('⚠️ client_id был массивом, взят первый элемент:', rawClientId);
+                }
+
+                // Удаляем фигурные скобки и кавычки
+                let cleanClientId = String(rawClientId)
+                    .replace(/[{}]/g, '')
+                    .replace(/^["']|["']$/g, '')
+                    .trim();
 
                 console.log('📌 raw client_id:', rawClientId);
                 console.log('📌 clean client_id:', cleanClientId);
@@ -102,22 +110,26 @@ console.log('📌 project_type_id:', projectTypeId);
             }
 
             // 5. Обработка команды
-            if (req.body.team_data) {
-                try {
-                    const teamData = JSON.parse(req.body.team_data);
-
-                    await req.pool.query('DELETE FROM project_team WHERE project_id = $1', [projectId]);
-
-                    for (const member of teamData) {
-                        await req.pool.query(
-                            `INSERT INTO project_team (project_id, team_id, role) VALUES ($1, $2, $3)`,
-                            [projectId, member.id, member.role || 'architect']
-                        );
-                    }
-                } catch (err) {
-                    console.error('Ошибка обработки team_data:', err);
-                }
-            }
+if (req.body.team_data) {
+    try {
+        const teamData = JSON.parse(req.body.team_data);
+        
+        for (const member of teamData) {
+            // ⭐ ОЧИЩАЕМ ID от фигурных скобок и кавычек
+            let cleanTeamId = String(member.id)
+                .replace(/[{}]/g, '')
+                .replace(/^["']|["']$/g, '');
+            
+            await req.pool.query(
+                `INSERT INTO project_team (project_id, team_id, role) VALUES ($1, $2, $3)`,
+                [projectId, cleanTeamId, member.role || 'architect']
+            );
+        }
+        console.log('✅ Команда сохранена');
+    } catch (err) {
+        console.error('Ошибка обработки team_data:', err);
+    }
+}
 
             // 6. Обработка галереи
             if (req.files && req.files.gallery_images) {
@@ -235,7 +247,20 @@ console.log('📌 project_type_id:', projectTypeId);
                 mainImagePath = `/uploads/projects/${fileName}`;
             }
 
-            // Обновляем проект (БЕЗ поля awards)
+            // ⭐⭐⭐ ОЧИСТКА CLIENT_ID ⭐⭐⭐
+            let clientId = req.body.client_id;
+            if (Array.isArray(clientId)) {
+                clientId = clientId[0];
+                console.log('⚠️ client_id был массивом, взят первый элемент:', clientId);
+            }
+            if (typeof clientId === 'string' && clientId) {
+                clientId = clientId
+                    .replace(/[{}]/g, '')
+                    .replace(/^["']|["']$/g, '');
+                console.log('🧹 Очищенный client_id:', clientId);
+            }
+
+            // Обновляем проект
             const updateData = {
                 title: req.body.title,
                 slug: req.body.slug,
@@ -245,17 +270,15 @@ console.log('📌 project_type_id:', projectTypeId);
                 project_year: req.body.project_year,
                 status: req.body.status,
                 project_type_id: req.body.project_type_id,
-                client_id: req.body.client_id,
+                client_id: clientId,
                 main_image: mainImagePath || req.body.main_image,
                 is_featured: req.body.is_featured === 'true' || req.body.is_featured === true
             };
 
-            // Удаляем undefined поля
             Object.keys(updateData).forEach(key =>
                 updateData[key] === undefined && delete updateData[key]
             );
 
-            // Строим запрос динамически
             let query = 'UPDATE projects SET ';
             const updateValues = [];
             let paramIndex = 1;
@@ -280,14 +303,94 @@ console.log('📌 project_type_id:', projectTypeId);
             query += `, updated_at = CURRENT_TIMESTAMP WHERE id = $${paramIndex} RETURNING *`;
             updateValues.push(req.params.id);
 
+            console.log('📝 SQL Query:', query);
+            console.log('📝 Values:', updateValues);
+
             const result = await req.pool.query(query, updateValues);
 
-            // Обновляем награды, если переданы
+            // ⭐⭐⭐ ОБРАБОТКА КОМАНДЫ (ВАЖНО!) ⭐⭐⭐
+            if (req.body.team_data) {
+                try {
+                    const teamData = JSON.parse(req.body.team_data);
+                    console.log('👥 Сохранение команды:', teamData);
+
+                    // Удаляем старые связи
+                    await req.pool.query('DELETE FROM project_team WHERE project_id = $1', [req.params.id]);
+
+                    // Добавляем новые
+                    for (const member of teamData) {
+                        // Очищаем ID от возможных скобок
+                        let cleanTeamId = String(member.id)
+                            .replace(/[{}]/g, '')
+                            .replace(/^["']|["']$/g, '');
+
+                        await req.pool.query(
+                            `INSERT INTO project_team (project_id, team_id, role) VALUES ($1, $2, $3)`,
+                            [req.params.id, cleanTeamId, member.role || 'architect']
+                        );
+                    }
+                    console.log('✅ Команда успешно обновлена');
+                } catch (err) {
+                    console.error('Ошибка обработки team_data:', err);
+                }
+            }
+
+            // ⭐⭐⭐ ОБРАБОТКА КОМНАТ ⭐⭐⭐
+            if (req.body.rooms) {
+                try {
+                    const rooms = JSON.parse(req.body.rooms);
+                    console.log('🏠 Сохранение комнат:', rooms);
+
+                    // Удаляем старые комнаты
+                    await req.pool.query('DELETE FROM project_rooms WHERE project_id = $1', [req.params.id]);
+
+                    // Добавляем новые
+                    for (const room of rooms) {
+                        await req.pool.query(
+                            `INSERT INTO project_rooms (project_id, name, area, description) VALUES ($1, $2, $3, $4)`,
+                            [req.params.id, room.name, room.area || null, room.description || null]
+                        );
+                    }
+                    console.log('✅ Комнаты успешно обновлены');
+                } catch (err) {
+                    console.error('Ошибка обработки rooms:', err);
+                }
+            }
+
+            // ⭐⭐⭐ ОБРАБОТКА ГАЛЕРЕИ (новые изображения) ⭐⭐⭐
+            if (req.files && req.files.gallery_images) {
+                const images = Array.isArray(req.files.gallery_images)
+                    ? req.files.gallery_images
+                    : [req.files.gallery_images];
+
+                for (let i = 0; i < images.length; i++) {
+                    const fileName = Date.now() + '_' + images[i].name.replace(/\s/g, '_');
+                    const uploadPath = 'uploads/projects/' + fileName;
+                    await images[i].mv(uploadPath);
+                    await req.pool.query(
+                        `INSERT INTO project_images (project_id, image_url, sort_order) VALUES ($1, $2, $3)`,
+                        [req.params.id, `/uploads/projects/${fileName}`, i]
+                    );
+                }
+            }
+
+            // ⭐⭐⭐ УДАЛЕНИЕ ИЗОБРАЖЕНИЙ ⭐⭐⭐
+            if (req.body.delete_images) {
+                try {
+                    const deleteImages = JSON.parse(req.body.delete_images);
+                    for (const imageId of deleteImages) {
+                        await req.pool.query('DELETE FROM project_images WHERE id = $1', [imageId]);
+                    }
+                    console.log('🗑️ Удалены изображения:', deleteImages);
+                } catch (err) {
+                    console.error('Ошибка удаления изображений:', err);
+                }
+            }
+
+            // Обновляем награды
             if (req.body.awards) {
-                // Удаляем старые награды
                 await req.pool.query('DELETE FROM awards WHERE project_id = $1', [req.params.id]);
 
-                // Добавляем новые
                 const awards = req.body.awards.split(',');
                 for (const awardName of awards) {
                     if (awardName.trim()) {
@@ -381,74 +484,74 @@ console.log('📌 project_type_id:', projectTypeId);
             res.status(500).json({ error: error.message });
         }
     }
-// В ProjectController.js, в начало метода getAllWithFilters добавьте:
-async getAllWithFilters(req, res) {
-    try {
-        console.log('\n========== PROJECTS API CALLED ==========');
-        console.log('Full URL:', req.originalUrl);
-        console.log('Query params:', req.query);
-          console.log('🔥🔥🔥 getAllWithFilters in CONTROLLER called! 🔥🔥🔥');
-    console.log('Query params:', req.query);
-        const { 
-            status, 
-            type,           // от фронтенда приходит как 'type'
-            year, 
-            search, 
-            sort,           // от фронтенда приходит как 'sort' (date_desc, title_asc и т.д.)
-            page = 1, 
-            limit = 12 
-        } = req.query;
+    // В ProjectController.js, в начало метода getAllWithFilters добавьте:
+    async getAllWithFilters(req, res) {
+        try {
+            console.log('\n========== PROJECTS API CALLED ==========');
+            console.log('Full URL:', req.originalUrl);
+            console.log('Query params:', req.query);
+            console.log('🔥🔥🔥 getAllWithFilters in CONTROLLER called! 🔥🔥🔥');
+            console.log('Query params:', req.query);
+            const {
+                status,
+                type,           // от фронтенда приходит как 'type'
+                year,
+                search,
+                sort,           // от фронтенда приходит как 'sort' (date_desc, title_asc и т.д.)
+                page = 1,
+                limit = 12
+            } = req.query;
 
-        console.log('📥 Распарсенные параметры:', { 
-            status, 
-            type, 
-            year, 
-            search, 
-            sort, 
-            page, 
-            limit 
-        });
+            console.log('📥 Распарсенные параметры:', {
+                status,
+                type,
+                year,
+                search,
+                sort,
+                page,
+                limit
+            });
 
-        // Преобразуем sort из формата фронтенда в формат для SQL
-        let sortField = 'p.created_at';
-        let sortOrder = 'DESC';
-        
-        if (sort) {
-            console.log('🔄 Применяем сортировку:', sort);
-            switch (sort) {
-                case 'date_desc':
-                    sortField = 'p.project_year';
-                    sortOrder = 'DESC';
-                    break;
-                case 'date_asc':
-                    sortField = 'p.project_year';
-                    sortOrder = 'ASC';
-                    break;
-                case 'title_asc':
-                    sortField = 'p.title';
-                    sortOrder = 'ASC';
-                    break;
-                case 'title_desc':
-                    sortField = 'p.title';
-                    sortOrder = 'DESC';
-                    break;
-                case 'area_desc':
-                    sortField = 'p.area';
-                    sortOrder = 'DESC';
-                    break;
-                case 'area_asc':
-                    sortField = 'p.area';
-                    sortOrder = 'ASC';
-                    break;
-                default:
-                    sortField = 'p.created_at';
-                    sortOrder = 'DESC';
+            // Преобразуем sort из формата фронтенда в формат для SQL
+            let sortField = 'p.created_at';
+            let sortOrder = 'DESC';
+
+            if (sort) {
+                console.log('🔄 Применяем сортировку:', sort);
+                switch (sort) {
+                    case 'date_desc':
+                        sortField = 'p.project_year';
+                        sortOrder = 'DESC';
+                        break;
+                    case 'date_asc':
+                        sortField = 'p.project_year';
+                        sortOrder = 'ASC';
+                        break;
+                    case 'title_asc':
+                        sortField = 'p.title';
+                        sortOrder = 'ASC';
+                        break;
+                    case 'title_desc':
+                        sortField = 'p.title';
+                        sortOrder = 'DESC';
+                        break;
+                    case 'area_desc':
+                        sortField = 'p.area';
+                        sortOrder = 'DESC';
+                        break;
+                    case 'area_asc':
+                        sortField = 'p.area';
+                        sortOrder = 'ASC';
+                        break;
+                    default:
+                        sortField = 'p.created_at';
+                        sortOrder = 'DESC';
+                }
+                console.log('📊 SQL сортировка:', { sortField, sortOrder });
             }
-            console.log('📊 SQL сортировка:', { sortField, sortOrder });
-        }
 
-        // Строим запрос
-        let query = `
+            // Строим запрос
+            let query = `
             SELECT 
                 p.id, p.title, p.slug, p.location, p.area, 
                 p.project_year, p.status, p.main_image, p.description,
@@ -458,111 +561,111 @@ async getAllWithFilters(req, res) {
             LEFT JOIN project_types pt ON p.project_type_id = pt.id
             WHERE 1=1
         `;
-        
-        const values = [];
-        let paramIndex = 1;
 
-        // Фильтр по статусу
-        if (status && status !== '') {
-            query += ` AND p.status = $${paramIndex++}`;
-            values.push(status);
-            console.log(`🏷️ Фильтр по статусу: ${status}`);
-        }
+            const values = [];
+            let paramIndex = 1;
 
-        // Фильтр по типу проекта
-        if (type && type !== '') {
-            query += ` AND p.project_type_id = $${paramIndex++}`;
-            values.push(parseInt(type));
-            console.log(`🏷️ Фильтр по типу: ${type}`);
-        }
+            // Фильтр по статусу
+            if (status && status !== '') {
+                query += ` AND p.status = $${paramIndex++}`;
+                values.push(status);
+                console.log(`🏷️ Фильтр по статусу: ${status}`);
+            }
 
-        // Фильтр по году
-        if (year && year !== '') {
-            query += ` AND p.project_year = $${paramIndex++}`;
-            values.push(parseInt(year));
-            console.log(`🏷️ Фильтр по году: ${year}`);
-        }
+            // Фильтр по типу проекта
+            if (type && type !== '') {
+                query += ` AND p.project_type_id = $${paramIndex++}`;
+                values.push(parseInt(type));
+                console.log(`🏷️ Фильтр по типу: ${type}`);
+            }
 
-        // Поиск по названию
-        if (search && search !== '') {
-            query += ` AND p.title ILIKE $${paramIndex++}`;
-            values.push(`%${search}%`);
-            console.log(`🔍 Поиск: ${search}`);
-        }
+            // Фильтр по году
+            if (year && year !== '') {
+                query += ` AND p.project_year = $${paramIndex++}`;
+                values.push(parseInt(year));
+                console.log(`🏷️ Фильтр по году: ${year}`);
+            }
 
-        // Добавляем сортировку
-        query += ` ORDER BY ${sortField} ${sortOrder}`;
+            // Поиск по названию
+            if (search && search !== '') {
+                query += ` AND p.title ILIKE $${paramIndex++}`;
+                values.push(`%${search}%`);
+                console.log(`🔍 Поиск: ${search}`);
+            }
 
-        // Пагинация
-        const offset = (parseInt(page) - 1) * parseInt(limit);
-        query += ` LIMIT $${paramIndex++} OFFSET $${paramIndex++}`;
-        values.push(parseInt(limit), offset);
+            // Добавляем сортировку
+            query += ` ORDER BY ${sortField} ${sortOrder}`;
 
-        console.log('\n📝 SQL Query:', query);
-        console.log('📝 Values:', values);
-        console.log('📝 Offset:', offset, 'Limit:', limit);
+            // Пагинация
+            const offset = (parseInt(page) - 1) * parseInt(limit);
+            query += ` LIMIT $${paramIndex++} OFFSET $${paramIndex++}`;
+            values.push(parseInt(limit), offset);
 
-        // Выполняем запрос
-        const result = await req.pool.query(query, values);
-        console.log(`✅ Найдено проектов в БД: ${result.rows.length}`);
+            console.log('\n📝 SQL Query:', query);
+            console.log('📝 Values:', values);
+            console.log('📝 Offset:', offset, 'Limit:', limit);
 
-        // Получаем общее количество (для пагинации)
-        let countQuery = `
+            // Выполняем запрос
+            const result = await req.pool.query(query, values);
+            console.log(`✅ Найдено проектов в БД: ${result.rows.length}`);
+
+            // Получаем общее количество (для пагинации)
+            let countQuery = `
             SELECT COUNT(*) as total 
             FROM projects p
             WHERE 1=1
         `;
-        
-        const countValues = [];
-        let countIndex = 1;
-        
-        if (status && status !== '') {
-            countQuery += ` AND p.status = $${countIndex++}`;
-            countValues.push(status);
-        }
-        if (type && type !== '') {
-            countQuery += ` AND p.project_type_id = $${countIndex++}`;
-            countValues.push(parseInt(type));
-        }
-        if (year && year !== '') {
-            countQuery += ` AND p.project_year = $${countIndex++}`;
-            countValues.push(parseInt(year));
-        }
-        if (search && search !== '') {
-            countQuery += ` AND p.title ILIKE $${countIndex++}`;
-            countValues.push(`%${search}%`);
-        }
-        
-        console.log('\n📊 Count Query:', countQuery);
-        console.log('📊 Count Values:', countValues);
-        
-        const countResult = await req.pool.query(countQuery, countValues);
-        const total = parseInt(countResult.rows[0].total);
 
-        console.log(`📊 Всего проектов по фильтрам: ${total}`);
-        console.log(`📄 Страница: ${page}, Всего страниц: ${Math.ceil(total / parseInt(limit))}`);
-        console.log('========== END ==========\n');
+            const countValues = [];
+            let countIndex = 1;
 
-        res.json({
-            success: true,
-            projects: result.rows,
-            pagination: {
-                page: parseInt(page),
-                limit: parseInt(limit),
-                total: total,
-                pages: Math.ceil(total / parseInt(limit))
+            if (status && status !== '') {
+                countQuery += ` AND p.status = $${countIndex++}`;
+                countValues.push(status);
             }
-        });
+            if (type && type !== '') {
+                countQuery += ` AND p.project_type_id = $${countIndex++}`;
+                countValues.push(parseInt(type));
+            }
+            if (year && year !== '') {
+                countQuery += ` AND p.project_year = $${countIndex++}`;
+                countValues.push(parseInt(year));
+            }
+            if (search && search !== '') {
+                countQuery += ` AND p.title ILIKE $${countIndex++}`;
+                countValues.push(`%${search}%`);
+            }
 
-    } catch (error) {
-        console.error('❌ Ошибка в getAllWithFilters:', error);
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
+            console.log('\n📊 Count Query:', countQuery);
+            console.log('📊 Count Values:', countValues);
+
+            const countResult = await req.pool.query(countQuery, countValues);
+            const total = parseInt(countResult.rows[0].total);
+
+            console.log(`📊 Всего проектов по фильтрам: ${total}`);
+            console.log(`📄 Страница: ${page}, Всего страниц: ${Math.ceil(total / parseInt(limit))}`);
+            console.log('========== END ==========\n');
+
+            res.json({
+                success: true,
+                projects: result.rows,
+                pagination: {
+                    page: parseInt(page),
+                    limit: parseInt(limit),
+                    total: total,
+                    pages: Math.ceil(total / parseInt(limit))
+                }
+            });
+
+        } catch (error) {
+            console.error('❌ Ошибка в getAllWithFilters:', error);
+            res.status(500).json({
+                success: false,
+                error: error.message
+            });
+        }
     }
-}
- 
+
 
     // Добавить комнату к проекту
     async addRoom(req, res) {

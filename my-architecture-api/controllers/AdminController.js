@@ -13,6 +13,58 @@ class AdminController {
             res.status(500).json({ error: error.message });
         }
     }
+    // my-architecture-api/controllers/AdminController.js
+// Добавь эти методы в конец класса AdminController
+
+async updateTeamSecureData(req, res) {
+    try {
+        const { teamId } = req.params;
+        const data = req.body;
+        
+        console.log('📝 updateTeamSecureData вызван!');
+        console.log('teamId:', teamId);
+        console.log('data:', data);
+        
+        const result = await AdminService.updateTeamSecureData(teamId, data);
+        
+        console.log('result:', result);
+        
+        if (!result) {
+            return res.status(404).json({ 
+                success: false, 
+                error: 'Данные сотрудника не найдены' 
+            });
+        }
+        
+        res.json({ success: true, message: 'Данные обновлены', data: result });
+    } catch (error) {
+        console.error('❌ Ошибка обновления приватных данных сотрудника:', error);
+        res.status(500).json({ error: error.message });
+    }
+}
+
+async updateClientSecureData(req, res) {
+    try {
+        const { clientId } = req.params;
+        const data = req.body;
+        
+        console.log('📝 Обновление приватных данных для клиента (PUT):', clientId);
+        
+        const result = await AdminService.updateClientSecureData(clientId, data);
+        
+        if (!result) {
+            return res.status(404).json({ 
+                success: false, 
+                error: 'Данные клиента не найдены' 
+            });
+        }
+        
+        res.json({ success: true, message: 'Данные обновлены', data: result });
+    } catch (error) {
+        console.error('❌ Ошибка обновления приватных данных клиента:', error);
+        res.status(500).json({ error: error.message });
+    }
+}
 
     async getAccountById(req, res) {
         try {

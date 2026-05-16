@@ -5,11 +5,12 @@ import MyButton from '../../components/UI/MyButton/MyButton';
 import Icons from '../../components/UI/Icons/Icons';
 import { getAllClients, getActiveTeam, getProjectTypes, createFullProject, updateFullProject, getProjectForAdmin } from '../../services/api';
 import './ProjectForm.css';
+import { useModal } from '../../hooks/useModal';
 const ProjectForm = ({ projectId, onSaved }) => {
     const [activeTab, setActiveTab] = useState('basic');
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
-    // Добавьте рядом с другими useState
+    const { showAlert, AlertModalComponent } = useModal();
     const [existingImages, setExistingImages] = useState([]); // существующие изображения из БД
     const [imagesToDelete, setImagesToDelete] = useState([]); // изображения для удаления
     // Основные данные проекта
@@ -83,10 +84,15 @@ const ProjectForm = ({ projectId, onSaved }) => {
                 setProjectTypes(Array.isArray(typesRes) ? typesRes : []);
 
                 // 2. Клиенты
+                // В loadData, когда загружаете клиентов, убедитесь, что id — строка
                 const clientsRes = await getAllClients();
                 const clientsData = clientsRes.clients || clientsRes;
-                setClients(Array.isArray(clientsData) ? clientsData : []);
-
+                setClients(Array.isArray(clientsData) ? clientsData.map(client => ({
+                    ...client,
+                    client_id: String(client.client_id || client.id || '')
+                        .replace(/[{}]/g, '')
+                        .replace(/^["']|["']$/g, '')
+                })) : []);
                 // 3. ⭐ КОМАНДА - используем ТОТ ЖЕ метод, что и в TeamList
                 const teamRes = await getActiveTeam();  // ← ВОТ ТАК!
                 console.log('✅ Команда из getActiveTeam():', teamRes);
@@ -146,8 +152,20 @@ const ProjectForm = ({ projectId, onSaved }) => {
             });
 
             // Загружаем клиента
+            // Загружаем клиента
+            // Загружаем клиента
             if (data.client_id) {
-                let cleanClientId = data.client_id.replace(/[{}]/g, '');
+                let rawClientId = data.client_id;
+
+                // Если это массив — берём первый элемент
+                if (Array.isArray(rawClientId)) {
+                    rawClientId = rawClientId[0];
+                }
+
+                let cleanClientId = String(rawClientId)
+                    .replace(/[{}]/g, '')
+                    .replace(/^["']|["']$/g, '');
+
                 setSelectedClientId(cleanClientId);
                 setIsNewClient(false);
             }
@@ -203,11 +221,25 @@ const ProjectForm = ({ projectId, onSaved }) => {
 
         // Добавляем информацию о клиенте
         // Добавляем информацию о клиенте
+        // Добавляем информацию о клиенте
         if (isNewClient) {
             formData.append('new_client', JSON.stringify(newClient));
         } else if (selectedClientId && selectedClientId !== '') {
-            // ⭐ ОЧИЩАЕМ client_id от фигурных скобок
-            let cleanClientId = selectedClientId.replace(/[{}]/g, '');
+            // ⭐ Проверяем, что selectedClientId — это строка, а не массив
+            let rawClientId = selectedClientId;
+
+            // Если это массив — берём первый элемент
+            if (Array.isArray(rawClientId)) {
+                rawClientId = rawClientId[0];
+                console.warn('⚠️ selectedClientId был массивом, взят первый элемент:', rawClientId);
+            }
+
+            // Очищаем от фигурных скобок и кавычек
+            let cleanClientId = String(rawClientId)
+                .replace(/[{}]/g, '')           // удаляем { и }
+                .replace(/^["']|["']$/g, '');   // удаляем " в начале и конце
+
+            console.log('🧹 Очищенный client_id:', cleanClientId);
             formData.append('client_id', cleanClientId);
         }
 
@@ -251,8 +283,7 @@ const ProjectForm = ({ projectId, onSaved }) => {
             }
 
             if (result.success) {
-                alert(projectId ? 'Проект обновлен!' : 'Проект создан!');
-
+                showAlert(projectId ? 'Проект обновлен!' : 'Проект создан!');
                 // ✅ ОЧИЩАЕМ ФОРМУ ПОСЛЕ УСПЕШНОГО СОЗДАНИЯ
                 if (!projectId) {
                     // Сбрасываем все поля формы
@@ -265,7 +296,7 @@ const ProjectForm = ({ projectId, onSaved }) => {
             }
         } catch (error) {
             console.error('Ошибка:', error);
-            alert('Ошибка при сохранении: ' + error.message);
+            showAlert('Ошибка при сохранении: ' + error.message);
         } finally {
             setSaving(false);
         }
@@ -507,10 +538,21 @@ const ProjectForm = ({ projectId, onSaved }) => {
                             <div className="project-form-field-full">
                                 <Typography variant="small" weight="medium">Выберите клиента</Typography>
                                 <select
-                                    value={selectedClientId}
+                                    value={selectedClientId || ''}
                                     onChange={e => {
-                                        setSelectedClientId(e.target.value);
-                                        setProject({ ...project, client_id: e.target.value });
+                                        let rawValue = e.target.value;
+
+                                        // Если это массив (может быть при множественном выборе)
+                                        if (Array.isArray(rawValue)) {
+                                            rawValue = rawValue[0];
+                                        }
+
+                                        let cleanId = String(rawValue || '')
+                                            .replace(/[{}]/g, '')
+                                            .replace(/^["']|["']$/g, '');
+
+                                        setSelectedClientId(cleanId);
+                                        setProject({ ...project, client_id: cleanId });
                                     }}
                                     className="project-form-select"
                                 >
@@ -599,7 +641,7 @@ const ProjectForm = ({ projectId, onSaved }) => {
                                             window.mainImageDeleted = true;
                                         }}
                                     >
-                                        <Icons.Trash size={16} /> 
+                                        <Icons.Trash size={16} />
                                     </button>
                                 </div>
                             </div>
@@ -792,7 +834,7 @@ const ProjectForm = ({ projectId, onSaved }) => {
                                             setSelectedTeamMember(null);
                                             setTeamSearchTerm('');
                                         } else {
-                                            alert('Этот сотрудник уже добавлен в проект');
+                                            showAlert('Этот сотрудник уже добавлен в проект');
                                         }
                                     }
                                 }}
@@ -859,6 +901,7 @@ const ProjectForm = ({ projectId, onSaved }) => {
                     </div>
                 </div>
             )}
+            <AlertModalComponent />
 
             {/* Кнопки сохранения */}
             <div className="project-form-actions">
@@ -870,6 +913,7 @@ const ProjectForm = ({ projectId, onSaved }) => {
                 </MyButton>
             </div>
         </form>
+
     );
 };
 

@@ -400,12 +400,12 @@ class AdminService {
     }
 
     async getTeamSecureData(teamId, teamName) {
-    try {
-        console.log('🔍 Поиск данных для teamId:', teamId);
-        
-        // Прямой поиск в team_secure_view по team_id (это внешний ключ)
-        const result = await pool.query(
-            `SELECT 
+        try {
+            console.log('🔍 Поиск данных для teamId:', teamId);
+
+            // Прямой поиск в team_secure_view по team_id (это внешний ключ)
+            const result = await pool.query(
+                `SELECT 
                 team_id,
                 marriage_status,
                 children_count,
@@ -423,25 +423,25 @@ class AdminService {
                 emergency_contact
              FROM team_secure_view 
              WHERE team_id = $1`,
-            [teamId]
-        );
-        
-        console.log('📊 Результат запроса team_secure:', result.rows.length, 'записей');
-        
-        if (result.rows.length === 0) {
-            console.log('⚠️ Данные не найдены для teamId:', teamId);
-            return null;
+                [teamId]
+            );
+
+            console.log('📊 Результат запроса team_secure:', result.rows.length, 'записей');
+
+            if (result.rows.length === 0) {
+                console.log('⚠️ Данные не найдены для teamId:', teamId);
+                return null;
+            }
+
+            return {
+                teamName: teamName,
+                ...result.rows[0]
+            };
+        } catch (error) {
+            console.error('❌ Ошибка получения данных сотрудника:', error);
+            throw error;
         }
-        
-        return {
-            teamName: teamName,
-            ...result.rows[0]
-        };
-    } catch (error) {
-        console.error('❌ Ошибка получения данных сотрудника:', error);
-        throw error;
     }
-}
 
     // Получить расшифрованные данные клиента
     async getClientSecureData(clientId, clientName) {
@@ -480,20 +480,20 @@ class AdminService {
     }
 
     // my-architecture-api/services/AdminService.js
-// Добавь эти методы в конец класса AdminService
+    // Добавь эти методы в конец класса AdminService
 
-// Создание приватных данных сотрудника
-async createTeamSecureData(teamId, data) {
-    const {
-        passport_data, inn, snils,
-        registration_address, actual_address, birth_place,
-        marriage_status, children_count,
-        medical_info, bank_details, contract_info,
-        vacation_days_remaining, sick_days_this_year, emergency_contact
-    } = data;
-    
-    const result = await pool.query(
-        `INSERT INTO team_secure (
+    // Создание приватных данных сотрудника
+    async createTeamSecureData(teamId, data) {
+        const {
+            passport_data, inn, snils,
+            registration_address, actual_address, birth_place,
+            marriage_status, children_count,
+            medical_info, bank_details, contract_info,
+            vacation_days_remaining, sick_days_this_year, emergency_contact
+        } = data;
+
+        const result = await pool.query(
+            `INSERT INTO team_secure (
             team_id, marriage_status, children_count,
             passport_data, inn, snils,
             registration_address, actual_address, birth_place,
@@ -514,20 +514,20 @@ async createTeamSecureData(teamId, data) {
             pgp_sym_encrypt($14, 'momol050505'),
             pgp_sym_encrypt($15, 'momol050505')
         ) RETURNING id`,
-        [
-            teamId, marriage_status || 'single', children_count || 0,
-            passport_data || '', inn || '', snils || '',
-            registration_address || '', actual_address || '', birth_place || '',
-            medical_info || '', bank_details || '', contract_info || '',
-            vacation_days_remaining || '', sick_days_this_year || '', emergency_contact || ''
-        ]
-    );
-    
-    return { id: result.rows[0].id };
-}
+            [
+                teamId, marriage_status || 'single', children_count || 0,
+                passport_data || '', inn || '', snils || '',
+                registration_address || '', actual_address || '', birth_place || '',
+                medical_info || '', bank_details || '', contract_info || '',
+                vacation_days_remaining || '', sick_days_this_year || '', emergency_contact || ''
+            ]
+        );
 
-// Обновление приватных данных сотрудника
-async updateTeamSecureData(teamId, data) {
+        return { id: result.rows[0].id };
+    }
+
+    // Обновление приватных данных сотрудника
+    async updateTeamSecureData(teamId, data) {
     const {
         passport_data, inn, snils,
         registration_address, actual_address, birth_place,
@@ -535,49 +535,113 @@ async updateTeamSecureData(teamId, data) {
         medical_info, bank_details, contract_info,
         vacation_days_remaining, sick_days_this_year, emergency_contact
     } = data;
-    
-    const result = await pool.query(
-        `UPDATE team_secure SET
-            marriage_status = COALESCE($1, marriage_status),
-            children_count = COALESCE($2, children_count),
-            passport_data = CASE WHEN $3 IS NOT NULL THEN pgp_sym_encrypt($3, 'momol050505') ELSE passport_data END,
-            inn = CASE WHEN $4 IS NOT NULL THEN pgp_sym_encrypt($4, 'momol050505') ELSE inn END,
-            snils = CASE WHEN $5 IS NOT NULL THEN pgp_sym_encrypt($5, 'momol050505') ELSE snils END,
-            registration_address = CASE WHEN $6 IS NOT NULL THEN pgp_sym_encrypt($6, 'momol050505') ELSE registration_address END,
-            actual_address = CASE WHEN $7 IS NOT NULL THEN pgp_sym_encrypt($7, 'momol050505') ELSE actual_address END,
-            birth_place = CASE WHEN $8 IS NOT NULL THEN pgp_sym_encrypt($8, 'momol050505') ELSE birth_place END,
-            medical_info = CASE WHEN $9 IS NOT NULL THEN pgp_sym_encrypt($9, 'momol050505') ELSE medical_info END,
-            bank_details = CASE WHEN $10 IS NOT NULL THEN pgp_sym_encrypt($10, 'momol050505') ELSE bank_details END,
-            contract_info = CASE WHEN $11 IS NOT NULL THEN pgp_sym_encrypt($11, 'momol050505') ELSE contract_info END,
-            vacation_days_remaining = CASE WHEN $12 IS NOT NULL THEN pgp_sym_encrypt($12, 'momol050505') ELSE vacation_days_remaining END,
-            sick_days_this_year = CASE WHEN $13 IS NOT NULL THEN pgp_sym_encrypt($13, 'momol050505') ELSE sick_days_this_year END,
-            emergency_contact = CASE WHEN $14 IS NOT NULL THEN pgp_sym_encrypt($14, 'momol050505') ELSE emergency_contact END,
-            updated_at = NOW()
-        WHERE team_id = $15
-        RETURNING id`,
-        [
-            marriage_status, children_count,
-            passport_data, inn, snils,
-            registration_address, actual_address, birth_place,
-            medical_info, bank_details, contract_info,
-            vacation_days_remaining, sick_days_this_year, emergency_contact,
-            teamId
-        ]
-    );
-    
-    return result.rows[0];
-}
 
-// Создание приватных данных клиента
-async createClientSecureData(clientId, data) {
-    const {
-        passport_data, inn, snils,
-        registration_address, actual_address, birth_date, birth_place,
-        bank_details, contract_info, notes
-    } = data;
-    
-    const result = await pool.query(
-        `INSERT INTO clients_private (
+    console.log('📝 updateTeamSecureData вызван:', { teamId, data });
+    const encryptionKey = process.env.PGP_ENCRYPTION_KEY || 'momol050505';
+
+    // Обработка пустых значений
+    const safePassport = passport_data?.trim() !== '' ? passport_data : null;
+    const safeInn = inn?.trim() !== '' ? inn : null;
+    const safeSnils = snils?.trim() !== '' ? snils : null;
+    const safeRegistrationAddress = registration_address?.trim() !== '' ? registration_address : null;
+    const safeActualAddress = actual_address?.trim() !== '' ? actual_address : null;
+    const safeBirthPlace = birth_place?.trim() !== '' ? birth_place : null;
+    const safeMedicalInfo = medical_info?.trim() !== '' ? medical_info : null;
+    const safeBankDetails = bank_details?.trim() !== '' ? bank_details : null;
+    const safeContractInfo = contract_info?.trim() !== '' ? contract_info : null;
+    const safeVacationDays = vacation_days_remaining?.trim() !== '' ? vacation_days_remaining : null;
+    const safeSickDays = sick_days_this_year?.trim() !== '' ? sick_days_this_year : null;
+    const safeEmergencyContact = emergency_contact?.trim() !== '' ? emergency_contact : null;
+
+    try {
+        const existing = await pool.query(
+            `SELECT id FROM team_secure WHERE team_id = $1`,
+            [teamId]
+        );
+
+        if (existing.rows.length === 0) {
+            // INSERT
+            const result = await pool.query(
+                `INSERT INTO team_secure (
+                    team_id, marriage_status, children_count,
+                    passport_data, inn, snils,
+                    registration_address, actual_address, birth_place,
+                    medical_info, bank_details, contract_info,
+                    vacation_days_remaining, sick_days_this_year, emergency_contact
+                ) VALUES (
+                    $1, $2, $3,
+                    CASE WHEN $4::text IS NOT NULL THEN pgp_sym_encrypt($4::text, $16) ELSE NULL END,
+                    CASE WHEN $5::text IS NOT NULL THEN pgp_sym_encrypt($5::text, $16) ELSE NULL END,
+                    CASE WHEN $6::text IS NOT NULL THEN pgp_sym_encrypt($6::text, $16) ELSE NULL END,
+                    CASE WHEN $7::text IS NOT NULL THEN pgp_sym_encrypt($7::text, $16) ELSE NULL END,
+                    CASE WHEN $8::text IS NOT NULL THEN pgp_sym_encrypt($8::text, $16) ELSE NULL END,
+                    CASE WHEN $9::text IS NOT NULL THEN pgp_sym_encrypt($9::text, $16) ELSE NULL END,
+                    CASE WHEN $10::text IS NOT NULL THEN pgp_sym_encrypt($10::text, $16) ELSE NULL END,
+                    CASE WHEN $11::text IS NOT NULL THEN pgp_sym_encrypt($11::text, $16) ELSE NULL END,
+                    CASE WHEN $12::text IS NOT NULL THEN pgp_sym_encrypt($12::text, $16) ELSE NULL END,
+                    CASE WHEN $13::text IS NOT NULL THEN pgp_sym_encrypt($13::text, $16) ELSE NULL END,
+                    CASE WHEN $14::text IS NOT NULL THEN pgp_sym_encrypt($14::text, $16) ELSE NULL END,
+                    CASE WHEN $15::text IS NOT NULL THEN pgp_sym_encrypt($15::text, $16) ELSE NULL END
+                ) RETURNING id`,
+                [
+                    teamId, marriage_status || 'single', children_count || 0,
+                    safePassport, safeInn, safeSnils,
+                    safeRegistrationAddress, safeActualAddress, safeBirthPlace,
+                    safeMedicalInfo, safeBankDetails, safeContractInfo,
+                    safeVacationDays, safeSickDays, safeEmergencyContact,
+                    encryptionKey
+                ]
+            );
+            return result.rows[0];
+        }
+
+        // UPDATE — 🔧 ИСПРАВЛЕННАЯ ВЕРСИЯ с ::text в WHEN
+        const result = await pool.query(
+            `UPDATE team_secure SET
+                marriage_status = COALESCE($1, marriage_status),
+                children_count = COALESCE($2, children_count),
+                passport_data = CASE WHEN $3::text IS NOT NULL THEN pgp_sym_encrypt($3::text, $16) ELSE passport_data END,
+                inn = CASE WHEN $4::text IS NOT NULL THEN pgp_sym_encrypt($4::text, $16) ELSE inn END,
+                snils = CASE WHEN $5::text IS NOT NULL THEN pgp_sym_encrypt($5::text, $16) ELSE snils END,
+                registration_address = CASE WHEN $6::text IS NOT NULL THEN pgp_sym_encrypt($6::text, $16) ELSE registration_address END,
+                actual_address = CASE WHEN $7::text IS NOT NULL THEN pgp_sym_encrypt($7::text, $16) ELSE actual_address END,
+                birth_place = CASE WHEN $8::text IS NOT NULL THEN pgp_sym_encrypt($8::text, $16) ELSE birth_place END,
+                medical_info = CASE WHEN $9::text IS NOT NULL THEN pgp_sym_encrypt($9::text, $16) ELSE medical_info END,
+                bank_details = CASE WHEN $10::text IS NOT NULL THEN pgp_sym_encrypt($10::text, $16) ELSE bank_details END,
+                contract_info = CASE WHEN $11::text IS NOT NULL THEN pgp_sym_encrypt($11::text, $16) ELSE contract_info END,
+                vacation_days_remaining = CASE WHEN $12::text IS NOT NULL THEN pgp_sym_encrypt($12::text, $16) ELSE vacation_days_remaining END,
+                sick_days_this_year = CASE WHEN $13::text IS NOT NULL THEN pgp_sym_encrypt($13::text, $16) ELSE sick_days_this_year END,
+                emergency_contact = CASE WHEN $14::text IS NOT NULL THEN pgp_sym_encrypt($14::text, $16) ELSE emergency_contact END,
+                updated_at = NOW()
+            WHERE team_id = $15
+            RETURNING id`,
+            [
+                marriage_status, children_count,
+                safePassport, safeInn, safeSnils,
+                safeRegistrationAddress, safeActualAddress, safeBirthPlace,
+                safeMedicalInfo, safeBankDetails, safeContractInfo,
+                safeVacationDays, safeSickDays, safeEmergencyContact,
+                teamId, encryptionKey
+            ]
+        );
+
+        return result.rows[0];
+
+    } catch (error) {
+        console.error('❌ Ошибка в updateTeamSecureData:', error);
+        throw error;
+    }
+}
+    // Создание приватных данных клиента
+    async createClientSecureData(clientId, data) {
+        const {
+            passport_data, inn, snils,
+            registration_address, actual_address, birth_date, birth_place,
+            bank_details, contract_info, notes
+        } = data;
+
+        const result = await pool.query(
+            `INSERT INTO clients_private (
             client_id, birth_date,
             passport_data, inn, snils,
             registration_address, actual_address, birth_place,
@@ -594,49 +658,107 @@ async createClientSecureData(clientId, data) {
             pgp_sym_encrypt($10, 'momol050505'),
             pgp_sym_encrypt($11, 'momol050505')
         ) RETURNING id`,
-        [
-            clientId, birth_date || null,
-            passport_data || '', inn || '', snils || '',
-            registration_address || '', actual_address || '', birth_place || '',
-            bank_details || '', contract_info || '', notes || ''
-        ]
-    );
-    
-    return { id: result.rows[0].id };
-}
+            [
+                clientId, birth_date || null,
+                passport_data || '', inn || '', snils || '',
+                registration_address || '', actual_address || '', birth_place || '',
+                bank_details || '', contract_info || '', notes || ''
+            ]
+        );
 
-// Обновление приватных данных клиента
-async updateClientSecureData(clientId, data) {
+        return { id: result.rows[0].id };
+    }
+    async updateClientSecureData(clientId, data) {
     const {
         passport_data, inn, snils,
         registration_address, actual_address, birth_date, birth_place,
         bank_details, contract_info, notes
     } = data;
     
+    console.log('📝 updateClientSecureData вызван:', { clientId, data });
+    const encryptionKey = process.env.PGP_ENCRYPTION_KEY || 'momol050505'; // 🔐 Используйте env!
+    
+    // Обработка пустых значений
+    const safePassport = passport_data && passport_data.trim() !== '' ? passport_data : null;
+    const safeInn = inn && inn.trim() !== '' ? inn : null;
+    const safeSnils = snils && snils.trim() !== '' ? snils : null;
+    const safeRegAddr = registration_address && registration_address.trim() !== '' ? registration_address : null;
+    const safeActualAddr = actual_address && actual_address.trim() !== '' ? actual_address : null;
+    const safeBirthPlace = birth_place && birth_place.trim() !== '' ? birth_place : null;
+    const safeBank = bank_details && bank_details.trim() !== '' ? bank_details : null;
+    const safeContract = contract_info && contract_info.trim() !== '' ? contract_info : null;
+    const safeNotes = notes && notes.trim() !== '' ? notes : null;
+    const safeBirthDate = birth_date && birth_date.trim() !== '' ? birth_date : null;
+    
+    const existing = await pool.query(
+        `SELECT id FROM clients_private WHERE client_id = $1`,
+        [clientId]
+    );
+    
+    if (existing.rows.length === 0) {
+        // INSERT
+        const result = await pool.query(
+            `INSERT INTO clients_private (
+                client_id, birth_date,
+                passport_data, inn, snils,
+                registration_address, actual_address, birth_place,
+                bank_details, contract_info, notes
+            ) VALUES (
+                $1, $2,
+                CASE WHEN $3::text IS NOT NULL THEN pgp_sym_encrypt($3::text, $4) ELSE NULL END,
+                CASE WHEN $5::text IS NOT NULL THEN pgp_sym_encrypt($5::text, $4) ELSE NULL END,
+                CASE WHEN $6::text IS NOT NULL THEN pgp_sym_encrypt($6::text, $4) ELSE NULL END,
+                CASE WHEN $7::text IS NOT NULL THEN pgp_sym_encrypt($7::text, $4) ELSE NULL END,
+                CASE WHEN $8::text IS NOT NULL THEN pgp_sym_encrypt($8::text, $4) ELSE NULL END,
+                CASE WHEN $9::text IS NOT NULL THEN pgp_sym_encrypt($9::text, $4) ELSE NULL END,
+                CASE WHEN $10::text IS NOT NULL THEN pgp_sym_encrypt($10::text, $4) ELSE NULL END,
+                CASE WHEN $11::text IS NOT NULL THEN pgp_sym_encrypt($11::text, $4) ELSE NULL END,
+                CASE WHEN $12::text IS NOT NULL THEN pgp_sym_encrypt($12::text, $4) ELSE NULL END
+            ) RETURNING id`,
+            [
+                clientId, safeBirthDate,
+                safePassport, encryptionKey,
+                safeInn, safeSnils,
+                safeRegAddr, safeActualAddr, safeBirthPlace,
+                safeBank, safeContract, safeNotes
+            ]
+        );
+        console.log('✅ INSERT успешен');
+        return result.rows[0];
+    }
+    
+    // UPDATE — ИСПРАВЛЕННАЯ ВЕРСИЯ 🔧
     const result = await pool.query(
         `UPDATE clients_private SET
             birth_date = COALESCE($1, birth_date),
-            passport_data = CASE WHEN $2 IS NOT NULL THEN pgp_sym_encrypt($2, 'momol050505') ELSE passport_data END,
-            inn = CASE WHEN $3 IS NOT NULL THEN pgp_sym_encrypt($3, 'momol050505') ELSE inn END,
-            snils = CASE WHEN $4 IS NOT NULL THEN pgp_sym_encrypt($4, 'momol050505') ELSE snils END,
-            registration_address = CASE WHEN $5 IS NOT NULL THEN pgp_sym_encrypt($5, 'momol050505') ELSE registration_address END,
-            actual_address = CASE WHEN $6 IS NOT NULL THEN pgp_sym_encrypt($6, 'momol050505') ELSE actual_address END,
-            birth_place = CASE WHEN $7 IS NOT NULL THEN pgp_sym_encrypt($7, 'momol050505') ELSE birth_place END,
-            bank_details = CASE WHEN $8 IS NOT NULL THEN pgp_sym_encrypt($8, 'momol050505') ELSE bank_details END,
-            contract_info = CASE WHEN $9 IS NOT NULL THEN pgp_sym_encrypt($9, 'momol050505') ELSE contract_info END,
-            notes = CASE WHEN $10 IS NOT NULL THEN pgp_sym_encrypt($10, 'momol050505') ELSE notes END,
+            passport_data = CASE WHEN $2::text IS NOT NULL THEN pgp_sym_encrypt($2::text, $3) ELSE passport_data END,
+            inn = CASE WHEN $4::text IS NOT NULL THEN pgp_sym_encrypt($4::text, $3) ELSE inn END,
+            snils = CASE WHEN $5::text IS NOT NULL THEN pgp_sym_encrypt($5::text, $3) ELSE snils END,
+            registration_address = CASE WHEN $6::text IS NOT NULL THEN pgp_sym_encrypt($6::text, $3) ELSE registration_address END,
+            actual_address = CASE WHEN $7::text IS NOT NULL THEN pgp_sym_encrypt($7::text, $3) ELSE actual_address END,
+            birth_place = CASE WHEN $8::text IS NOT NULL THEN pgp_sym_encrypt($8::text, $3) ELSE birth_place END,
+            bank_details = CASE WHEN $9::text IS NOT NULL THEN pgp_sym_encrypt($9::text, $3) ELSE bank_details END,
+            contract_info = CASE WHEN $10::text IS NOT NULL THEN pgp_sym_encrypt($10::text, $3) ELSE contract_info END,
+            notes = CASE WHEN $11::text IS NOT NULL THEN pgp_sym_encrypt($11::text, $3) ELSE notes END,
             updated_at = NOW()
-        WHERE client_id = $11
+        WHERE client_id = $12
         RETURNING id`,
         [
-            birth_date,
-            passport_data, inn, snils,
-            registration_address, actual_address, birth_place,
-            bank_details, contract_info, notes,
+            safeBirthDate,
+            safePassport, encryptionKey,
+            safeInn,
+            safeSnils,
+            safeRegAddr,
+            safeActualAddr,
+            safeBirthPlace,
+            safeBank,
+            safeContract,
+            safeNotes,
             clientId
         ]
     );
     
+    console.log('✅ UPDATE успешен');
     return result.rows[0];
 }
 }
