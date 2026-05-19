@@ -71,7 +71,21 @@ const ProjectForm = ({ projectId, onSaved }) => {
     });
     // Команда
     const [selectedTeam, setSelectedTeam] = useState([]);
+    // Добавьте этот useEffect после всех useState
+    useEffect(() => {
+        // Рассчитываем общую площадь как сумму площадей всех комнат
+        const totalArea = rooms.reduce((sum, room) => {
+            const area = parseFloat(room.area);
+            return sum + (isNaN(area) ? 0 : area);
+        }, 0);
 
+        // Обновляем поле area в проекте только если оно не было изменено вручную
+        // или если мы хотим автоматически обновлять
+        setProject(prev => ({
+            ...prev,
+            area: totalArea > 0 ? totalArea.toString() : prev.area
+        }));
+    }, [rooms]); // Зависимость от rooms - пересчитывается при каждом изменении списка комнат
     // Загрузка справочников из БД через api.js
     useEffect(() => {
         const loadData = async () => {
