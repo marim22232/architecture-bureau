@@ -9,7 +9,12 @@ export const authAPI = {
         const response = await fetch(`${API_URL}/auth/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: data.email, password: data.password })
+            body: JSON.stringify({ 
+                email: data.email, 
+                password: data.password,
+                captcha: data.captcha,
+                captchaId: data.captchaId
+            })
         });
         return response.json();
     },

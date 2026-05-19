@@ -4,6 +4,7 @@ import Typography from '../Typography/Typography.jsx';
 import MyInput from '../MyInput/MyInput.jsx';
 import MyTextarea from '../MyTextarea/MyTextarea.jsx';
 import MyButton from '../MyButton/MyButton.jsx';
+import { useModal } from '../../../hooks/useModal.js'; // ✅ Добавить импорт
 
 const ContactForm = ({
     title = "Напишите нам",
@@ -14,6 +15,7 @@ const ContactForm = ({
     onSuccess = () => { },
     className = ""
 }) => {
+    const { showAlert, AlertModalComponent } = useModal(); // ✅ Добавить
     const [isExpanded, setIsExpanded] = useState(false);
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
@@ -41,18 +43,16 @@ const ContactForm = ({
         };
 
         if (variant === 'calculator') {
-            // Используем данные из calculatorData (ID)
             requestData = {
                 ...requestData,
                 project_type_id: calculatorData.project_type_id,
-                selected_services: calculatorData.selected_services,  // массив ID
+                selected_services: calculatorData.selected_services,
                 area: calculatorData.area,
                 message: `Дополнительно: ${formData.message || 'не указано'}`
             };
             
             console.log('Отправляемые данные (калькулятор):', requestData);
         } else {
-            // Обычная форма
             requestData = {
                 ...requestData,
                 city: formData.city,
@@ -62,7 +62,7 @@ const ContactForm = ({
         }
 
         try {
-            const response = await fetch('http://localhost:5000/api/contacts', {
+            const response = await fetch('/api/contacts', {  // ← убрать localhost
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(requestData),
@@ -72,127 +72,128 @@ const ContactForm = ({
             console.log('Ответ сервера:', result);
             
             if (response.ok) {
-                alert('Спасибо! Ваша заявка отправлена.');
+                showAlert('Спасибо! Ваша заявка отправлена.', 'Успех');  // ✅ вместо alert
                 setFormData({
                     name: '', city: '', phone: '', email: '', message: '', question: ''
                 });
                 if (onSuccess) onSuccess();
             } else {
-                alert(result.error || 'Ошибка отправки');
+                showAlert(result.error || 'Ошибка отправки', 'Ошибка');  // ✅ вместо alert
             }
         } catch (error) {
             console.error('Ошибка:', error);
-            alert('Ошибка подключения к серверу');
+            showAlert('Ошибка подключения к серверу', 'Ошибка');  // ✅ вместо alert
         } finally {
             setLoading(false);
         }
     };
     
     return (
-        <div className={`contact-form-component ${className}`}>
-            <Typography variant="h2" color="white" align="center" weight="bold">
-                {title}
-            </Typography>
-            <Typography variant="body" color="white" align="center" className="form-subtitle">
-                {subtitle}
-            </Typography>
+        <>
+            <div className={`contact-form-component ${className}`}>
+                <Typography variant="h2" color="white" align="center" weight="bold">
+                    {title}
+                </Typography>
+                <Typography variant="body" color="white" align="center" className="form-subtitle">
+                    {subtitle}
+                </Typography>
 
-            <form onSubmit={handleSubmit}>
-                {variant === 'calculator' ? (
-                    // Форма для калькулятора
-                    <>
-                        <MyInput
-                            type="text"
-                            name="name"
-                            placeholder="ФИО *"
-                            value={formData.name}
-                            onChange={handleChange}
-                            required
-                        />
-                        <MyInput
-                            type="tel"
-                            name="phone"
-                            placeholder="Телефон *"
-                            value={formData.phone}
-                            onChange={handleChange}
-                            required
-                        />
-                        <MyInput
-                            type="email"
-                            name="email"
-                            placeholder="Email *"
-                            value={formData.email}
-                            onChange={handleChange}
-                            required
-                        />
-                        <MyTextarea
-                            name="message"
-                            placeholder="Сообщение *"
-                            value={formData.message}
-                            onChange={handleChange}
-                            required
-                            rows={4}
-                        />
-                    </>
-                ) : (
-                    // Стандартная форма (главная страница)
-                    <>
-                        {isExpanded && (
-                            <div className="extra-fields">
-                                <MyInput
-                                    type="text"
-                                    name="name"
-                                    placeholder="ФИО *"
-                                    value={formData.name}
-                                    onChange={handleChange}
-                                    required
-                                />
-                                <MyInput
-                                    type="text"
-                                    name="city"
-                                    placeholder="Город, страна *"
-                                    value={formData.city}
-                                    onChange={handleChange}
-                                    required
-                                />
-                                <MyInput
-                                    type="tel"
-                                    name="phone"
-                                    placeholder="Телефон *"
-                                    value={formData.phone}
-                                    onChange={handleChange}
-                                    required
-                                />
-                                <MyInput
-                                    type="email"
-                                    name="email"
-                                    placeholder="Email"
-                                    value={formData.email}
-                                    onChange={handleChange}
-                                />
-                            </div>
-                        )}
+                <form onSubmit={handleSubmit}>
+                    {variant === 'calculator' ? (
+                        <>
+                            <MyInput
+                                type="text"
+                                name="name"
+                                placeholder="ФИО *"
+                                value={formData.name}
+                                onChange={handleChange}
+                                required
+                            />
+                            <MyInput
+                                type="tel"
+                                name="phone"
+                                placeholder="Телефон *"
+                                value={formData.phone}
+                                onChange={handleChange}
+                                required
+                            />
+                            <MyInput
+                                type="email"
+                                name="email"
+                                placeholder="Email *"
+                                value={formData.email}
+                                onChange={handleChange}
+                                required
+                            />
+                            <MyTextarea
+                                name="message"
+                                placeholder="Сообщение *"
+                                value={formData.message}
+                                onChange={handleChange}
+                                required
+                                rows={4}
+                            />
+                        </>
+                    ) : (
+                        <>
+                            {isExpanded && (
+                                <div className="extra-fields">
+                                    <MyInput
+                                        type="text"
+                                        name="name"
+                                        placeholder="ФИО *"
+                                        value={formData.name}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                    <MyInput
+                                        type="text"
+                                        name="city"
+                                        placeholder="Город, страна *"
+                                        value={formData.city}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                    <MyInput
+                                        type="tel"
+                                        name="phone"
+                                        placeholder="Телефон *"
+                                        value={formData.phone}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                    <MyInput
+                                        type="email"
+                                        name="email"
+                                        placeholder="Email"
+                                        value={formData.email}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                            )}
 
-                        <MyTextarea
-                            name="question"
-                            placeholder="Что вас интересует? *"
-                            value={formData.question}
-                            onChange={handleChange}
-                            onFocus={() => setIsExpanded(true)}
-                            required
-                        />
-                    </>
-                )}
+                            <MyTextarea
+                                name="question"
+                                placeholder="Что вас интересует? *"
+                                value={formData.question}
+                                onChange={handleChange}
+                                onFocus={() => setIsExpanded(true)}
+                                required
+                            />
+                        </>
+                    )}
 
-                <MyButton
-                    type="submit"
-                    variant="dark"
-                    disabled={loading}
-                >
-                    {loading ? 'Отправка...' : buttonText}
-                </MyButton>
-            </form>
-        </div>
+                    <MyButton
+                        type="submit"
+                        variant="dark"
+                        disabled={loading}
+                    >
+                        {loading ? 'Отправка...' : buttonText}
+                    </MyButton>
+                </form>
+            </div>
+            <AlertModalComponent />
+        </>
     );
 };
 

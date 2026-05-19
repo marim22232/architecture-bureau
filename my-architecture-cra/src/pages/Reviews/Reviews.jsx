@@ -7,8 +7,11 @@ import Icons from '../../components/UI/Icons/Icons.jsx';
 import Loader from '../../components/UI/Loader/Loader.jsx';
 import ReviewFormModal from '../../components/Auth/ReviewFormModal/ReviewFormModal';
 import { updateMyTestimonial, deleteMyTestimonial } from '../../services/api.js';
+import { useModal } from '../../hooks/useModal.js'; // ✅ Добавить импорт
 
 const Reviews = () => {
+    const { showAlert, showConfirm, AlertModalComponent, ConfirmModalComponent } = useModal(); // ✅ Добавить
+    
     const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('all');
@@ -35,25 +38,29 @@ const Reviews = () => {
         });
         
         if (result.success) {
-            alert('Отзыв успешно обновлен');
+            showAlert('Отзыв успешно обновлен', 'Успех'); // ✅ вместо alert
             loadReviews();
             setEditingReview(null);
         } else {
-            alert(result.error || 'Ошибка при обновлении отзыва');
+            showAlert(result.error || 'Ошибка при обновлении отзыва', 'Ошибка'); // ✅ вместо alert
             throw new Error(result.error);
         }
     };
 
-    const handleDeleteReview = async (reviewId) => {
-        if (!window.confirm('Вы уверены, что хотите удалить свой отзыв?')) return;
-        
-        const result = await deleteMyTestimonial(reviewId);
-        if (result.success) {
-            alert('Отзыв удален');
-            loadReviews();
-        } else {
-            alert(result.error || 'Ошибка при удалении отзыва');
-        }
+    const handleDeleteReview = (reviewId) => {
+        showConfirm(
+            'Вы уверены, что хотите удалить свой отзыв?', 
+            async () => {
+                const result = await deleteMyTestimonial(reviewId);
+                if (result.success) {
+                    showAlert('Отзыв удален', 'Успех'); // ✅ вместо alert
+                    loadReviews();
+                } else {
+                    showAlert(result.error || 'Ошибка при удалении отзыва', 'Ошибка'); // ✅ вместо alert
+                }
+            },
+            'Подтверждение удаления'
+        );
     };
 
     const checkAuthAndLoadProjects = async () => {
@@ -69,7 +76,6 @@ const Reviews = () => {
             }
 
             console.log('📡 2. Запрос /api/auth/me');
-            // Убираем localhost
             const userResponse = await fetch('/api/auth/me', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -100,7 +106,6 @@ const Reviews = () => {
         try {
             console.log('📡 3. Запрос проектов клиента');
             
-            // Убираем localhost
             const endpoints = [
                 '/api/projects/my-projects',
                 '/api/clients/my-projects',
@@ -153,7 +158,6 @@ const Reviews = () => {
 
     const checkExistingReviews = async (token) => {
         try {
-            // Убираем localhost
             const response = await fetch('/api/testimonials/my', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -172,7 +176,6 @@ const Reviews = () => {
     const loadReviews = async () => {
         setLoading(true);
         try {
-            // Убираем localhost
             const response = await fetch('/api/testimonials?published=true');
             
             if (response.ok) {
@@ -196,7 +199,6 @@ const Reviews = () => {
     const handleAddReview = async (reviewData) => {
         try {
             const token = localStorage.getItem('token');
-            // Убираем localhost
             const response = await fetch('/api/testimonials', {
                 method: 'POST',
                 headers: {
@@ -213,16 +215,16 @@ const Reviews = () => {
             const result = await response.json();
 
             if (response.ok && result.success) {
-                alert(result.message);
+                showAlert(result.message || 'Спасибо за отзыв! Он будет опубликован после проверки модератором.', 'Успех'); // ✅ вместо alert
                 setIsModalOpen(false);
                 setHasExistingReview(true);
                 loadReviews();
             } else {
-                alert(result.error || 'Ошибка при добавлении отзыва');
+                showAlert(result.error || 'Ошибка при добавлении отзыва', 'Ошибка'); // ✅ вместо alert
             }
         } catch (error) {
             console.error('❌ Ошибка:', error);
-            alert('Произошла ошибка при отправке отзыва');
+            showAlert('Произошла ошибка при отправке отзыва', 'Ошибка'); // ✅ вместо alert
         }
     };
 
@@ -428,6 +430,10 @@ const Reviews = () => {
                     setEditingReview(null);
                 }}
             />
+
+            {/* ✅ Добавить модальные окна */}
+            <AlertModalComponent />
+            <ConfirmModalComponent />
         </div>
     );
 };

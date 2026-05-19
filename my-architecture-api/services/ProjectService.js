@@ -196,7 +196,30 @@ class ProjectService {
             });
 
             query += 'updated_at = CURRENT_TIMESTAMP, ';
-
+            if (updateData.title && !updateData.slug) {
+            updateData.slug = generateSlug(updateData.title);
+            
+            // Проверяем уникальность
+            let finalSlug = updateData.slug;
+            let counter = 1;
+            let slugExists = true;
+            
+            while (slugExists) {
+                const existing = await pool.query(
+                    'SELECT id FROM projects WHERE slug = $1 AND id != $2',
+                    [finalSlug, id]
+                );
+                
+                if (existing.rows.length === 0) {
+                    slugExists = false;
+                } else {
+                    finalSlug = `${updateData.slug}-${counter}`;
+                    counter++;
+                }
+            }
+            
+            updateData.slug = finalSlug;
+        }
             if (updateValues.length === 0) {
                 return {
                     success: false,

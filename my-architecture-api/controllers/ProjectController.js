@@ -1,161 +1,170 @@
 import ProjectService from '../services/ProjectService.js';
-
+import { generateSlug } from '../utils/slugify.js';
 class ProjectController {
 
-
-    async create(req, res) {
-        try {  // 1. Обработка клиента (если создается новый)
-            // 1. Обработка клиента
-            let clientId = null;
-
-            if (req.body.new_client) {
-                try {
-                    const newClient = JSON.parse(req.body.new_client);
-                    const clientResult = await req.pool.query(
-                        `INSERT INTO clients (first_name, last_name, patronymic, email, phone) 
-             VALUES ($1, $2, $3, $4, $5) RETURNING client_id`,
-                        [newClient.first_name, newClient.last_name, newClient.patronymic, newClient.email, newClient.phone]
-                    );
-                    clientId = clientResult.rows[0].client_id;
-                    console.log('✅ Создан новый клиент с ID:', clientId);
-                } catch (err) {
-                    console.error('Ошибка создания клиента:', err);
-                    console.log('📌 raw client_id from frontend:', req.body.client_id);
-                    console.log('📌 cleaned client_id:', clientId);
-                    console.log('📌 project_type_id:', projectTypeId);
-                }
-            } else if (req.body.client_id && req.body.client_id !== '') {
-                // ⭐ ОЧИЩАЕМ client_id от фигурных скобок и лишних символов
-                let rawClientId = req.body.client_id;
-
-                // Если массив - берём первый элемент
-                if (Array.isArray(rawClientId)) {
-                    rawClientId = rawClientId[0];
-                    console.log('⚠️ client_id был массивом, взят первый элемент:', rawClientId);
-                }
-
-                // Удаляем фигурные скобки и кавычки
-                let cleanClientId = String(rawClientId)
-                    .replace(/[{}]/g, '')
-                    .replace(/^["']|["']$/g, '')
-                    .trim();
-
-                console.log('📌 raw client_id:', rawClientId);
-                console.log('📌 clean client_id:', cleanClientId);
-
-                clientId = cleanClientId;
-                console.log('✅ Используем существующего клиента с ID:', clientId);
-            } else {
-                console.log('⚠️ Клиент не указан, будет NULL');
-            }
-
-            // 2. Создаем проект
-            const slug = req.body.slug || req.body.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-
-            // ⭐ Очищаем project_type_id — должно быть число или null
-            let projectTypeId = null;
-            if (req.body.project_type_id && req.body.project_type_id !== '') {
-                projectTypeId = parseInt(req.body.project_type_id);
-                if (isNaN(projectTypeId)) {
-                    projectTypeId = null;
-                }
-            }
-
-            console.log('📌 project_type_id после очистки:', projectTypeId);
-
-            const projectResult = await req.pool.query(
-                `INSERT INTO projects (
-        title, slug, description, location, area, project_year,
-        status, project_type_id, client_id, is_featured
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
-                [
-                    req.body.title,
-                    slug,
-                    req.body.description || null,
-                    req.body.location || null,
-                    req.body.area ? parseFloat(req.body.area) : null,
-                    req.body.project_year ? parseInt(req.body.project_year) : null,
-                    req.body.status || 'in_progress',
-                    projectTypeId,  // ⭐ используем очищенное значение
-                    clientId,
-                    req.body.is_featured === 'true' || req.body.is_featured === true
-                ]
-            );
-
-            const project = projectResult.rows[0];
-            const projectId = project.id;
-
-            // 3. Обработка главного изображения
-            if (req.files && req.files.main_image) {
-                const image = req.files.main_image;
-                const fileName = Date.now() + '_' + image.name.replace(/\s/g, '_');
-                const uploadPath = 'uploads/projects/' + fileName;
-                await image.mv(uploadPath);
-                await req.pool.query(`UPDATE projects SET main_image = $1 WHERE id = $2`, [`/uploads/projects/${fileName}`, projectId]);
-            }
-
-            // 4. Обработка комнат
-            if (req.body.rooms) {
-                try {
-                    const rooms = JSON.parse(req.body.rooms);
-                    for (const room of rooms) {
-                        await req.pool.query(
-                            `INSERT INTO project_rooms (project_id, name, area, description) VALUES ($1, $2, $3, $4)`,
-                            [projectId, room.name, room.area || null, room.description || null]
-                        );
-                    }
-                } catch (err) {
-                    console.error('Ошибка добавления комнат:', err);
-                }
-            }
-
-            // 5. Обработка команды
-if (req.body.team_data) {
+async create(req, res) {
     try {
-        const teamData = JSON.parse(req.body.team_data);
-        
-        for (const member of teamData) {
-            // ⭐ ОЧИЩАЕМ ID от фигурных скобок и кавычек
-            let cleanTeamId = String(member.id)
+        // 1. Обработка клиента
+        let clientId = null;
+
+        if (req.body.new_client) {
+            try {
+                const newClient = JSON.parse(req.body.new_client);
+                const clientResult = await req.pool.query(
+                    `INSERT INTO clients (first_name, last_name, patronymic, email, phone) 
+                     VALUES ($1, $2, $3, $4, $5) RETURNING client_id`,
+                    [newClient.first_name, newClient.last_name, newClient.patronymic, newClient.email, newClient.phone]
+                );
+                clientId = clientResult.rows[0].client_id;
+                console.log('✅ Создан новый клиент с ID:', clientId);
+            } catch (err) {
+                console.error('Ошибка создания клиента:', err);
+            }
+        } else if (req.body.client_id && req.body.client_id !== '') {
+            let rawClientId = req.body.client_id;
+            if (Array.isArray(rawClientId)) {
+                rawClientId = rawClientId[0];
+                console.log('⚠️ client_id был массивом, взят первый элемент:', rawClientId);
+            }
+            let cleanClientId = String(rawClientId)
                 .replace(/[{}]/g, '')
-                .replace(/^["']|["']$/g, '');
-            
-            await req.pool.query(
-                `INSERT INTO project_team (project_id, team_id, role) VALUES ($1, $2, $3)`,
-                [projectId, cleanTeamId, member.role || 'architect']
-            );
+                .replace(/^["']|["']$/g, '')
+                .trim();
+            clientId = cleanClientId;
+            console.log('✅ Используем существующего клиента с ID:', clientId);
+        } else {
+            console.log('⚠️ Клиент не указан, будет NULL');
         }
-        console.log('✅ Команда сохранена');
-    } catch (err) {
-        console.error('Ошибка обработки team_data:', err);
+
+        // ⭐⭐⭐ ГЕНЕРАЦИЯ SLUG (ОДИН РАЗ!) ⭐⭐⭐
+        let slug = req.body.slug;
+        if (!slug || slug.trim() === '') {
+            // Генерируем из названия
+            slug = generateSlug(req.body.title);
+            console.log('🔗 Сгенерирован slug из названия:', slug);
+        }
+        
+        // Проверяем уникальность slug
+        let finalSlug = slug;
+        let counter = 1;
+        let slugExists = true;
+        
+        while (slugExists) {
+            const existing = await req.pool.query(
+                'SELECT id FROM projects WHERE slug = $1',
+                [finalSlug]
+            );
+            
+            if (existing.rows.length === 0) {
+                slugExists = false;
+            } else {
+                finalSlug = `${slug}-${counter}`;
+                counter++;
+                console.log(`⚠️ Slug ${slug} уже существует, используем ${finalSlug}`);
+            }
+        }
+
+        // ⭐ Очищаем project_type_id
+        let projectTypeId = null;
+        if (req.body.project_type_id && req.body.project_type_id !== '') {
+            projectTypeId = parseInt(req.body.project_type_id);
+            if (isNaN(projectTypeId)) {
+                projectTypeId = null;
+            }
+        }
+
+        console.log('📌 project_type_id после очистки:', projectTypeId);
+
+        const projectResult = await req.pool.query(
+            `INSERT INTO projects (
+                title, slug, description, location, area, project_year,
+                status, project_type_id, client_id, is_featured
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
+            [
+                req.body.title,
+                finalSlug,  // ← используем finalSlug
+                req.body.description || null,
+                req.body.location || null,
+                req.body.area ? parseFloat(req.body.area) : null,
+                req.body.project_year ? parseInt(req.body.project_year) : null,
+                req.body.status || 'in_progress',
+                projectTypeId,
+                clientId,
+                req.body.is_featured === 'true' || req.body.is_featured === true
+            ]
+        );
+
+        const project = projectResult.rows[0];
+        const projectId = project.id;
+
+        // 3. Обработка главного изображения
+        if (req.files && req.files.main_image) {
+            const image = req.files.main_image;
+            const fileName = Date.now() + '_' + image.name.replace(/\s/g, '_');
+            const uploadPath = 'uploads/projects/' + fileName;
+            await image.mv(uploadPath);
+            await req.pool.query(`UPDATE projects SET main_image = $1 WHERE id = $2`, [`/uploads/projects/${fileName}`, projectId]);
+        }
+
+        // 4. Обработка комнат
+        if (req.body.rooms) {
+            try {
+                const rooms = JSON.parse(req.body.rooms);
+                for (const room of rooms) {
+                    await req.pool.query(
+                        `INSERT INTO project_rooms (project_id, name, area, description) VALUES ($1, $2, $3, $4)`,
+                        [projectId, room.name, room.area || null, room.description || null]
+                    );
+                }
+            } catch (err) {
+                console.error('Ошибка добавления комнат:', err);
+            }
+        }
+
+        // 5. Обработка команды
+        if (req.body.team_data) {
+            try {
+                const teamData = JSON.parse(req.body.team_data);
+                for (const member of teamData) {
+                    let cleanTeamId = String(member.id)
+                        .replace(/[{}]/g, '')
+                        .replace(/^["']|["']$/g, '');
+                    await req.pool.query(
+                        `INSERT INTO project_team (project_id, team_id, role) VALUES ($1, $2, $3)`,
+                        [projectId, cleanTeamId, member.role || 'architect']
+                    );
+                }
+                console.log('✅ Команда сохранена');
+            } catch (err) {
+                console.error('Ошибка обработки team_data:', err);
+            }
+        }
+
+        // 6. Обработка галереи
+        if (req.files && req.files.gallery_images) {
+            const images = Array.isArray(req.files.gallery_images) ? req.files.gallery_images : [req.files.gallery_images];
+            for (let i = 0; i < images.length; i++) {
+                const fileName = Date.now() + '_' + images[i].name.replace(/\s/g, '_');
+                const uploadPath = 'uploads/projects/' + fileName;
+                await images[i].mv(uploadPath);
+                await req.pool.query(
+                    `INSERT INTO project_images (project_id, image_url, sort_order) VALUES ($1, $2, $3)`,
+                    [projectId, `/uploads/projects/${fileName}`, i]
+                );
+            }
+        }
+
+        res.status(201).json({
+            success: true,
+            message: 'Проект успешно создан',
+            project: project
+        });
+
+    } catch (error) {
+        console.error('Ошибка в create:', error);
+        res.status(500).json({ error: error.message });
     }
 }
-
-            // 6. Обработка галереи
-            if (req.files && req.files.gallery_images) {
-                const images = Array.isArray(req.files.gallery_images) ? req.files.gallery_images : [req.files.gallery_images];
-                for (let i = 0; i < images.length; i++) {
-                    const fileName = Date.now() + '_' + images[i].name.replace(/\s/g, '_');
-                    const uploadPath = 'uploads/projects/' + fileName;
-                    await images[i].mv(uploadPath);
-                    await req.pool.query(
-                        `INSERT INTO project_images (project_id, image_url, sort_order) VALUES ($1, $2, $3)`,
-                        [projectId, `/uploads/projects/${fileName}`, i]
-                    );
-                }
-            }
-
-            res.status(201).json({
-                success: true,
-                message: 'Проект успешно создан',
-                project: project
-            });
-
-        } catch (error) {
-            console.error('Ошибка в create:', error);
-            res.status(500).json({ error: error.message });
-        }
-    }
     async getAll(req, res) {
         try {
             const filters = {

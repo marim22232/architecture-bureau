@@ -316,13 +316,18 @@ const ServicesSlider = ({ isAdmin = false, onServicesUpdate }) => {
                       <Typography variant="small" color="primary" className="service-description">
                         {service.description}
                       </Typography>
-                      {(service.price_range || service.price_per_sqm) && (
-                        <div className="service-price">
-                          <Typography variant="small" color="accent" weight="bold">
-                            {service.price_range || `от ${service.price_per_sqm} ₽/м²`}
-                          </Typography>
-                        </div>
-                      )}
+                   
+{(service.price_per_sqm || service.price_fixed || service.price_range) && (
+    <div className="service-price">
+        <Typography variant="small" color="accent" weight="bold">
+            {service.price_per_sqm 
+                ? `от ${service.price_per_sqm} ₽/м²` 
+                : service.price_fixed 
+                    ? `${service.price_fixed} ₽` 
+                    : service.price_range}
+        </Typography>
+    </div>
+)}
                     </div>
                   </SwiperSlide>
                 );

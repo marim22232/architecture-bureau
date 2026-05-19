@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getFullProjectBySlug } from '../../services/api';
 
-// UI компоненты
-import Typography from '../../components/UI/Typography/Typography.jsx';
-import MyButton from '../../components/UI/MyButton/MyButton.jsx';
-import MyButtonOutline from '../../components/UI/MyButtonOutline/MyButtonOutline.jsx';
-import Loader from '../../components/UI/Loader/Loader.jsx';
-import Icons from '../../components/UI/Icons/Icons.jsx';
-import ExpandableText from '../../components/UI/ExpandableText/ExpandableText.jsx';
+
+import Typography from '../../components/UI/Typography/Typography.jsx';      // ✅ правильно
+import MyButton from '../../components/UI/MyButton/MyButton.jsx';            // ✅ правильно
+import MyButtonOutline from '../../components/UI/MyButtonOutline/MyButtonOutline.jsx'; // ✅ правильно
+import Loader from '../../components/UI/Loader/Loader.jsx';                  // ✅ правильно
+import Icons from '../../components/UI/Icons/Icons.jsx';                     // ✅ правильно
+import ExpandableText from '../../components/UI/ExpandableText/ExpandableText.jsx'; // ✅ правильно
 import './ProjectPage.css'
 
 const ProjectPage = () => {
@@ -254,10 +254,7 @@ const ProjectPage = () => {
                                         <Typography variant="h3" weight="semibold">
                                             Описание проекта
                                         </Typography>
-                                        <ExpandableText
-                                            text={project.description}
-                                            maxLength={500}
-                                        />
+                                        
                                     </div>
                                 )}
 

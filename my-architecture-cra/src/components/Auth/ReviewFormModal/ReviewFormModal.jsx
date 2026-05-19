@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import './ReviewFormModal.css';
 import Typography from '../../UI/Typography/Typography.jsx';
 import MyButton from '../../UI/MyButton/MyButton.jsx';
+import { useModal } from '../../../hooks/useModal.js'; // ✅ Добавить импорт
 
 const ReviewFormModal = ({ 
     isOpen, 
@@ -14,6 +15,8 @@ const ReviewFormModal = ({
     review = null,
     isEditing = false 
 }) => {
+    const { showAlert, AlertModalComponent } = useModal(); // ✅ Добавить
+    
     const [formData, setFormData] = useState({
         project_id: '',
         rating: 5,
@@ -55,17 +58,17 @@ const ReviewFormModal = ({
         e.preventDefault();
         
         if (!isEditing && !formData.project_id) {
-            alert('Пожалуйста, выберите проект');
+            showAlert('Пожалуйста, выберите проект', 'Ошибка');  // ✅ вместо alert
             return;
         }
         
         if (!formData.text.trim()) {
-            alert('Пожалуйста, напишите отзыв');
+            showAlert('Пожалуйста, напишите отзыв', 'Ошибка');  // ✅ вместо alert
             return;
         }
         
         if (formData.text.length < 10) {
-            alert('Отзыв должен содержать не менее 10 символов');
+            showAlert('Отзыв должен содержать не менее 10 символов', 'Ошибка');  // ✅ вместо alert
             return;
         }
         
@@ -85,7 +88,7 @@ const ReviewFormModal = ({
             if (onSuccess) onSuccess();
         } catch (error) {
             console.error('Ошибка:', error);
-            alert(isEditing ? 'Ошибка при обновлении отзыва' : 'Ошибка при отправке отзыва');
+            showAlert(isEditing ? 'Ошибка при обновлении отзыва' : 'Ошибка при отправке отзыва', 'Ошибка');  // ✅ вместо alert
         } finally {
             setIsSubmitting(false);
         }
@@ -120,135 +123,138 @@ const ReviewFormModal = ({
     };
 
     return (
-        <div className="modal-overlay" onClick={onClose}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                <div className="modal-header">
-                    <Typography variant="h3" weight="bold">
-                        {isEditing ? 'Редактировать отзыв' : 'Оставить отзыв'}
-                    </Typography>
-                    <button className="modal-close-btn" onClick={onClose}>✕</button>
-                </div>
+        <>
+            <div className="modal-overlay" onClick={onClose}>
+                <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                    <div className="modal-header">
+                        <Typography variant="h3" weight="bold">
+                            {isEditing ? 'Редактировать отзыв' : 'Оставить отзыв'}
+                        </Typography>
+                        <button className="modal-close-btn" onClick={onClose}>✕</button>
+                    </div>
 
-                <form onSubmit={handleSubmit} className="review-form">
-                    {!isEditing && (
+                    <form onSubmit={handleSubmit} className="review-form">
+                        {!isEditing && (
+                            <div className="form-group">
+                                <Typography variant="body" weight="bold" as="label" className="form-label">
+                                    Выберите проект *
+                                </Typography>
+                                <select
+                                    name="project_id"
+                                    value={formData.project_id}
+                                    onChange={handleChange}
+                                    className="form-select"
+                                    required
+                                >
+                                    <option value="">Выберите проект</option>
+                                    {projects.map(project => (
+                                        <option key={project.id} value={project.id}>
+                                            {project.title} - {project.project_year || new Date(project.created_at).getFullYear()}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+
+                        {isEditing && review?.project_title && (
+                            <div className="form-group">
+                                <Typography variant="body" weight="bold" as="label" className="form-label">
+                                    Проект
+                                </Typography>
+                                <div className="form-static">
+                                    {review.project_title}
+                                </div>
+                            </div>
+                        )}
+
                         <div className="form-group">
                             <Typography variant="body" weight="bold" as="label" className="form-label">
-                                Выберите проект *
+                                Оценка *
                             </Typography>
-                            <select
-                                name="project_id"
-                                value={formData.project_id}
+                            <div className="rating-container">
+                                <div className="rating-stars">
+                                    {renderStars()}
+                                </div>
+                                <Typography variant="small" color="default" className="rating-label">
+                                    {ratingLabels[hoveredRating || formData.rating]}
+                                </Typography>
+                            </div>
+                        </div>
+
+                        <div className="form-group">
+                            <Typography variant="body" weight="bold" as="label" className="form-label">
+                                Ваш отзыв *
+                            </Typography>
+                            <textarea
+                                name="text"
+                                value={formData.text}
                                 onChange={handleChange}
-                                className="form-select"
+                                className="form-textarea"
+                                rows={5}
+                                placeholder="Расскажите о своем опыте сотрудничества с нами..."
                                 required
-                            >
-                                <option value="">Выберите проект</option>
-                                {projects.map(project => (
-                                    <option key={project.id} value={project.id}>
-                                        {project.title} - {project.project_year || new Date(project.created_at).getFullYear()}
-                                    </option>
-                                ))}
-                            </select>
+                            />
+                            <Typography variant="small" color="default" className="form-hint">
+                                Минимум 10 символов. {formData.text.length}/500
+                            </Typography>
                         </div>
-                    )}
 
-                    {isEditing && review?.project_title && (
                         <div className="form-group">
                             <Typography variant="body" weight="bold" as="label" className="form-label">
-                                Проект
+                                Ваше имя
                             </Typography>
-                            <div className="form-static">
-                                {review.project_title}
-                            </div>
-                        </div>
-                    )}
-
-                    <div className="form-group">
-                        <Typography variant="body" weight="bold" as="label" className="form-label">
-                            Оценка *
-                        </Typography>
-                        <div className="rating-container">
-                            <div className="rating-stars">
-                                {renderStars()}
-                            </div>
-                            <Typography variant="small" color="default" className="rating-label">
-                                {ratingLabels[hoveredRating || formData.rating]}
+                            <input
+                                type="text"
+                                name="client_name"
+                                value={formData.client_name}
+                                onChange={handleChange}
+                                className="form-input"
+                                readOnly
+                                disabled
+                            />
+                            <Typography variant="small" color="default" className="form-hint">
+                                Имя автоматически берется из вашего аккаунта
                             </Typography>
                         </div>
-                    </div>
 
-                    <div className="form-group">
-                        <Typography variant="body" weight="bold" as="label" className="form-label">
-                            Ваш отзыв *
-                        </Typography>
-                        <textarea
-                            name="text"
-                            value={formData.text}
-                            onChange={handleChange}
-                            className="form-textarea"
-                            rows={5}
-                            placeholder="Расскажите о своем опыте сотрудничества с нами..."
-                            required
-                        />
-                        <Typography variant="small" color="default" className="form-hint">
-                            Минимум 10 символов. {formData.text.length}/500
-                        </Typography>
-                    </div>
+                        <div className="form-group">
+                            <Typography variant="body" weight="bold" as="label" className="form-label">
+                                Компания
+                            </Typography>
+                            <input
+                                type="text"
+                                name="client_company"
+                                value={formData.client_company}
+                                onChange={handleChange}
+                                className="form-input"
+                                placeholder="Ваша компания (опционально)"
+                            />
+                        </div>
 
-                    <div className="form-group">
-                        <Typography variant="body" weight="bold" as="label" className="form-label">
-                            Ваше имя
-                        </Typography>
-                        <input
-                            type="text"
-                            name="client_name"
-                            value={formData.client_name}
-                            onChange={handleChange}
-                            className="form-input"
-                            readOnly
-                            disabled
-                        />
-                        <Typography variant="small" color="default" className="form-hint">
-                            Имя автоматически берется из вашего аккаунта
-                        </Typography>
-                    </div>
-
-                    <div className="form-group">
-                        <Typography variant="body" weight="bold" as="label" className="form-label">
-                            Компания
-                        </Typography>
-                        <input
-                            type="text"
-                            name="client_company"
-                            value={formData.client_company}
-                            onChange={handleChange}
-                            className="form-input"
-                            placeholder="Ваша компания (опционально)"
-                        />
-                    </div>
-
-                    <div className="modal-footer">
-                        <MyButton type="button" variant="secondary" onClick={onClose}>
-                            Отмена
-                        </MyButton>
-                        <MyButton type="submit" variant="primary" disabled={isSubmitting}>
-                            {isSubmitting 
-                                ? (isEditing ? 'Сохранение...' : 'Отправка...') 
-                                : (isEditing ? 'Сохранить изменения' : 'Отправить отзыв')}
-                        </MyButton>
-                    </div>
-                    
-                    <div className="form-notice">
-                        <span>ℹ️</span>
-                        <Typography variant="small" color="default" className="notice-text">
-                            {isEditing 
-                                ? 'После редактирования отзыв снова пройдет модерацию.'
-                                : 'Отзыв будет опубликован после проверки модератором. Вы можете оставить только один отзыв на проект.'}
-                        </Typography>
-                    </div>
-                </form>
+                        <div className="modal-footer">
+                            <MyButton type="button" variant="secondary" onClick={onClose}>
+                                Отмена
+                            </MyButton>
+                            <MyButton type="submit" variant="primary" disabled={isSubmitting}>
+                                {isSubmitting 
+                                    ? (isEditing ? 'Сохранение...' : 'Отправка...') 
+                                    : (isEditing ? 'Сохранить изменения' : 'Отправить отзыв')}
+                            </MyButton>
+                        </div>
+                        
+                        <div className="form-notice">
+                            <span>ℹ️</span>
+                            <Typography variant="small" color="default" className="notice-text">
+                                {isEditing 
+                                    ? 'После редактирования отзыв снова пройдет модерацию.'
+                                    : 'Отзыв будет опубликован после проверки модератором. Вы можете оставить только один отзыв на проект.'}
+                            </Typography>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </div>
+            <AlertModalComponent />
+        </>
     );
 };
 

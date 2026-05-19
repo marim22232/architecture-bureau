@@ -7,17 +7,15 @@ import MyButton from '../../UI/MyButton/MyButton';
 import Icons from '../../UI/Icons/Icons';
 import { authAPI } from '../../../services/api';
 import { useAuth } from '../../../hooks/useAuth.js';
+import { useModal } from '../../../hooks/useModal.js';
 
 const AuthModal = ({ isOpen, onClose, onSuccess, defaultMode = 'login' }) => {
     const { login, isLoading: authLoading } = useAuth();
+    const { showAlert, AlertModalComponent } = useModal();
     const [isLogin, setIsLogin] = useState(defaultMode === 'login');
     const navigate = useNavigate();
-    const [verificationStep, setVerificationStep] = useState(false);
-    const [verificationCode, setVerificationCode] = useState('');
-    const [tempEmail, setTempEmail] = useState('');
     const [forgotPasswordStep, setForgotPasswordStep] = useState(false);
-    const [resetCodeStep, setResetCodeStep] = useState(false);
-    const [resetCode, setResetCode] = useState('');
+    const [resetPasswordEmail, setResetPasswordEmail] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmNewPassword, setConfirmNewPassword] = useState('');
     const [formData, setFormData] = useState({
@@ -30,6 +28,31 @@ const AuthModal = ({ isOpen, onClose, onSuccess, defaultMode = 'login' }) => {
     const [showPassword, setShowPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    
+    // Капча
+    const [captchaCode, setCaptchaCode] = useState('');
+    const [captchaId, setCaptchaId] = useState('');
+    const [captchaInput, setCaptchaInput] = useState('');
+
+    // Функция загрузки капчи
+    const loadCaptcha = async () => {
+        try {
+            const response = await fetch('/api/auth/captcha');
+            const data = await response.json();
+            setCaptchaCode(data.captcha);
+            setCaptchaId(data.captchaId);
+            setCaptchaInput('');
+        } catch (error) {
+            console.error('Ошибка загрузки капчи:', error);
+        }
+    };
+
+    // При открытии модалки в режиме регистрации загружаем капчу
+    useEffect(() => {
+        if (isOpen && !isLogin) {
+            loadCaptcha();
+        }
+    }, [isOpen, isLogin]);
 
     // Закрытие по Escape
     useEffect(() => {
@@ -60,12 +83,8 @@ const AuthModal = ({ isOpen, onClose, onSuccess, defaultMode = 'login' }) => {
     }, [isOpen]);
 
     const resetForm = () => {
-        setVerificationStep(false);
-        setVerificationCode('');
-        setTempEmail('');
         setForgotPasswordStep(false);
-        setResetCodeStep(false);
-        setResetCode('');
+        setResetPasswordEmail('');
         setNewPassword('');
         setConfirmNewPassword('');
         setFormData({
@@ -74,6 +93,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess, defaultMode = 'login' }) => {
             confirmPassword: '',
             rememberMe: false
         });
+        setCaptchaInput('');
         setErrors({});
         setShowPassword(false);
         setIsLoading(false);
@@ -102,7 +122,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess, defaultMode = 'login' }) => {
             }
         }
 
-        if (!isLogin && !verificationStep && !forgotPasswordStep) {
+        if (!isLogin && !forgotPasswordStep) {
             if (!formData.password) {
                 newErrors.password = 'Введите пароль';
             } else if (formData.password.length < 6) {
@@ -112,6 +132,11 @@ const AuthModal = ({ isOpen, onClose, onSuccess, defaultMode = 'login' }) => {
             if (formData.password !== formData.confirmPassword) {
                 newErrors.confirmPassword = 'Пароли не совпадают';
             }
+
+            // Проверка капчи
+            if (!captchaInput || captchaInput !== captchaCode) {
+                newErrors.captcha = 'Неверный код проверки';
+            }
         }
 
         setErrors(newErrors);
@@ -120,110 +145,52 @@ const AuthModal = ({ isOpen, onClose, onSuccess, defaultMode = 'login' }) => {
 
     // РЕГИСТРАЦИЯ
     const handleRegister = async () => {
+        if (!validateForm()) return;
+
         setIsLoading(true);
         setErrors({});
 
         try {
             const payload = {
                 email: formData.email,
-                password: formData.password
+                password: formData.password,
+                captcha: captchaInput,
+                captchaId: captchaId
             };
 
-            console.log('📤 Отправка регистрации:', { email: payload.email });
+            console.log('📤 Отправка регистрации:', { email: payload.email, captcha: payload.captcha });
 
             const result = await authAPI.register(payload);
 
             console.log('📥 Ответ сервера:', result);
 
             if (result && result.success === true) {
-                setTempEmail(formData.email);
-                setVerificationStep(true);
-
-                if (result.verificationCode) {
-                    alert(`⚡ ТЕСТОВЫЙ РЕЖИМ: Ваш код подтверждения: ${result.verificationCode}`);
-                }
+                showAlert('✅ Регистрация успешна! Теперь вы можете войти.', 'Успех');
+                setIsLogin(true);
+                setFormData({
+                    email: formData.email,
+                    password: '',
+                    confirmPassword: '',
+                    rememberMe: false
+                });
+                setCaptchaInput('');
             } else {
                 throw new Error(result?.error || 'Ошибка регистрации');
             }
 
         } catch (error) {
             console.error('❌ Ошибка регистрации:', error);
-            setErrors({ general: error.message || 'Ошибка регистрации' });
+            showAlert(error.message || 'Ошибка регистрации', 'Ошибка');
         } finally {
             setIsLoading(false);
+            loadCaptcha();
         }
     };
 
-    // ПОДТВЕРЖДЕНИЕ КОДА (регистрация)
-    const handleVerify = async () => {
-        if (!verificationCode || verificationCode.length !== 6) {
-            setErrors({ verification: 'Введите 6-значный код' });
-            return;
-        }
-
-        setIsLoading(true);
-        setErrors({});
-
-        try {
-            const result = await authAPI.verify({
-                email: tempEmail,
-                code: verificationCode
-            });
-
-            if (result && result.success === true) {
-                alert('✅ Аккаунт успешно подтверждён! Теперь войдите.');
-                setVerificationStep(false);
-                setIsLogin(true);
-                setFormData({
-                    email: tempEmail,
-                    password: '',
-                    confirmPassword: '',
-                    rememberMe: false
-                });
-                setVerificationCode('');
-            } else {
-                throw new Error(result?.error || 'Ошибка подтверждения');
-            }
-        } catch (error) {
-            console.error('❌ Ошибка подтверждения:', error);
-            setErrors({ verification: error.message || 'Ошибка подтверждения' });
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    // ВОССТАНОВЛЕНИЕ ПАРОЛЯ - отправка кода
-    const handleForgotPassword = async () => {
-        if (!formData.email) {
-            setErrors({ email: 'Введите email' });
-            return;
-        }
-
-        setIsLoading(true);
-        setErrors({});
-
-        try {
-            const result = await authAPI.sendVerificationCode({ email: formData.email });
-
-            if (result && result.success === true) {
-                setTempEmail(formData.email);
-                setResetCodeStep(true);
-                alert('Код подтверждения отправлен на ваш email');
-            } else {
-                throw new Error(result?.error || 'Ошибка отправки кода');
-            }
-        } catch (error) {
-            console.error('❌ Ошибка:', error);
-            setErrors({ general: error.message || 'Ошибка отправки кода' });
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    // ВОССТАНОВЛЕНИЕ ПАРОЛЯ - сброс с кодом
+    // СБРОС ПАРОЛЯ
     const handleResetPassword = async () => {
-        if (!resetCode || resetCode.length !== 6) {
-            setErrors({ resetCode: 'Введите 6-значный код' });
+        if (!resetPasswordEmail) {
+            setErrors({ resetEmail: 'Введите email' });
             return;
         }
 
@@ -242,31 +209,29 @@ const AuthModal = ({ isOpen, onClose, onSuccess, defaultMode = 'login' }) => {
 
         try {
             const result = await authAPI.resetPassword({
-                email: tempEmail,
-                code: resetCode,
+                email: resetPasswordEmail,
                 newPassword: newPassword
             });
 
             if (result && result.success === true) {
-                alert('✅ Пароль успешно изменён! Теперь войдите.');
+                showAlert('✅ Пароль успешно изменён! Теперь войдите.', 'Успех');
                 setForgotPasswordStep(false);
-                setResetCodeStep(false);
                 setIsLogin(true);
+                setResetPasswordEmail('');
+                setNewPassword('');
+                setConfirmNewPassword('');
                 setFormData({
-                    email: tempEmail,
+                    email: resetPasswordEmail,
                     password: '',
                     confirmPassword: '',
                     rememberMe: false
                 });
-                setResetCode('');
-                setNewPassword('');
-                setConfirmNewPassword('');
             } else {
                 throw new Error(result?.error || 'Ошибка сброса пароля');
             }
         } catch (error) {
             console.error('❌ Ошибка:', error);
-            setErrors({ general: error.message || 'Ошибка сброса пароля' });
+            showAlert(error.message || 'Ошибка сброса пароля', 'Ошибка');
         } finally {
             setIsLoading(false);
         }
@@ -274,7 +239,10 @@ const AuthModal = ({ isOpen, onClose, onSuccess, defaultMode = 'login' }) => {
 
     // ВХОД
     const handleLogin = async () => {
-        if (!validateForm()) return;
+        if (!formData.email || !formData.password) {
+            setErrors({ login: 'Введите email и пароль' });
+            return;
+        }
 
         const result = await login(formData.email, formData.password);
 
@@ -285,67 +253,97 @@ const AuthModal = ({ isOpen, onClose, onSuccess, defaultMode = 'login' }) => {
                 userType: localStorage.getItem('userType'),
                 id: localStorage.getItem('userId')
             };
-            
+
             console.log('✅ Передаем пользователя в onSuccess:', user);
-            
+
             if (onSuccess) {
                 onSuccess(user);
             }
-            
+
             onClose();
         } else {
-            setErrors({ login: result.error || 'Ошибка входа' });
+            showAlert(result.error || 'Ошибка входа. Проверьте email и пароль.', 'Ошибка');
         }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
-        if (forgotPasswordStep && !resetCodeStep) {
-            await handleForgotPassword();
-        } else if (resetCodeStep) {
+
+        if (forgotPasswordStep) {
             await handleResetPassword();
         } else if (isLogin) {
             await handleLogin();
-        } else if (!verificationStep) {
-            if (validateForm()) await handleRegister();
+        } else {
+            await handleRegister();
         }
     };
 
     if (!isOpen) return null;
 
-    // Шаг восстановления пароля (ввод email)
-    if (forgotPasswordStep && !resetCodeStep) {
-        return (
+    // Шаг восстановления пароля
+    // Шаг восстановления пароля
+if (forgotPasswordStep) {
+    return (
+        <>
             <div className="auth-modal-overlay" onClick={onClose}>
                 <div className="auth-modal-container" onClick={(e) => e.stopPropagation()}>
-                    <button className="auth-modal-close" onClick={onClose}>✕</button>
+                    <button className="auth-modal-close" onClick={onClose}>
+                        <Icons.Close size={24} color="#9fb2bd" />
+                    </button>
                     <div className="auth-modal-header">
                         <div className="auth-modal-logo">
-                            <span className="logo-icon">🏛️</span>
+                            <Icons.Building size={28} color="#3a5a6a" />
                             <Typography variant="h3" color="dark" weight="bold">M&Y</Typography>
                         </div>
-                        <Typography variant="body" color="primary">Восстановление пароля</Typography>
-                        <Typography variant="small" color="primary">Введите email для сброса пароля</Typography>
+                        <Typography variant="body" color="primary">Сброс пароля</Typography>
+                        <Typography variant="small" color="primary">Введите email и новый пароль</Typography>
                     </div>
                     <form onSubmit={handleSubmit}>
                         <div className="form-group">
                             <label><Icons.Email size={16} color="#3a5a6a" /> Email</label>
                             <div className="input-wrapper">
-                                <input 
-                                    type="email" 
-                                    name="email" 
-                                    placeholder="example@mail.ru" 
-                                    value={formData.email} 
-                                    onChange={handleChange} 
-                                    className={errors.email ? 'error' : ''} 
+                                <input
+                                    type="email"
+                                    placeholder="example@mail.ru"
+                                    value={resetPasswordEmail}
+                                    onChange={(e) => setResetPasswordEmail(e.target.value)}
+                                    className={errors.resetEmail ? 'error' : ''}
                                 />
                             </div>
-                            {errors.email && <span className="error-text">{errors.email}</span>}
+                            {errors.resetEmail && <span className="error-text">{errors.resetEmail}</span>}
                         </div>
-                        {errors.general && <span className="error-text">{errors.general}</span>}
+                        <div className="form-group">
+                            <label><Icons.Lock size={16} color="#3a5a6a" /> Новый пароль</label>
+                            <div className="input-wrapper password-wrapper">
+                                <input
+                                    type={showNewPassword ? 'text' : 'password'}
+                                    placeholder="Новый пароль (мин. 6 символов)"
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                />
+                                <button type="button" className="password-toggle" onClick={() => setShowNewPassword(!showNewPassword)}>
+                                    {showNewPassword ? <Icons.Eye size={16} /> : <Icons.Eye size={16} />}
+                                </button>
+                            </div>
+                            {errors.newPassword && <span className="error-text">{errors.newPassword}</span>}
+                        </div>
+                        <div className="form-group">
+                            <label><Icons.Lock size={16} color="#3a5a6a" /> Подтверждение пароля</label>
+                            <div className="input-wrapper password-wrapper">
+                                <input
+                                    type={showNewPassword ? 'text' : 'password'}
+                                    placeholder="Повторите пароль"
+                                    value={confirmNewPassword}
+                                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                                />
+                                <button type="button" className="password-toggle" onClick={() => setShowNewPassword(!showNewPassword)}>
+                                    {showNewPassword ? <Icons.Eye size={16} /> : <Icons.Eye size={16} />}
+                                </button>
+                            </div>
+                            {errors.confirmNewPassword && <span className="error-text">{errors.confirmNewPassword}</span>}
+                        </div>
                         <MyButton type="submit" variant="primary" style={{ width: '100%' }} disabled={isLoading}>
-                            {isLoading ? 'Отправка...' : 'Отправить код'}
+                            {isLoading ? 'Сохранение...' : 'Сохранить новый пароль'}
                         </MyButton>
                         <div className="auth-modal-footer">
                             <button type="button" onClick={() => { setForgotPasswordStep(false); setErrors({}); }} className="link-btn">
@@ -355,216 +353,171 @@ const AuthModal = ({ isOpen, onClose, onSuccess, defaultMode = 'login' }) => {
                     </form>
                 </div>
             </div>
-        );
-    }
-
-    // Шаг восстановления пароля (ввод кода и нового пароля)
-    if (resetCodeStep) {
-        return (
-            <div className="auth-modal-overlay" onClick={onClose}>
-                <div className="auth-modal-container" onClick={(e) => e.stopPropagation()}>
-                    <button className="auth-modal-close" onClick={onClose}>✕</button>
-                    <div className="auth-modal-header">
-                        <div className="auth-modal-logo">
-                            <span className="logo-icon">🏛️</span>
-                            <Typography variant="h3" color="dark" weight="bold">M&Y</Typography>
-                        </div>
-                        <Typography variant="body" color="primary">Сброс пароля</Typography>
-                        <Typography variant="small" color="primary">Код отправлен на {tempEmail}</Typography>
-                    </div>
-                    <form onSubmit={handleSubmit}>
-                        <div className="form-group">
-                            <label>Код подтверждения</label>
-                            <input
-                                type="text"
-                                placeholder="Введите 6-значный код"
-                                value={resetCode}
-                                onChange={(e) => setResetCode(e.target.value)}
-                                maxLength={6}
-                                style={{ textAlign: 'center', fontSize: '24px', letterSpacing: '8px' }}
-                            />
-                            {errors.resetCode && <span className="error-text">{errors.resetCode}</span>}
-                        </div>
-                        <div className="form-group">
-                            <label>Новый пароль</label>
-                            <div className="input-wrapper password-wrapper">
-                                <input
-                                    type={showNewPassword ? 'text' : 'password'}
-                                    placeholder="Новый пароль (мин. 6 символов)"
-                                    value={newPassword}
-                                    onChange={(e) => setNewPassword(e.target.value)}
-                                />
-                                <button type="button" className="password-toggle" onClick={() => setShowNewPassword(!showNewPassword)}>
-                                    {showNewPassword ? '🙈' : '👁️'}
-                                </button>
-                            </div>
-                            {errors.newPassword && <span className="error-text">{errors.newPassword}</span>}
-                        </div>
-                        <div className="form-group">
-                            <label>Подтверждение пароля</label>
-                            <div className="input-wrapper">
-                                <input
-                                    type="password"
-                                    placeholder="Повторите пароль"
-                                    value={confirmNewPassword}
-                                    onChange={(e) => setConfirmNewPassword(e.target.value)}
-                                />
-                            </div>
-                            {errors.confirmNewPassword && <span className="error-text">{errors.confirmNewPassword}</span>}
-                        </div>
-                        {errors.general && <span className="error-text">{errors.general}</span>}
-                        <MyButton type="submit" variant="primary" style={{ width: '100%' }} disabled={isLoading}>
-                            {isLoading ? 'Сброс...' : 'Сбросить пароль'}
-                        </MyButton>
-                        <div className="auth-modal-footer">
-                            <button type="button" onClick={() => { setResetCodeStep(false); setForgotPasswordStep(true); }} className="link-btn">
-                                ← Назад
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        );
-    }
-
-    // Шаг подтверждения регистрации
-    if (verificationStep) {
-        return (
-            <div className="auth-modal-overlay" onClick={onClose}>
-                <div className="auth-modal-container" onClick={(e) => e.stopPropagation()}>
-                    <button className="auth-modal-close" onClick={onClose}>✕</button>
-                    <div className="auth-modal-header">
-                        <div className="auth-modal-logo">
-                            <span className="logo-icon">🏛️</span>
-                            <Typography variant="h3" color="dark" weight="bold">M&Y</Typography>
-                        </div>
-                        <Typography variant="body" color="primary">Подтверждение аккаунта</Typography>
-                        <Typography variant="small" color="primary">Код отправлен на {tempEmail}</Typography>
-                    </div>
-                    <form onSubmit={(e) => { e.preventDefault(); handleVerify(); }}>
-                        <div className="form-group">
-                            <label>Код подтверждения</label>
-                            <input
-                                type="text"
-                                placeholder="Введите 6-значный код"
-                                value={verificationCode}
-                                onChange={(e) => setVerificationCode(e.target.value)}
-                                maxLength={6}
-                                style={{ textAlign: 'center', fontSize: '24px', letterSpacing: '8px' }}
-                            />
-                        </div>
-                        {errors.verification && <span className="error-text">{errors.verification}</span>}
-                        <MyButton type="submit" variant="primary" style={{ width: '100%' }} disabled={isLoading}>
-                            {isLoading ? 'Подтверждение...' : 'Подтвердить'}
-                        </MyButton>
-                        <div className="auth-modal-footer">
-                            <button type="button" onClick={() => { setVerificationStep(false); setVerificationCode(''); }} className="link-btn">
-                                Назад
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        );
-    }
-
+            <AlertModalComponent />
+        </>
+    );
+}
     // Основная форма (вход/регистрация)
     return (
-        <div className="auth-modal-overlay" onClick={onClose}>
-            <div className="auth-modal-container" onClick={(e) => e.stopPropagation()}>
-                <button className="auth-modal-close" onClick={onClose}>
-                    <Icons.Close size={24} color="#9fb2bd" />
-                </button>
-                <div className="auth-modal-header">
-                    <div className="auth-modal-logo">
-                        <span className="logo-icon">🏛️</span>
-                        <Typography variant="h3" color="dark" weight="bold">M&Y</Typography>
-                    </div>
-                    <Typography variant="body" color="primary" className="auth-modal-subtitle">
-                        {isLogin ? 'Добро пожаловать!' : 'Создайте аккаунт'}
-                    </Typography>
-                </div>
-                <div className="auth-modal-tabs">
-                    <button className={`tab-btn ${isLogin ? 'active' : ''}`} onClick={() => { setIsLogin(true); resetForm(); }}>
-                        Вход
+        <>
+            <div className="auth-modal-overlay" onClick={onClose}>
+                <div className="auth-modal-container" onClick={(e) => e.stopPropagation()}>
+                    <button className="auth-modal-close" onClick={onClose}>
+                        <Icons.Close size={24} color="#9fb2bd" />
                     </button>
-                    <button className={`tab-btn ${!isLogin ? 'active' : ''}`} onClick={() => { setIsLogin(false); resetForm(); }}>
-                        Регистрация
-                    </button>
-                </div>
-                <form className="auth-modal-form" onSubmit={handleSubmit}>
-                    {/* Email */}
-                    <div className="form-group">
-                        <label><Icons.Email size={16} color="#3a5a6a" /> Email</label>
-                        <div className="input-wrapper">
-                            <input type="email" name="email" placeholder="example@mail.ru" value={formData.email} onChange={handleChange} className={errors.email ? 'error' : ''} />
+                    <div className="auth-modal-header">
+                        <div className="auth-modal-logo">
+                            <Icons.Building size={28} color="#3a5a6a" />
+                            <Typography variant="h3" color="dark" weight="bold">M&Y</Typography>
                         </div>
-                        {errors.email && <span className="error-text">{errors.email}</span>}
+                        <Typography variant="body" color="primary" className="auth-modal-subtitle">
+                            {isLogin ? 'Добро пожаловать!' : 'Создайте аккаунт'}
+                        </Typography>
                     </div>
-
-                    {/* Пароль (только для входа и регистрации) */}
-                    {!forgotPasswordStep && (
+                    <div className="auth-modal-tabs">
+                        <button className={`tab-btn ${isLogin ? 'active' : ''}`} onClick={() => { setIsLogin(true); resetForm(); }}>
+                            Вход
+                        </button>
+                        <button className={`tab-btn ${!isLogin ? 'active' : ''}`} onClick={() => { setIsLogin(false); resetForm(); }}>
+                            Регистрация
+                        </button>
+                    </div>
+                    <form className="auth-modal-form" onSubmit={handleSubmit}>
+                        {/* Email */}
                         <div className="form-group">
-                            <label><Icons.Lock size={16} color="#3a5a6a" /> Пароль</label>
-                            <div className="input-wrapper password-wrapper">
-                                <input type={showPassword ? 'text' : 'password'} name="password" placeholder="Введите пароль (мин. 6 символов)" value={formData.password} onChange={handleChange} className={errors.password ? 'error' : ''} />
-                                <button type="button" className="password-toggle" onClick={() => setShowPassword(!showPassword)}>
-                                    {showPassword ? '🙈' : '👁️'}
+                            <label><Icons.Email size={16} color="#3a5a6a" /> Email</label>
+                            <div className="input-wrapper">
+                                <input type="email" name="email" placeholder="example@mail.ru" value={formData.email} onChange={handleChange} className={errors.email ? 'error' : ''} />
+                            </div>
+                            {errors.email && <span className="error-text">{errors.email}</span>}
+                        </div>
+
+                        {/* Пароль */}
+                  {/* Пароль */}
+<div className="form-group">
+    <label><Icons.Lock size={16} color="#3a5a6a" /> Пароль</label>
+    <div className="input-wrapper password-wrapper">
+        <input 
+            type={showPassword ? 'text' : 'password'} 
+            name="password" 
+            placeholder="Введите пароль (мин. 6 символов)" 
+            value={formData.password} 
+            onChange={handleChange} 
+            className={errors.password ? 'error' : ''} 
+        />
+        <button 
+            type="button" 
+            className="password-toggle" 
+            onClick={() => setShowPassword(!showPassword)}
+            style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+        >
+            {showPassword ? <Icons.Eye size={16} /> : <Icons.Eye size={16} />}
+        </button>
+    </div>
+    {errors.password && <span className="error-text">{errors.password}</span>}
+</div>
+
+{/* Подтверждение пароля (только для регистрации) */}
+{!isLogin && (
+    <div className="form-group">
+        <label><Icons.Lock size={16} color="#3a5a6a" /> Подтверждение пароля</label>
+        <div className="input-wrapper password-wrapper">
+            <input 
+                type={showPassword ? 'text' : 'password'} 
+                name="confirmPassword" 
+                placeholder="Повторите пароль" 
+                value={formData.confirmPassword} 
+                onChange={handleChange} 
+                className={errors.confirmPassword ? 'error' : ''} 
+            />
+            <button 
+                type="button" 
+                className="password-toggle" 
+                onClick={() => setShowPassword(!showPassword)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+            >
+                {showPassword ? <Icons.Eye size={16} /> : <Icons.Eye size={16} />}
+            </button>
+        </div>
+        {errors.confirmPassword && <span className="error-text">{errors.confirmPassword}</span>}
+    </div>
+)}
+
+                        {/* Капча (только для регистрации) */}
+                        {!isLogin && (
+                            <div className="form-group">
+                                <label><Icons.Lock size={16} color="#3a5a6a" /> Проверка "Я не робот"</label>
+                                <div className="captcha-wrapper">
+                                    <div className="captcha-display" style={{
+                                        background: '#f0f0f0',
+                                        padding: '12px',
+                                        textAlign: 'center',
+                                        fontSize: '24px',
+                                        letterSpacing: '8px',
+                                        fontFamily: 'monospace',
+                                        fontWeight: 'bold',
+                                        borderRadius: '8px',
+                                        marginBottom: '10px',
+                                        userSelect: 'none'
+                                    }}>
+                                        {captchaCode}
+                                    </div>
+                                    <button 
+                                        type="button" 
+                                        onClick={loadCaptcha}
+                                        style={{ marginBottom: '10px', padding: '4px 8px', fontSize: '12px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                                    >
+                                        <Icons.Calendar size={14} /> Обновить код
+                                    </button>
+                                    <input
+                                        type="text"
+                                        placeholder="Введите код с картинки"
+                                        value={captchaInput}
+                                        onChange={(e) => setCaptchaInput(e.target.value)}
+                                        maxLength="6"
+                                        style={{ textAlign: 'center', letterSpacing: '4px', width: '100%' }}
+                                    />
+                                </div>
+                                {errors.captcha && <span className="error-text">{errors.captcha}</span>}
+                            </div>
+                        )}
+
+                        {/* Забыли пароль? (только для входа) */}
+                        {isLogin && (
+                            <div className="form-options">
+                                <button
+                                    type="button"
+                                    className="forgot-password-link"
+                                    onClick={() => {
+                                        setForgotPasswordStep(true);
+                                        setErrors({});
+                                    }}
+                                >
+                                    <Icons.Link size={14} /> Забыли пароль?
                                 </button>
                             </div>
-                            {errors.password && <span className="error-text">{errors.password}</span>}
-                        </div>
-                    )}
-
-                    {/* Подтверждение пароля (только для регистрации) */}
-                    {!isLogin && !verificationStep && !forgotPasswordStep && (
-                        <div className="form-group">
-                            <label><Icons.Lock size={16} color="#3a5a6a" /> Подтверждение пароля</label>
-                            <div className="input-wrapper">
-                                <input type="password" name="confirmPassword" placeholder="Повторите пароль" value={formData.confirmPassword} onChange={handleChange} className={errors.confirmPassword ? 'error' : ''} />
-                            </div>
-                            {errors.confirmPassword && <span className="error-text">{errors.confirmPassword}</span>}
-                        </div>
-                    )}
-
-                    {/* Забыли пароль? (только для входа) */}
-                    {isLogin && (
-                        <div className="form-options">
-                            <button 
-                                type="button" 
-                                className="forgot-password-link"
-                                onClick={() => {
-                                    setForgotPasswordStep(true);
-                                    setErrors({});
-                                }}
-                            >
-                                Забыли пароль?
-                            </button>
-                        </div>
-                    )}
-
-                    {/*errors.login && <span className="error-text" style={{ display: 'block', textAlign: 'center' }}>{errors.login}</span>}
-                    {errors.general && <span className="error-text" style={{ display: 'block', textAlign: 'center' }}>{errors.general}</span>*/}
-{errors.login && <span className="error-text">{typeof errors.login === 'string' ? errors.login : JSON.stringify(errors.login)}</span>}
-{errors.general && <span className="error-text">{typeof errors.general === 'string' ? errors.general : errors.general?.message || 'Произошла ошибка'}</span>}
-                    <MyButton type="submit" variant="primary" style={{ width: '100%', padding: '12px', fontSize: '15px' }} disabled={isLoading}>
-                        {isLoading ? 'Загрузка...' : (isLogin ? 'Войти' : 'Зарегистрироваться')}
-                    </MyButton>
-
-                    <div className="auth-modal-footer">
-                        {isLogin ? (
-                            <Typography variant="small" color="primary">
-                                Нет аккаунта? <button type="button" onClick={() => setIsLogin(false)} className="link-btn">Зарегистрироваться</button>
-                            </Typography>
-                        ) : (
-                            <Typography variant="small" color="primary">
-                                Уже есть аккаунт? <button type="button" onClick={() => setIsLogin(true)} className="link-btn">Войти</button>
-                            </Typography>
                         )}
-                    </div>
-                </form>
+
+                        <MyButton type="submit" variant="primary" style={{ width: '100%', padding: '12px', fontSize: '15px' }} disabled={isLoading}>
+                            {isLoading ? 'Загрузка...' : (isLogin ? 'Войти' : 'Зарегистрироваться')}
+                        </MyButton>
+
+                        <div className="auth-modal-footer">
+                            {isLogin ? (
+                                <Typography variant="small" color="primary">
+                                    Нет аккаунта? <button type="button" onClick={() => setIsLogin(false)} className="link-btn">Зарегистрироваться</button>
+                                </Typography>
+                            ) : (
+                                <Typography variant="small" color="primary">
+                                    Уже есть аккаунт? <button type="button" onClick={() => setIsLogin(true)} className="link-btn">Войти</button>
+                                </Typography>
+                            )}
+                        </div>
+                    </form>
+                </div>
             </div>
-        </div>
+            <AlertModalComponent />
+        </>
     );
 };
 

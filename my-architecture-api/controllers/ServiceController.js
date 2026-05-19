@@ -1,54 +1,105 @@
 import ServiceService from "../services/ServiceService.js";
 class ServiceController {
-    async create(req, res) {
-        try {
-            let iconPath = null;
-            let iconData = null;
+    // ServiceController.js
 
-            // Проверяем, есть ли загруженный файл
-            if (req.files && req.files.icon) {
-                const icon = req.files.icon;
-                const fileName = Date.now() + '_' + icon.name.replace(/\s/g, '_');
-                const uploadPath = 'uploads/' + fileName;
+async create(req, res) {
+    try {
+        let iconPath = null;
+        let iconData = null;
 
-                // Сохраняем файл
-                await icon.mv(uploadPath);
-                iconPath = `/uploads/${fileName}`;
-            }
-
-            // Проверяем, пришли ли данные иконки как JSON
-            if (req.body.icon && typeof req.body.icon === 'string') {
-                try {
-                    iconData = JSON.parse(req.body.icon);
-                } catch (e) {
-                    iconData = req.body.icon;
-                }
-            }
-
-            const serviceData = {
-                title: req.body.title,
-                description: req.body.description,
-                icon: iconData || req.body.icon || null,
-                price_range: req.body.price_range,
-                category_id: req.body.category_id,  // ← ДОБАВИТЬ ЭТУ СТРОКУ!
-                is_active: req.body.is_active === 'false' ? false : true,
-            };
-
-            const result = await ServiceService.create(serviceData, req.pool);
-
-            if (result.success) {
-                res.status(201).json({
-                    message: result.message,
-                    service: result.service
-                });
-            } else {
-                res.status(result.status || 500).json({ error: result.error });
-            }
-        } catch (error) {
-            console.error('Ошибка в контроллере при создании:', error);
-            res.status(500).json({ error: error.message });
+        if (req.files && req.files.icon) {
+            const icon = req.files.icon;
+            const fileName = Date.now() + '_' + icon.name.replace(/\s/g, '_');
+            const uploadPath = 'uploads/' + fileName;
+            await icon.mv(uploadPath);
+            iconPath = `/uploads/${fileName}`;
         }
+
+        if (req.body.icon && typeof req.body.icon === 'string') {
+            try {
+                iconData = JSON.parse(req.body.icon);
+            } catch (e) {
+                iconData = req.body.icon;
+            }
+        }
+
+        const serviceData = {
+            title: req.body.title,
+            description: req.body.description,
+            icon: iconData || req.body.icon || null,
+            price_range: req.body.price_range || null,
+            price_per_sqm: req.body.price_per_sqm || null,  // ✅ добавить
+            price_fixed: req.body.price_fixed || null,      // ✅ добавить
+            category_id: req.body.category_id,
+            is_active: req.body.is_active === 'false' ? false : true,
+        };
+
+        const result = await ServiceService.create(serviceData, req.pool);
+
+        if (result.success) {
+            res.status(201).json({
+                message: result.message,
+                service: result.service
+            });
+        } else {
+            res.status(result.status || 500).json({ error: result.error });
+        }
+    } catch (error) {
+        console.error('Ошибка в контроллере при создании:', error);
+        res.status(500).json({ error: error.message });
     }
+}
+
+async update(req, res) {
+    try {
+        let iconPath = null;
+        let iconData = null;
+
+        if (req.files && req.files.icon) {
+            const icon = req.files.icon;
+            const fileName = Date.now() + '_' + icon.name.replace(/\s/g, '_');
+            const uploadPath = 'uploads/' + fileName;
+            await icon.mv(uploadPath);
+            iconPath = `/uploads/${fileName}`;
+        }
+
+        if (req.body.icon && typeof req.body.icon === 'string') {
+            try {
+                iconData = JSON.parse(req.body.icon);
+            } catch (e) {
+                iconData = req.body.icon;
+            }
+        }
+
+        const updateData = {
+            title: req.body.title,
+            description: req.body.description,
+            icon: iconData || req.body.icon,
+            price_range: req.body.price_range,
+            price_per_sqm: req.body.price_per_sqm,  // ✅ добавить
+            price_fixed: req.body.price_fixed,      // ✅ добавить
+            is_active: req.body.is_active,
+        };
+
+        Object.keys(updateData).forEach(key =>
+            updateData[key] === undefined && delete updateData[key]
+        );
+
+        const result = await ServiceService.update(req.params.id, updateData, req.pool);
+
+        if (result.success) {
+            res.json({
+                message: result.message,
+                service: result.service
+            });
+        } else {
+            res.status(result.status || 500).json({ error: result.error });
+        }
+    } catch (error) {
+        console.error('Ошибка в контроллере при обновлении:', error);
+        res.status(500).json({ error: error.message });
+    }
+}
 
     async getAll(req, res) {
         try {
@@ -76,61 +127,6 @@ class ServiceController {
             }
         } catch (error) {
             console.error('Ошибка в контроллере при получении одной:', error);
-            res.status(500).json({ error: error.message });
-        }
-    }
-
-    async update(req, res) {
-        try {
-            let iconPath = null;
-            let iconData = null;
-
-            // Проверяем, есть ли новый загруженный файл
-            if (req.files && req.files.icon) {
-                const icon = req.files.icon;
-                const fileName = Date.now() + '_' + icon.name.replace(/\s/g, '_');
-                const uploadPath = 'uploads/' + fileName;
-
-                // Сохраняем файл
-                await icon.mv(uploadPath);
-                iconPath = `/uploads/${fileName}`;
-            }
-
-            // Проверяем, пришли ли данные иконки как JSON
-            if (req.body.icon && typeof req.body.icon === 'string') {
-                try {
-                    iconData = JSON.parse(req.body.icon);
-                } catch (e) {
-                    iconData = req.body.icon;
-                }
-            }
-
-            // Подготавливаем данные для обновления
-            const updateData = {
-                title: req.body.title,
-                description: req.body.description,
-                icon: iconData || req.body.icon,
-                price_range: req.body.price_range,
-                is_active: req.body.is_active,
-            };
-
-            // Удаляем undefined поля
-            Object.keys(updateData).forEach(key =>
-                updateData[key] === undefined && delete updateData[key]
-            );
-
-            const result = await ServiceService.update(req.params.id, updateData, req.pool);
-
-            if (result.success) {
-                res.json({
-                    message: result.message,
-                    service: result.service
-                });
-            } else {
-                res.status(result.status || 500).json({ error: result.error });
-            }
-        } catch (error) {
-            console.error('Ошибка в контроллере при обновлении:', error);
             res.status(500).json({ error: error.message });
         }
     }

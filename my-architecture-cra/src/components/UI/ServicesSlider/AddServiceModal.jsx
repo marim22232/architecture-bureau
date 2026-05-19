@@ -1,3 +1,4 @@
+// AddServiceModal.jsx
 import React, { useState } from 'react';
 import Typography from '../../UI/Typography/Typography.jsx';
 import './ServiceEditModal.css';
@@ -7,6 +8,8 @@ const AddServiceModal = ({ isOpen, onClose, onSave, categories }) => {
     title: '',
     description: '',
     price_range: '',
+    price_per_sqm: '',   // ✅ добавить
+    price_fixed: '',     // ✅ добавить
     icon: '',
     category_id: null,
     category_slug: 'architecture'
@@ -27,41 +30,42 @@ const AddServiceModal = ({ isOpen, onClose, onSave, categories }) => {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setIsLoading(true);
+    e.preventDefault();
+    setIsLoading(true);
 
-  try {
-    // Находим выбранную категорию и получаем её ID
-    const selectedCategory = categories.find(cat => cat.slug === formData.category_slug);
-    
-    // Подготавливаем данные с правильным category_id (число, а не строка!)
-    const newService = {
-      title: formData.title,
-      description: formData.description,
-      price_range: formData.price_range,
-      icon: formData.icon,
-      category_id: selectedCategory?.id || null  // ← должно быть число (1 или 2)
-    };
-    
-    console.log('Отправляем данные:', newService); // Проверьте в консоли
-    await onSave(newService);
-    
-    // Сброс формы
-    setFormData({
-      title: '',
-      description: '',
-      price_range: '', 
-      icon: '',
-      category_id: null,
-      category_slug: 'architecture'
-    });
-    setSelectedFile(null);
-  } catch (error) {
-    console.error('Ошибка при создании:', error);
-  } finally {
-    setIsLoading(false);
-  }
-};
+    try {
+      const selectedCategory = categories.find(cat => cat.slug === formData.category_slug);
+      
+      const newService = {
+        title: formData.title,
+        description: formData.description,
+        price_range: formData.price_range,
+        price_per_sqm: formData.price_per_sqm ? parseFloat(formData.price_per_sqm) : null,  // ✅ добавить
+        price_fixed: formData.price_fixed ? parseFloat(formData.price_fixed) : null,        // ✅ добавить
+        icon: formData.icon,
+        category_id: selectedCategory?.id || null
+      };
+      
+      console.log('Отправляем данные:', newService);
+      await onSave(newService);
+      
+      setFormData({
+        title: '',
+        description: '',
+        price_range: '',
+        price_per_sqm: '',   // ✅ сбросить
+        price_fixed: '',     // ✅ сбросить
+        icon: '',
+        category_id: null,
+        category_slug: 'architecture'
+      });
+      setSelectedFile(null);
+    } catch (error) {
+      console.error('Ошибка при создании:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -78,7 +82,7 @@ const AddServiceModal = ({ isOpen, onClose, onSave, categories }) => {
             <label>Категория *</label>
             <select
               name="category_slug"
-              value={formData.category_slug}  // ← было category_id, исправьте на category_slug
+              value={formData.category_slug}
               onChange={handleChange}
               required
             >
@@ -115,17 +119,39 @@ const AddServiceModal = ({ isOpen, onClose, onSave, categories }) => {
           </div>
 
           <div className="form-group">
-            <label>Ценовой диапазон</label>
+            <label>Ценовой диапазон (текст)</label>
             <input
               type="text"
               name="price_range"
               value={formData.price_range}
               onChange={handleChange}
-              placeholder="например: от 50 000 ₽ или договорная"
+              placeholder="например: от 1500 ₽/м²"
             />
           </div>
 
+          <div className="form-group">
+            <label>Цена за м² (число)</label>
+            <input
+              type="number"
+              name="price_per_sqm"
+              value={formData.price_per_sqm}
+              onChange={handleChange}
+              placeholder="например: 1500"
+              step="0.01"
+            />
+          </div>
 
+          <div className="form-group">
+            <label>Фиксированная цена (число)</label>
+            <input
+              type="number"
+              name="price_fixed"
+              value={formData.price_fixed}
+              onChange={handleChange}
+              placeholder="например: 50000"
+              step="0.01"
+            />
+          </div>
 
           <div className="form-group">
             <label>Иконка (эмодзи)</label>

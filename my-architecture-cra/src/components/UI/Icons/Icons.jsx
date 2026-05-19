@@ -68,6 +68,65 @@ const Icons = {
             <path d="M17 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z" fill="currentColor" />
         </svg>
     ),
+    // Добавьте в объект Icons (например, после ChevronRight):
+
+// Стрелка влево (ArrowLeft)
+ArrowLeft: ({ className, color, size = 20 }) => (
+    <svg 
+        width={size} 
+        height={size} 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="currentColor" 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round" 
+        className={className} 
+        style={{ color }}
+    >
+        <line x1="19" y1="12" x2="5" y2="12" />
+        <polyline points="12 19 5 12 12 5" />
+    </svg>
+),
+
+// Стрелка вправо (ArrowRight) - тоже может пригодиться
+ArrowRight: ({ className, color, size = 20 }) => (
+    <svg 
+        width={size} 
+        height={size} 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="currentColor" 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round" 
+        className={className} 
+        style={{ color }}
+    >
+        <line x1="5" y1="12" x2="19" y2="12" />
+        <polyline points="12 5 19 12 12 19" />
+    </svg>
+),
+// Добавьте в объект Icons (например, после Heart или в любое место):
+
+// Награда / Трофей
+Award: ({ className, color, size = 20 }) => (
+    <svg 
+        width={size} 
+        height={size} 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="currentColor" 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round" 
+        className={className} 
+        style={{ color }}
+    >
+        <circle cx="12" cy="8" r="6" />
+        <path d="M12 14v8M8 22l4-2 4 2M6 8h12" />
+    </svg>
+),
 
     // Информация
     Info: ({ className, color, size = 20 }) => (

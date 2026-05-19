@@ -1,3 +1,4 @@
+// ServiceEditModal.jsx
 import React, { useState, useEffect } from 'react';
 import Typography from '../../UI/Typography/Typography.jsx';
 import './ServiceEditModal.css';
@@ -7,6 +8,8 @@ const ServiceEditModal = ({ isOpen, service, onClose, onSave, onDelete }) => {
     title: '',
     description: '',
     price_range: '',
+    price_per_sqm: '',   // ✅ добавить
+    price_fixed: '',     // ✅ добавить
     icon: ''
   });
   const [selectedFile, setSelectedFile] = useState(null);
@@ -18,6 +21,8 @@ const ServiceEditModal = ({ isOpen, service, onClose, onSave, onDelete }) => {
         title: service.title || '',
         description: service.description || '',
         price_range: service.price_range || '',
+        price_per_sqm: service.price_per_sqm || '',   // ✅ добавить
+        price_fixed: service.price_fixed || '',       // ✅ добавить
         icon: service.icon || '',
       });
     }
@@ -35,19 +40,29 @@ const ServiceEditModal = ({ isOpen, service, onClose, onSave, onDelete }) => {
     setSelectedFile(e.target.files[0]);
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setIsLoading(true);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
 
-  try {
-    // Просто сохраняем formData без загрузки файлов
-    await onSave(formData);
-  } catch (error) {
-    console.error('Ошибка при сохранении:', error);
-  } finally {
-    setIsLoading(false);
-  }
-};
+    try {
+      const updatedService = {
+        id: service.id,
+        title: formData.title,
+        description: formData.description,
+        price_range: formData.price_range,
+        price_per_sqm: formData.price_per_sqm ? parseFloat(formData.price_per_sqm) : null,  // ✅ добавить
+        price_fixed: formData.price_fixed ? parseFloat(formData.price_fixed) : null,        // ✅ добавить
+        icon: formData.icon,
+        is_active: service.is_active
+      };
+      
+      await onSave(updatedService);
+    } catch (error) {
+      console.error('Ошибка при сохранении:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -83,13 +98,37 @@ const handleSubmit = async (e) => {
           </div>
           
           <div className="form-group">
-            <label>Ценовой диапазон</label>
+            <label>Ценовой диапазон (текст)</label>
             <input
               type="text"
               name="price_range"
               value={formData.price_range}
               onChange={handleChange}
-              placeholder="например: от 50 000 ₽"
+              placeholder="например: от 1500 ₽/м²"
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Цена за м² (число)</label>
+            <input
+              type="number"
+              name="price_per_sqm"
+              value={formData.price_per_sqm}
+              onChange={handleChange}
+              placeholder="например: 1500"
+              step="0.01"
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Фиксированная цена (число)</label>
+            <input
+              type="number"
+              name="price_fixed"
+              value={formData.price_fixed}
+              onChange={handleChange}
+              placeholder="например: 50000"
+              step="0.01"
             />
           </div>
           

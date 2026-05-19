@@ -241,7 +241,7 @@ const MyProjectsNew = () => {
                             </button>
                             <div className="modal-image">
                                 {selectedProject.main_image && selectedProject.main_image.trim() !== '' ? (
-                                    <img src={`http://localhost:5000${selectedProject.main_image}`} alt={selectedProject.title} />
+                                    <img src={selectedProject.main_image} alt={selectedProject.title} />
                                 ) : (
                                     <div className="image-placeholder" style={{ height: '250px' }}>
                                         <Icons.Building size={48} color="#8ba5b5" />
