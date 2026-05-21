@@ -45,24 +45,42 @@ const ServiceEditModal = ({ isOpen, service, onClose, onSave, onDelete }) => {
     setIsLoading(true);
 
     try {
-      const updatedService = {
-        id: service.id,
-        title: formData.title,
-        description: formData.description,
-        price_range: formData.price_range,
-        price_per_sqm: formData.price_per_sqm ? parseFloat(formData.price_per_sqm) : null,  // ✅ добавить
-        price_fixed: formData.price_fixed ? parseFloat(formData.price_fixed) : null,        // ✅ добавить
-        icon: formData.icon,
-        is_active: service.is_active
-      };
-      
-      await onSave(updatedService);
+        // Создаем FormData для отправки файла
+        const submitData = new FormData();
+        submitData.append('title', formData.title);
+        submitData.append('description', formData.description);
+        submitData.append('price_range', formData.price_range || '');
+        submitData.append('price_per_sqm', formData.price_per_sqm ? parseFloat(formData.price_per_sqm) : '');
+        submitData.append('price_fixed', formData.price_fixed ? parseFloat(formData.price_fixed) : '');
+        submitData.append('icon', formData.icon || '📦');
+        
+        if (selectedFile) {
+            submitData.append('image', selectedFile);
+        }
+        
+        // Отправляем FormData вместо JSON
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/services/${service.id}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            body: submitData
+        });
+
+        if (response.ok) {
+            const updatedService = await response.json();
+            await onSave(updatedService);
+            onClose();
+        } else {
+            console.error('Ошибка при сохранении:', await response.text());
+        }
     } catch (error) {
-      console.error('Ошибка при сохранении:', error);
+        console.error('Ошибка при сохранении:', error);
     } finally {
-      setIsLoading(false);
+        setIsLoading(false);
     }
-  };
+};
 
   if (!isOpen) return null;
 

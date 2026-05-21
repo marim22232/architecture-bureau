@@ -201,17 +201,41 @@ const ServicesSlider = ({ isAdmin = false, onServicesUpdate }) => {
   };
 
   const getImageUrl = (service) => {
+    // Жестко задаем правильный URL API
+    const API_BASE_URL = 'https://my-architecture-api.onrender.com';
+    
+    // Обработка icon_path
     if (service.icon_path) {
-      return service.icon_path.startsWith('http') 
-        ? service.icon_path 
-        : `${API_BASE_URL}${service.icon_path}`;
-    } else if (service.icon && !service.icon.match(/^[🏛️🪑📦🎨💰📋🛒👨‍💻👩‍🎨⚡📄🏗️🌟🏆📈🏅🎨💚]/)) {
-      return service.icon.startsWith('http') 
-        ? service.icon 
-        : `${API_BASE_URL}/${service.icon}`;
+        let path = service.icon_path;
+        // Убираем лишний /api если он есть
+        if (path.startsWith('/api/uploads')) {
+            path = path.replace('/api', '');
+        }
+        // Если уже полный URL, возвращаем как есть
+        if (path.startsWith('http')) {
+            return path;
+        }
+        // Иначе добавляем базовый URL
+        return `${API_BASE_URL}${path}`;
     }
+    
+    // Обработка icon (если это не эмодзи)
+    if (service.icon && !service.icon.match(/^[🏛️🪑📦🎨💰📋🛒👨‍💻👩‍🎨⚡📄🏗️🌟🏆📈🏅🎨💚]/)) {
+        let path = service.icon;
+        // Убираем лишний /api если он есть
+        if (path.startsWith('/api/uploads')) {
+            path = path.replace('/api', '');
+        }
+        // Если уже полный URL, возвращаем как есть
+        if (path.startsWith('http')) {
+            return path;
+        }
+        // Иначе добавляем базовый URL
+        return `${API_BASE_URL}${path}`;
+    }
+    
     return null;
-  };
+};
 
   const getCategoryIcon = (slug) => {
     const icons = {

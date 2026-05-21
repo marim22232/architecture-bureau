@@ -34,39 +34,57 @@ const AddServiceModal = ({ isOpen, onClose, onSave, categories }) => {
     setIsLoading(true);
 
     try {
-      const selectedCategory = categories.find(cat => cat.slug === formData.category_slug);
-      
-      const newService = {
-        title: formData.title,
-        description: formData.description,
-        price_range: formData.price_range,
-        price_per_sqm: formData.price_per_sqm ? parseFloat(formData.price_per_sqm) : null,  // ✅ добавить
-        price_fixed: formData.price_fixed ? parseFloat(formData.price_fixed) : null,        // ✅ добавить
-        icon: formData.icon,
-        category_id: selectedCategory?.id || null
-      };
-      
-      console.log('Отправляем данные:', newService);
-      await onSave(newService);
-      
-      setFormData({
-        title: '',
-        description: '',
-        price_range: '',
-        price_per_sqm: '',   // ✅ сбросить
-        price_fixed: '',     // ✅ сбросить
-        icon: '',
-        category_id: null,
-        category_slug: 'architecture'
-      });
-      setSelectedFile(null);
-    } catch (error) {
-      console.error('Ошибка при создании:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+        const selectedCategory = categories.find(cat => cat.slug === formData.category_slug);
+        
+        // Создаем FormData для отправки файла
+        const submitData = new FormData();
+        submitData.append('title', formData.title);
+        submitData.append('description', formData.description);
+        submitData.append('price_range', formData.price_range || '');
+        submitData.append('price_per_sqm', formData.price_per_sqm ? parseFloat(formData.price_per_sqm) : '');
+        submitData.append('price_fixed', formData.price_fixed ? parseFloat(formData.price_fixed) : '');
+        submitData.append('icon', formData.icon || '📦');
+        submitData.append('category_id', selectedCategory?.id || '');
+        
+        if (selectedFile) {
+            submitData.append('image', selectedFile);
+        }
+        
+        // Отправляем FormData вместо JSON
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/services', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            body: submitData
+        });
 
+        if (response.ok) {
+            const newService = await response.json();
+            await onSave(newService);
+            
+            setFormData({
+                title: '',
+                description: '',
+                price_range: '',
+                price_per_sqm: '',
+                price_fixed: '',
+                icon: '',
+                category_id: null,
+                category_slug: 'architecture'
+            });
+            setSelectedFile(null);
+            onClose();
+        } else {
+            console.error('Ошибка при создании:', await response.text());
+        }
+    } catch (error) {
+        console.error('Ошибка при создании:', error);
+    } finally {
+        setIsLoading(false);
+    }
+};
   if (!isOpen) return null;
 
   return (
