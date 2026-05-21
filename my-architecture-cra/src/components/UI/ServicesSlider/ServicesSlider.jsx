@@ -200,43 +200,35 @@ const ServicesSlider = ({ isAdmin = false, onServicesUpdate }) => {
     }
   };
 
-  const getImageUrl = (service) => {
-    // Жестко задаем правильный URL API
-   const API_BASE_URL = 'https://my-architecture-api.onrender.com';
+const getImageUrl = (service) => {
+    const API_BASE_URL = 'https://my-architecture-api.onrender.com';
     
-    const cleanPath = (path) => {
-        if (!path) return null;
-        let cleaned = path;
-        if (cleaned.startsWith('/api/')) {
-            cleaned = cleaned.replace('/api', '');
+    // ✅ Вспомогательная функция: гарантирует корректный URL
+    const buildUrl = (rawPath) => {
+        if (!rawPath) return null;
+        if (rawPath.startsWith('http')) return rawPath;
+        
+        // Удаляем лишние префиксы, если есть
+        let path = rawPath;
+        if (path.startsWith('/api/')) {
+            path = path.replace('/api', '');
         }
-        if (cleaned.includes('/api/uploads')) {
-            cleaned = cleaned.replace('/api', '');
+        if (path.includes('/api/uploads')) {
+            path = path.replace('/api', '');
         }
-        return cleaned;  // ❌ Может вернуть "uploads/..." без ведущего слэша
+        
+        // ✅ КЛЮЧЕВОЕ: гарантируем ведущий слэш перед конкатенацией
+        const normalized = path.startsWith('/') ? path : `/${path}`;
+        
+        return `${API_BASE_URL}${normalized}`;
     };
     
-    // Обработка icon_path
-   if (service.icon_path) {
-        let cleanedPath = cleanPath(service.icon_path);
-        if (cleanedPath.startsWith('http')) {
-            return cleanedPath;
-        }
-        // ❌ ПРОБЛЕМА ЗДЕСЬ:
-        return `${API_BASE_URL}${cleanedPath}`;  
-        // Если cleanedPath = "uploads/services/2.png"
-        // Результат: "https://...onrender.comuploads/..." ❌
+    if (service.icon_path) {
+        return buildUrl(service.icon_path);
     }
     
-    // Обработка icon (если это не эмодзи)
     if (service.icon && !service.icon.match(/^[🏛️🪑📦🎨💰📋🛒👨‍💻👩‍🎨⚡📄🏗️🌟🏆📈🏅🎨💚]/)) {
-        let cleanedPath = cleanPath(service.icon);
-        // Если уже полный URL, возвращаем как есть
-        if (cleanedPath.startsWith('http')) {
-            return cleanedPath;
-        }
-        // Иначе добавляем базовый URL
-        return `${API_BASE_URL}${cleanedPath}`;
+        return buildUrl(service.icon);
     }
     
     return null;
