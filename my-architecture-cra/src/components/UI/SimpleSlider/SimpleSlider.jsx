@@ -18,16 +18,16 @@ const SimpleSlider = () => {
         try {
             setLoading(true);
             const response = await getAllProjects({ status: 'built' }, 1, 10);
-
+            
             console.log('SimpleSlider response:', response);
-
+            
             let projectsArray = [];
             if (response && response.success && response.projects) {
                 projectsArray = response.projects;
             } else if (response && response.projects) {
                 projectsArray = response.projects;
             }
-
+            
             setProjects(projectsArray);
         } catch (err) {
             console.error('Error loading projects:', err);
@@ -46,21 +46,24 @@ const SimpleSlider = () => {
     };
 
     const getImageUrl = (imagePath) => {
-        if (!imagePath) return placeholderImg;
-
-        // Если уже полный URL — возвращаем как есть
-        if (imagePath.startsWith('http')) return imagePath;
-
-        // ✅ Нормализуем путь: гарантируем ведущий слэш
-        const normalizedPath = imagePath.startsWith('/')
-            ? imagePath
-            : `/${imagePath}`;
-
-        // ✅ Используем константу для базы (удобно менять в одном месте)
-        const API_BASE_URL = 'https://my-architecture-api.onrender.com';
-
-        return `${API_BASE_URL}${normalizedPath}`;
-    };
+    console.log('🔍 getImageUrl получил:', {
+        значение: imagePath,
+        тип: typeof imagePath,
+        начинается_с_http: imagePath?.startsWith('http'),
+        начинается_с_slash: imagePath?.startsWith('/'),
+        длина: imagePath?.length
+    });
+    
+    if (!imagePath) return placeholderImg;
+    if (imagePath.startsWith('http')) return imagePath;
+    
+    const normalizedPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
+    const API_BASE_URL = 'https://my-architecture-api.onrender.com';
+    const result = `${API_BASE_URL}${normalizedPath}`;
+    
+    console.log('✅ getImageUrl вернул:', result);
+    return result;
+};
 
     if (loading) {
         return (
@@ -92,7 +95,7 @@ const SimpleSlider = () => {
     const getVisibleSlides = () => {
         const slides = [];
         const total = projects.length;
-
+        
         for (let i = -1; i <= 1; i++) {
             let index = (currentSlide + i + total) % total;
             let position = i === 0 ? 'center' : (i === -1 ? 'left' : 'right');
@@ -109,17 +112,17 @@ const SimpleSlider = () => {
                 <button className="slider-nav prev" onClick={prevSlide}>
                     ‹
                 </button>
-
+                
                 <div className="slider-track">
                     {visibleSlides.map((project, idx) => (
-                        <div
-                            key={`${project.id}-${idx}`}
+                        <div 
+                            key={`${project.id}-${idx}`} 
                             className={`slider-card ${project.position}`}
                         >
                             <div className="card-inner">
                                 <div className="card-image">
-                                    <img
-                                        src={getImageUrl(project.main_image || project.cover_image)}
+                                    <img 
+                                        src={getImageUrl(project.main_image || project.cover_image)} 
                                         alt={project.title}
                                         onError={(e) => {
                                             e.target.onerror = null; // Предотвращаем зацикливание
@@ -149,12 +152,12 @@ const SimpleSlider = () => {
                         </div>
                     ))}
                 </div>
-
+                
                 <button className="slider-nav next" onClick={nextSlide}>
                     ›
                 </button>
             </div>
-
+            
             <div className="slider-dots">
                 {projects.map((_, idx) => (
                     <button
