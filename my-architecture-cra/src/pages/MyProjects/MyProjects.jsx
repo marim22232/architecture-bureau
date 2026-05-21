@@ -215,7 +215,7 @@ const MyProjects = () => {
                                 <div className="project-image">
                                     {project.main_image ? (
                                         <img
-                                            src={project.main_image || '/placeholder-project.jpg'}
+                                            src={project.main_image.startsWith('http') ? project.main_image : `https://my-architecture-api.onrender.com${project.main_image}`}
                                             alt={project.title}
                                             onError={(e) => {
                                                 e.target.src = '/placeholder-project.jpg';

@@ -30,7 +30,7 @@ const MyProjectsModal = ({ isOpen, onClose }) => {
             const result = await profileAPI.getMyProjects();
             if (result.success) {
                 setProjects(result.projects);
-                
+
                 // Подсчет статистики
                 const newStats = {
                     total: result.projects.length,
@@ -72,7 +72,7 @@ const MyProjectsModal = ({ isOpen, onClose }) => {
         <div className="my-projects-modal-overlay" onClick={onClose}>
             <div className="my-projects-modal-container" onClick={(e) => e.stopPropagation()}>
                 <button className="my-projects-modal-close" onClick={onClose}>✕</button>
-                
+
                 <div className="my-projects-modal-header">
                     <div className="header-icon">
                         <Icons.Folder size={32} color="#3a5a6a" />
@@ -87,37 +87,37 @@ const MyProjectsModal = ({ isOpen, onClose }) => {
 
                 {/* Статистика */}
                 {/* Statistics Cards */}
-<div className="stats-grid">
-    <div className="stat-card">
-        <div className="stat-value">{stats.total}</div>
-        <div className="stat-label">Всего проектов</div>
-        <div className="stat-icon">📊</div>
-    </div>
-    <div className="stat-card stat-built">
-        <div className="stat-value">{stats.built}</div>
-        <div className="stat-label">Построено</div>
-        <div className="stat-icon">✅</div>
-    </div>
-    <div className="stat-card stat-progress">
-        <div className="stat-value">{stats.inProgress}</div>
-        <div className="stat-label">В процессе</div>
-        <div className="stat-icon">🔄</div>
-    </div>
-    <div className="stat-card stat-concept">
-        <div className="stat-value">{stats.concept}</div>
-        <div className="stat-label">Концепции</div>
-        <div className="stat-icon">💡</div>
-    </div>
-    <div className="stat-card stat-area">
-        <div className="stat-value">
-            {typeof stats.totalArea === 'number' 
-                ? stats.totalArea.toFixed(0) 
-                : Number(stats.totalArea || 0).toFixed(0)}
-        </div>
-        <div className="stat-label">Общая площадь, м²</div>
-        <div className="stat-icon">📐</div>
-    </div>
-</div>
+                <div className="stats-grid">
+                    <div className="stat-card">
+                        <div className="stat-value">{stats.total}</div>
+                        <div className="stat-label">Всего проектов</div>
+                        <div className="stat-icon">📊</div>
+                    </div>
+                    <div className="stat-card stat-built">
+                        <div className="stat-value">{stats.built}</div>
+                        <div className="stat-label">Построено</div>
+                        <div className="stat-icon">✅</div>
+                    </div>
+                    <div className="stat-card stat-progress">
+                        <div className="stat-value">{stats.inProgress}</div>
+                        <div className="stat-label">В процессе</div>
+                        <div className="stat-icon">🔄</div>
+                    </div>
+                    <div className="stat-card stat-concept">
+                        <div className="stat-value">{stats.concept}</div>
+                        <div className="stat-label">Концепции</div>
+                        <div className="stat-icon">💡</div>
+                    </div>
+                    <div className="stat-card stat-area">
+                        <div className="stat-value">
+                            {typeof stats.totalArea === 'number'
+                                ? stats.totalArea.toFixed(0)
+                                : Number(stats.totalArea || 0).toFixed(0)}
+                        </div>
+                        <div className="stat-label">Общая площадь, м²</div>
+                        <div className="stat-icon">📐</div>
+                    </div>
+                </div>
 
                 {/* Список проектов */}
                 <div className="my-projects-modal-content">
@@ -136,15 +136,15 @@ const MyProjectsModal = ({ isOpen, onClose }) => {
                     ) : (
                         <div className="projects-grid">
                             {projects.map(project => (
-                                <div 
-                                    key={project.id} 
+                                <div
+                                    key={project.id}
                                     className="project-card"
                                     onClick={() => setSelectedProject(project)}
                                 >
                                     <div className="project-image">
                                         {project.main_image ? (
-                                            <img 
-                                                src={project.main_image ? project.main_image : '/placeholder-project.jpg'}
+                                            <img
+                                                src={project.main_image.startsWith('http') ? project.main_image : `https://my-architecture-api.onrender.com${project.main_image}`}
                                                 alt={project.title}
                                                 onError={(e) => {
                                                     e.target.src = '/placeholder-project.jpg';
@@ -162,35 +162,35 @@ const MyProjectsModal = ({ isOpen, onClose }) => {
                                     <div className="project-info">
                                         <h4 className="project-title">{project.title}</h4>
                                         <div className="project-details">
-    {project.location && (
-        <div className="project-detail">
-            <Icons.MapPin size={14} color="#6c8a9a" />
-            <span>{project.location}</span>
-        </div>
-    )}
-    {project.project_year && (
-        <div className="project-detail">
-            <Icons.Calendar size={14} color="#6c8a9a" />
-            <span>{project.project_year}</span>
-        </div>
-    )}
-    {project.area && (
-        <div className="project-detail">
-            <Icons.Ruler size={14} color="#6c8a9a" />
-            <span>{Number(project.area).toFixed(0)} м²</span>
-        </div>
-    )}
-    {project.team_role && (
-        <div className="project-detail role">
-            <Icons.User size={14} color="#6c8a9a" />
-            <span>Роль: {project.team_role}</span>
-        </div>
-    )}
-</div>
+                                            {project.location && (
+                                                <div className="project-detail">
+                                                    <Icons.MapPin size={14} color="#6c8a9a" />
+                                                    <span>{project.location}</span>
+                                                </div>
+                                            )}
+                                            {project.project_year && (
+                                                <div className="project-detail">
+                                                    <Icons.Calendar size={14} color="#6c8a9a" />
+                                                    <span>{project.project_year}</span>
+                                                </div>
+                                            )}
+                                            {project.area && (
+                                                <div className="project-detail">
+                                                    <Icons.Ruler size={14} color="#6c8a9a" />
+                                                    <span>{Number(project.area).toFixed(0)} м²</span>
+                                                </div>
+                                            )}
+                                            {project.team_role && (
+                                                <div className="project-detail role">
+                                                    <Icons.User size={14} color="#6c8a9a" />
+                                                    <span>Роль: {project.team_role}</span>
+                                                </div>
+                                            )}
+                                        </div>
                                         {project.description && (
                                             <div className="project-description">
-                                                {project.description.length > 100 
-                                                    ? `${project.description.substring(0, 100)}...` 
+                                                {project.description.length > 100
+                                                    ? `${project.description.substring(0, 100)}...`
                                                     : project.description}
                                             </div>
                                         )}
@@ -206,10 +206,10 @@ const MyProjectsModal = ({ isOpen, onClose }) => {
                     <div className="project-detail-modal-overlay" onClick={() => setSelectedProject(null)}>
                         <div className="project-detail-modal" onClick={(e) => e.stopPropagation()}>
                             <button className="detail-modal-close" onClick={() => setSelectedProject(null)}>✕</button>
-                            
+
                             <div className="detail-modal-image">
                                 {selectedProject.main_image ? (
-                                    <img 
+                                    <img
                                         src={selectedProject.main_image ? selectedProject.main_image : '/placeholder-project.jpg'}
                                         alt={selectedProject.title}
                                     />
@@ -219,36 +219,36 @@ const MyProjectsModal = ({ isOpen, onClose }) => {
                                     </div>
                                 )}
                             </div>
-                            
+
                             <div className="detail-modal-content">
                                 <Typography variant="h4" weight="bold" color="dark">
                                     {selectedProject.title}
                                 </Typography>
                                 <div className="detail-modal-info">
-    <div className="detail-info-item">
-        <Icons.MapPin size={16} color="#3a5a6a" />
-        <span>{selectedProject.location || 'Локация не указана'}</span>
-    </div>
-    <div className="detail-info-item">
-        <Icons.Calendar size={16} color="#3a5a6a" />
-        <span>{selectedProject.project_year || 'Год не указан'}</span>
-    </div>
-    <div className="detail-info-item">
-        <Icons.Ruler size={16} color="#3a5a6a" />
-        <span>{selectedProject.area ? `${Number(selectedProject.area).toFixed(0)} м²` : '0 м²'}</span>
-    </div>
-    <div className="detail-info-item">
-        <div className={getStatusClass(selectedProject.status)}>
-            {getStatusText(selectedProject.status)}
-        </div>
-    </div>
-    {selectedProject.team_role && (
-        <div className="detail-info-item role-highlight">
-            <Icons.User size={16} color="#3a5a6a" />
-            <span><strong>Моя роль:</strong> {selectedProject.team_role}</span>
-        </div>
-    )}
-</div>
+                                    <div className="detail-info-item">
+                                        <Icons.MapPin size={16} color="#3a5a6a" />
+                                        <span>{selectedProject.location || 'Локация не указана'}</span>
+                                    </div>
+                                    <div className="detail-info-item">
+                                        <Icons.Calendar size={16} color="#3a5a6a" />
+                                        <span>{selectedProject.project_year || 'Год не указан'}</span>
+                                    </div>
+                                    <div className="detail-info-item">
+                                        <Icons.Ruler size={16} color="#3a5a6a" />
+                                        <span>{selectedProject.area ? `${Number(selectedProject.area).toFixed(0)} м²` : '0 м²'}</span>
+                                    </div>
+                                    <div className="detail-info-item">
+                                        <div className={getStatusClass(selectedProject.status)}>
+                                            {getStatusText(selectedProject.status)}
+                                        </div>
+                                    </div>
+                                    {selectedProject.team_role && (
+                                        <div className="detail-info-item role-highlight">
+                                            <Icons.User size={16} color="#3a5a6a" />
+                                            <span><strong>Моя роль:</strong> {selectedProject.team_role}</span>
+                                        </div>
+                                    )}
+                                </div>
                                 {selectedProject.description && (
                                     <div className="detail-modal-description">
                                         <Typography variant="body" weight="bold">Описание проекта:</Typography>
