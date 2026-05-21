@@ -383,25 +383,6 @@ const ProjectPage = () => {
                                                 )}
                                             </div>
 
-                                            {/* Контакты */}
-                                            {(member.email || member.phone || member.telegram || member.linkedin) && (
-                                                <div className="team-contacts">
-                                                    <Typography variant="small" weight="semibold" color="dark">
-                                                        Контакты:
-                                                    </Typography>
-                                                    {member.email && (
-                                                        <a href={`mailto:${member.email}`} className="team-contact-link">
-                                                            <Icons.Email size={14} /> {member.email}
-                                                        </a>
-                                                    )}
-                                                    {member.phone && (
-                                                        <a href={`tel:${member.phone}`} className="team-contact-link">
-                                                            <Icons.Phone size={14} /> {member.phone}
-                                                        </a>
-                                                    )}
-                                                </div>
-                                            )}
-
                                             {/* Образование и награды */}
                                             {member.education && (
                                                 <div className="team-education">

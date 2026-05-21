@@ -152,14 +152,6 @@
     color: var(--primary);
 }
 
-/* Контакты */
-.team-contacts {
-    display: flex;
-    gap: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--bg-light);
-}
-
 .contact-link {
     color: var(--accent);
     text-decoration: none;
@@ -217,27 +209,255 @@
     border-top: 1px solid var(--bg-light);
 }
 
-/* Адаптивность */
+/* ============================================ */
+/* АДАПТИВНОСТЬ ДЛЯ ТЕЛЕФОНОВ */
+/* ============================================ */
+
+/* Планшеты (768px - 1024px) */
+@media (max-width: 1024px) and (min-width: 769px) {
+    .team-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+    
+    .team-list-container {
+        padding: 1.5rem 1rem;
+    }
+    
+    .team-photo {
+        height: 260px;
+    }
+}
+
+/* Телефоны (до 768px) */
 @media (max-width: 768px) {
+    .team-list-container {
+        padding: 1rem 0.75rem;
+    }
+    
+    /* Фильтры - горизонтальная прокрутка для телефонов */
+    .team-filters {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        justify-content: flex-start;
+        gap: 0.6rem;
+        margin-bottom: 2rem;
+        padding-bottom: 0.5rem;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+    }
+    
+    .team-filters::-webkit-scrollbar {
+        height: 3px;
+    }
+    
+    .team-filters::-webkit-scrollbar-track {
+        background: var(--light-gray);
+        border-radius: 10px;
+    }
+    
+    .team-filters::-webkit-scrollbar-thumb {
+        background: var(--accent);
+        border-radius: 10px;
+    }
+    
+    .filter-btn {
+        flex-shrink: 0;
+        padding: 0.5rem 1rem;
+        font-size: 0.75rem;
+        white-space: nowrap;
+    }
+    
+    /* Сетка - одна колонка */
     .team-grid {
         grid-template-columns: 1fr;
-        gap: 1.5rem;
+        gap: 1.25rem;
+    }
+    
+    /* Карточка */
+    .team-card {
+        border-radius: 20px;
+    }
+    
+    .team-card:hover {
+        transform: translateY(-3px);
+    }
+    
+    /* Фото */
+    .team-photo {
+        height: 220px;
+    }
+    
+    .photo-placeholder span {
+        font-size: 3.5rem;
+    }
+    
+    .team-lead-badge {
+        top: 0.75rem;
+        right: 0.75rem;
+        padding: 0.2rem 0.6rem;
+        font-size: 0.65rem;
+    }
+    
+    /* Информация */
+    .team-info {
+        padding: 1.2rem;
+    }
+    
+    .team-name {
+        font-size: 1.1rem;
+        margin-bottom: 0.2rem;
+    }
+    
+    .team-position {
+        font-size: 0.8rem;
+    }
+    
+    .team-specialization {
+        font-size: 0.7rem;
+        padding: 0.15rem 0.7rem;
+        margin-bottom: 0.8rem;
+    }
+    
+    .team-bio {
+        font-size: 0.8rem;
+        line-height: 1.4;
+        margin-bottom: 0.8rem;
+    }
+    
+    /* Бейджи статистики */
+    .team-stats {
+        gap: 0.4rem;
+    }
+    
+    .stat-badge {
+        font-size: 0.65rem;
+        padding: 0.15rem 0.5rem;
+    }
+    
+    /* Футер со статистикой */
+    .team-stats-footer {
+        margin-top: 2rem;
+        padding-top: 1rem;
+    }
+    
+    .team-stats-footer p {
+        font-size: 0.8rem;
+    }
+    
+    /* Состояния загрузки/ошибки */
+    .team-loading, .team-error, .team-empty {
+        padding: 2rem 1rem;
+    }
+    
+    .spinner {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .retry-btn {
+        padding: 0.5rem 1.2rem;
+        font-size: 0.85rem;
+    }
+}
+
+/* Очень маленькие телефоны (до 480px) */
+@media (max-width: 480px) {
+    .team-list-container {
+        padding: 0.75rem 0.5rem;
     }
     
     .team-filters {
         gap: 0.5rem;
+        margin-bottom: 1.5rem;
     }
     
     .filter-btn {
-        padding: 0.4rem 1rem;
-        font-size: 0.75rem;
+        padding: 0.4rem 0.9rem;
+        font-size: 0.7rem;
     }
     
     .team-photo {
-        height: 240px;
+        height: 200px;
     }
     
     .team-info {
         padding: 1rem;
+    }
+    
+    .team-name {
+        font-size: 1rem;
+    }
+    
+    .team-position {
+        font-size: 0.75rem;
+    }
+    
+    .team-specialization {
+        font-size: 0.65rem;
+        padding: 0.12rem 0.6rem;
+    }
+    
+    .team-bio {
+        font-size: 0.75rem;
+    }
+    
+    .stat-badge {
+        font-size: 0.6rem;
+        padding: 0.12rem 0.45rem;
+    }
+    
+    .team-lead-badge {
+        font-size: 0.6rem;
+        padding: 0.15rem 0.5rem;
+    }
+    
+    .photo-placeholder span {
+        font-size: 3rem;
+    }
+}
+
+/* Альбомная ориентация на телефонах */
+@media (max-width: 768px) and (orientation: landscape) {
+    .team-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    .team-photo {
+        height: 180px;
+    }
+    
+    .team-info {
+        padding: 0.8rem;
+    }
+    
+    .team-name {
+        font-size: 0.95rem;
+    }
+    
+    .team-bio {
+        display: none; /* Скрываем био в ландшафтном режиме для экономии места */
+    }
+}
+
+/* Тач-устройства - убираем hover эффекты */
+@media (hover: none) and (pointer: coarse) {
+    .team-card:hover {
+        transform: none;
+    }
+    
+    .team-card:hover .team-photo img {
+        transform: none;
+    }
+    
+    .filter-btn:hover {
+        transform: none;
+    }
+    
+    .contact-link:hover {
+        transform: none;
+        background: var(--bg-light);
+        color: var(--accent);
     }
 }

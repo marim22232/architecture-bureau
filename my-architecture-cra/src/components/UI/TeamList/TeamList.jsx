@@ -134,18 +134,6 @@ const TeamList = () => {
                                     <span className="stat-badge">⭐ {member.rating}</span>
                                 )}
                             </div>
-                            <div className="team-contacts">
-                                {member.email && (
-                                    <a href={`mailto:${member.email}`} className="contact-link" title={member.email}>
-                                        📧
-                                    </a>
-                                )}
-                                {member.phone && (
-                                    <a href={`tel:${member.phone}`} className="contact-link" title={member.phone}>
-                                        📞
-                                    </a>
-                                )}
-                            </div>
                         </div>
                     </div>
                 ))}
