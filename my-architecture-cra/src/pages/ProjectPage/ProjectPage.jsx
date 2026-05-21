@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getFullProjectBySlug } from '../../services/api';
-
+import { getImageUrl } from '../../utils/imageUtils.js';
 
 import Typography from '../../components/UI/Typography/Typography.jsx';      // ✅ правильно
 import MyButton from '../../components/UI/MyButton/MyButton.jsx';            // ✅ правильно
@@ -185,7 +185,7 @@ const ProjectPage = () => {
                             )}
 
                             <div className="gallery-image">
-                                <img src={allImages[activeImage].image_url} alt={project.title} />
+                            <img src={getImageUrl(allImages[activeImage].image_url)} alt={project.title} />
                             </div>
 
                             {allImages.length > 1 && (
@@ -203,7 +203,7 @@ const ProjectPage = () => {
                                         className={`thumbnail ${idx === activeImage ? 'active' : ''}`}
                                         onClick={() => setActiveImage(idx)}
                                     >
-                                        <img src={img.image_url} alt="" />
+                                    <img src={getImageUrl(img.image_url)} alt="" />
                                     </button>
                                 ))}
                             </div>
@@ -338,8 +338,7 @@ const ProjectPage = () => {
                                     <div key={member.id} className="team-card">
                                         <div className="team-photo">
                                             {member.photo ? (
-                                                <img src={member.photo} alt={member.name} />
-                                            ) : (
+                                            <img src={getImageUrl(member.photo)} alt={member.name} />) : (
                                                 <div className="team-avatar">
                                                     {member.name?.charAt(0) || '👤'}
                                                 </div>

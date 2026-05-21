@@ -4,6 +4,7 @@ import { getAllProjects, getProjectTypes } from '../../services/api';
 import Typography from '../../components/UI/Typography/Typography.jsx';
 import MyButton from '../../components/UI/MyButton/MyButton.jsx';
 import './ProjectsPage.css';
+import { getImageUrl } from '../../utils/imageUtils.js';
 import Icons from '../../components/UI/Icons/Icons.jsx';
 import Loader from '../../components/UI/Loader/Loader.jsx';
 const ProjectsPage = () => {
@@ -362,12 +363,12 @@ const ProjectCard = ({ project }) => {
                     </div>
                 )}
                 <img
-                    src={project.main_image}
-                    alt={project.title}
-                    className={`project-image ${imageLoaded ? 'loaded' : ''}`}
-                    onLoad={() => setImageLoaded(true)}
-                    loading="lazy"
-                />
+    src={getImageUrl(project.main_image)}  // ← ИСПРАВЛЕНО
+    alt={project.title}
+    className={`project-image ${imageLoaded ? 'loaded' : ''}`}
+    onLoad={() => setImageLoaded(true)}
+    loading="lazy"
+/>
                 <div className="project-overlay">
                     <div className="overlay-content">
                         <Typography variant="small" color="white" className="overlay-year">
