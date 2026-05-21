@@ -860,7 +860,6 @@ const ProjectForm = ({ projectId, onSaved }) => {
                         </div>
 
                         {/* Показываем выбранного сотрудника для добавления */}
-                        {/* Показываем выбранного сотрудника для добавления */}
                         {selectedTeamMember && (
                             <div className="selected-to-add">
                                 <Typography variant="small" weight="medium">

@@ -144,7 +144,7 @@ const MyProjectsModal = ({ isOpen, onClose }) => {
                                     <div className="project-image">
                                         {project.main_image ? (
                                             <img 
-                                                src={`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}${project.main_image}`} 
+                                                src={project.main_image ? project.main_image : '/placeholder-project.jpg'}
                                                 alt={project.title}
                                                 onError={(e) => {
                                                     e.target.src = '/placeholder-project.jpg';
@@ -210,7 +210,7 @@ const MyProjectsModal = ({ isOpen, onClose }) => {
                             <div className="detail-modal-image">
                                 {selectedProject.main_image ? (
                                     <img 
-                                        src={`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}${selectedProject.main_image}`} 
+                                        src={selectedProject.main_image ? selectedProject.main_image : '/placeholder-project.jpg'}
                                         alt={selectedProject.title}
                                     />
                                 ) : (

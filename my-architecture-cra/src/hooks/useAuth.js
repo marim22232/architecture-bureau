@@ -9,7 +9,6 @@ export const useAuth = () => {
     const [user, setUser] = useState(null);
     const [error, setError] = useState(null);
 
-    // Проверка авторизации при загрузке
     useEffect(() => {
         const token = localStorage.getItem('token');
         const userRole = localStorage.getItem('userRole');

@@ -46,13 +46,15 @@ const SimpleSlider = () => {
     };
 
     const getImageUrl = (imagePath) => {
-        if (!imagePath) return placeholderImg;
-        if (imagePath.startsWith('http')) return imagePath;
-        if (imagePath.startsWith('/uploads')) {
-            return `http://localhost:5000${imagePath}`;
-        }
-        return placeholderImg;
-    };
+    if (!imagePath) return placeholderImg;
+    // Если уже полный URL (начинается с http), возвращаем как есть
+    if (imagePath.startsWith('http')) return imagePath;
+    // Если начинается с /uploads, добавляем базовый URL API
+    if (imagePath.startsWith('/uploads')) {
+        return `https://my-architecture-api.onrender.com${imagePath}`;
+    }
+    return placeholderImg;
+};
 
     if (loading) {
         return (

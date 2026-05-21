@@ -47,10 +47,13 @@ const ProjectsSlider = () => {
     }, []);
 
     const getImageUrl = (imagePath) => {
-        if (!imagePath) return '/images/placeholder.svg';
-        if (imagePath.startsWith('http')) return imagePath;
-        return `http://localhost:5000${imagePath}`;
-    };
+    if (!imagePath) return '/images/placeholder.svg';
+    if (imagePath.startsWith('http')) return imagePath;
+    if (imagePath.startsWith('/uploads')) {
+        return `https://my-architecture-api.onrender.com${imagePath}`;
+    }
+    return '/images/placeholder.svg';
+};
 
     if (loading) {
         return (
