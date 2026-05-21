@@ -1,32 +1,59 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 
 <head>
   <meta charset="utf-8" />
-  <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#000000" />
-  <meta name="description" content="Web site created using create-react-app" />
-  <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-  <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-  <title>Архитектурное бюро</title>
-
-  <!-- Подключение шрифтов Google Fonts -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  
+  <!-- Основные мета-теги -->
+  <title>Архитектурное бюро M&Y | Проектирование и архитектура</title>
+  <meta name="description" content="Архитектурное бюро M&Y — профессиональное проектирование жилых домов, коттеджей и общественных зданий. Индивидуальный подход и авторский надзор." />
+  <meta name="keywords" content="архитектурное бюро, проектирование домов, архитектор, дизайн интерьера, авторский надзор" />
+  <meta name="author" content="Архитектурное бюро M&Y" />
+  
+  <!-- PWA и иконки -->
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png" />
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#A08972" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="M&Y" />
+  
+  <!-- Open Graph для соцсетей -->
+  <meta property="og:title" content="Архитектурное бюро M&Y" />
+  <meta property="og:description" content="Профессиональное архитектурное проектирование" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="/og-image.jpg" />
+  <meta property="og:locale" content="ru_RU" />
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Архитектурное бюро M&Y" />
+  <meta name="twitter:description" content="Профессиональное архитектурное проектирование" />
+  <meta name="twitter:image" content="/og-image.jpg" />
+  
+  <!-- Шрифты (оптимизировано) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&family=Playfair+Display:wght@400;500;600;700;800&display=swap"
-    rel="stylesheet">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&family=TASA+Orbiter:wght@400..800&display=swap"
-    rel="stylesheet">
-
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&family=Playfair+Display:wght@400;500;600;700;800&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Preload критических ресурсов -->
+  <link rel="preload" href="/logo.svg" as="image" />
+  
+  <!-- CSP заголовки (если нужно) -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; font-src 'self' fonts.googleapis.com fonts.gstatic.com; style-src 'self' 'unsafe-inline' fonts.googleapis.com;" />
 </head>
 
 <body>
-  <noscript>You need to enable JavaScript to run this app.</noscript>
+  <noscript>
+    <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
+      <h2>Для работы сайта необходимо включить JavaScript</h2>
+      <p>Пожалуйста, включите JavaScript в настройках вашего браузера</p>
+    </div>
+  </noscript>
   <div id="root"></div>
 </body>
 
