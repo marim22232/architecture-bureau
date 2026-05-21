@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './TeamList.css';
 import Typography from '../../UI/Typography/Typography.jsx';
 import { getActiveTeam } from '../../../services/api';
-
+import { getImageUrl } from '../../../utils/imageUtils.js';
 const TeamList = () => {
     const [team, setTeam] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -89,8 +89,8 @@ const TeamList = () => {
                         <div className="team-photo">
                             {member.photo ? (
                                 <img 
-                                    src={member.photo ? (member.photo.startsWith('http') ? member.photo : `https://my-architecture-api.onrender.com${member.photo}`) : 'https://via.placeholder.com/300x300/A08972/FFFFFF?text=Фото'}
-                                    alt={member.name}
+                                src={getImageUrl(member.photo) || 'https://via.placeholder.com/300x300/A08972/FFFFFF?text=Фото'}    
+                                alt={member.name}
                                     onError={(e) => {
                                         e.target.onerror = null;
                                         e.target.src = 'https://via.placeholder.com/300x300/A08972/FFFFFF?text=Фото';

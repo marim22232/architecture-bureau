@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { profileAPI } from '../../services/api.js';
 import './MyProjects.css';
 
+import { getImageUrl } from '../../../utils/imageUtils.js';
 import Typography from '../../components/UI/Typography/Typography.jsx';
 import MyButton from '../../components/UI/MyButton/MyButton.jsx';
 import Icons from '../../components/UI/Icons/Icons.jsx'; // ← ВЕРНУЛ ИМПОРТ ИКОНОК
@@ -215,7 +216,7 @@ const MyProjects = () => {
                                 <div className="project-image">
                                     {project.main_image ? (
                                         <img
-                                            src={project.main_image.startsWith('http') ? project.main_image : `https://my-architecture-api.onrender.com${project.main_image}`}
+                                            src={getImageUrl(project.main_image)}
                                             alt={project.title}
                                             onError={(e) => {
                                                 e.target.src = '/placeholder-project.jpg';
@@ -281,8 +282,11 @@ const MyProjects = () => {
                         <div className="detail-modal-image">
                             {selectedProject.main_image ? (
                                 <img
-                                    src={selectedProject.main_image || '/placeholder-project.jpg'}
+                                    src={getImageUrl(selectedProject.main_image)}  // ← ИСПРАВЛЕНО
                                     alt={selectedProject.title}
+                                    onError={(e) => {
+                                        e.target.src = '/placeholder-project.jpg';
+                                    }}
                                 />
                             ) : (
                                 <div className="no-image-large">
