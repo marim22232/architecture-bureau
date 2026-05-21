@@ -202,36 +202,41 @@ const ServicesSlider = ({ isAdmin = false, onServicesUpdate }) => {
 
   const getImageUrl = (service) => {
     // Жестко задаем правильный URL API
-    const API_BASE_URL = 'https://my-architecture-api.onrender.com';
+   const API_BASE_URL = 'https://my-architecture-api.onrender.com';
+    
+    const cleanPath = (path) => {
+        if (!path) return null;
+        let cleaned = path;
+        if (cleaned.startsWith('/api/')) {
+            cleaned = cleaned.replace('/api', '');
+        }
+        if (cleaned.includes('/api/uploads')) {
+            cleaned = cleaned.replace('/api', '');
+        }
+        return cleaned;  // ❌ Может вернуть "uploads/..." без ведущего слэша
+    };
     
     // Обработка icon_path
-    if (service.icon_path) {
-        let path = service.icon_path;
-        // Убираем лишний /api если он есть
-        if (path.startsWith('/api/uploads')) {
-            path = path.replace('/api', '');
+   if (service.icon_path) {
+        let cleanedPath = cleanPath(service.icon_path);
+        if (cleanedPath.startsWith('http')) {
+            return cleanedPath;
         }
-        // Если уже полный URL, возвращаем как есть
-        if (path.startsWith('http')) {
-            return path;
-        }
-        // Иначе добавляем базовый URL
-        return `${API_BASE_URL}${path}`;
+        // ❌ ПРОБЛЕМА ЗДЕСЬ:
+        return `${API_BASE_URL}${cleanedPath}`;  
+        // Если cleanedPath = "uploads/services/2.png"
+        // Результат: "https://...onrender.comuploads/..." ❌
     }
     
     // Обработка icon (если это не эмодзи)
     if (service.icon && !service.icon.match(/^[🏛️🪑📦🎨💰📋🛒👨‍💻👩‍🎨⚡📄🏗️🌟🏆📈🏅🎨💚]/)) {
-        let path = service.icon;
-        // Убираем лишний /api если он есть
-        if (path.startsWith('/api/uploads')) {
-            path = path.replace('/api', '');
-        }
+        let cleanedPath = cleanPath(service.icon);
         // Если уже полный URL, возвращаем как есть
-        if (path.startsWith('http')) {
-            return path;
+        if (cleanedPath.startsWith('http')) {
+            return cleanedPath;
         }
         // Иначе добавляем базовый URL
-        return `${API_BASE_URL}${path}`;
+        return `${API_BASE_URL}${cleanedPath}`;
     }
     
     return null;
