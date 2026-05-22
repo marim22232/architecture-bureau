@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { profileAPI } from '../../services/api.js';
 import { useNavigate } from 'react-router-dom';
 import './MyProjectsNew.css';
-
+import { getImageUrl } from '../../../utils/imageUtils.js';
 import Typography from '../../components/UI/Typography/Typography.jsx';
 import MyButton from '../../components/UI/MyButton/MyButton.jsx';
 import Icons from '../../components/UI/Icons/Icons.jsx';
@@ -241,7 +241,7 @@ const MyProjectsNew = () => {
                             </button>
                             <div className="modal-image">
                                 {selectedProject.main_image && selectedProject.main_image.trim() !== '' ? (
-                                    <img src={selectedProject.main_image} alt={selectedProject.title} />
+                                    <img src={getImageUrl(selectedProject.main_image)} alt={selectedProject.title} />
                                 ) : (
                                     <div className="image-placeholder" style={{ height: '250px' }}>
                                         <Icons.Building size={48} color="#8ba5b5" />

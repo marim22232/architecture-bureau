@@ -233,17 +233,44 @@ const loadProjects = async () => {
                 {selectedProject && (
                     <div className="project-detail-modal-overlay" onClick={() => setSelectedProject(null)}>
                         <div className="project-detail-modal" onClick={(e) => e.stopPropagation()}>
-                            <button className="detail-modal-close" onClick={() => setSelectedProject(null)}>✕</button>
+                            <button className="detail-modal-close" onClick={() => setSelectedProject(null)}>
+                                <Icons.Close size={20} color="white" />
+                            </button>
 
                             <div className="detail-modal-image">
                                 {selectedProject.main_image ? (
                                     <img
-                                        src={getImageUrl(selectedProject.main_image)}  // ← ИСПРАВЛЕНО
+                                        src={getImageUrl(selectedProject.main_image)}  // ✅ ИСПРАВЛЕНО
                                         alt={selectedProject.title}
+                                        onLoad={() => console.log('✅ Детальное изображение загружено:', selectedProject.title)}
+                                        onError={(e) => {
+                                            console.error('❌ Ошибка загрузки детального изображения:', {
+                                                title: selectedProject.title,
+                                                url: getImageUrl(selectedProject.main_image),
+                                                main_image: selectedProject.main_image
+                                            });
+                                            e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjAiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4=';
+                                            e.target.style.objectFit = 'cover';
+                                        }}
+                                        style={{
+                                            width: '100%',
+                                            height: '300px',
+                                            objectFit: 'cover',
+                                            borderRadius: '8px 8px 0 0'
+                                        }}
                                     />
                                 ) : (
-                                    <div className="no-image-large">
+                                    <div className="no-image-large" style={{
+                                        width: '100%',
+                                        height: '300px',
+                                        backgroundColor: '#f5f5f5',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        borderRadius: '8px 8px 0 0'
+                                    }}>
                                         <Icons.Image size={64} color="#ccc" />
+                                        <span style={{ marginLeft: '12px', color: '#999' }}>Нет изображения</span>
                                     </div>
                                 )}
                             </div>
