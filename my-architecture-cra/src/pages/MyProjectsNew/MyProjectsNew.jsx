@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { profileAPI } from '../../services/api.js';
 import { useNavigate } from 'react-router-dom';
 import './MyProjectsNew.css';
-import { getImageUrl } from '../../../utils/imageUtils.js';
+import { getImageUrl } from '../../utils/imageUtils.js';
 import Typography from '../../components/UI/Typography/Typography.jsx';
 import MyButton from '../../components/UI/MyButton/MyButton.jsx';
 import Icons from '../../components/UI/Icons/Icons.jsx';
@@ -240,14 +240,48 @@ const MyProjectsNew = () => {
                                 <Icons.Close size={20} color="white" />
                             </button>
                             <div className="modal-image">
-                                {selectedProject.main_image && selectedProject.main_image.trim() !== '' ? (
-                                    <img src={getImageUrl(selectedProject.main_image)} alt={selectedProject.title} />
-                                ) : (
-                                    <div className="image-placeholder" style={{ height: '250px' }}>
-                                        <Icons.Building size={48} color="#8ba5b5" />
-                                    </div>
-                                )}
-                            </div>
+    {selectedProject.main_image && selectedProject.main_image.trim() !== '' ? (
+        <>
+            {/* 🔥 ЛОГИ для отладки */}
+            {console.log('🖼️ Modal Image Debug:', {
+                main_image: selectedProject.main_image,
+                imageUrl: getImageUrl(selectedProject.main_image),
+                type: typeof selectedProject.main_image
+            })}
+            
+            <img 
+                src={getImageUrl(selectedProject.main_image)} 
+                alt={selectedProject.title}
+                onLoad={() => console.log('✅ Изображение загружено:', selectedProject.title)}
+                onError={(e) => {
+                    console.error('❌ Ошибка загрузки изображения:', {
+                        title: selectedProject.title,
+                        main_image: selectedProject.main_image,
+                        generatedUrl: getImageUrl(selectedProject.main_image),
+                        status: e.target.naturalWidth === 0 ? '404' : 'error'
+                    });
+                    // Показываем placeholder при ошибке
+                    e.target.style.display = 'none';
+                    e.target.parentElement.innerHTML = `
+                        <div class="image-placeholder" style="height: 250px; display: flex; align-items: center; justify-content: center; background: #f5f5f5;">
+                            <span style="color: #999;">📷 Не удалось загрузить</span>
+                        </div>
+                    `;
+                }}
+                style={{
+                    width: '100%',
+                    height: '250px',
+                    objectFit: 'cover',
+                    borderRadius: '8px 8px 0 0'
+                }}
+            />
+        </>
+    ) : (
+        <div className="image-placeholder" style={{ height: '250px' }}>
+            <Icons.Building size={48} color="#8ba5b5" />
+        </div>
+    )}
+</div>
                             <div className="modal-content">
                                 <Typography variant="h2" color="dark" weight="bold">{selectedProject.title}</Typography>
                                 <div className="modal-details-grid">
