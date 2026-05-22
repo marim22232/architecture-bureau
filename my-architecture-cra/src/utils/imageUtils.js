@@ -1,16 +1,41 @@
 // src/utils/imageUtils.js
 const API_BASE_URL = 'https://my-architecture-api.onrender.com';
+// Или попробуйте: 
+// const API_BASE_URL = window.location.origin; // если API на том же домене
 
 export const getImageUrl = (imagePath) => {
-    // Пустая заглушка
-    if (!imagePath) return '/placeholder-project.jpg';
+    console.log('️ getImageUrl called with:', imagePath); // Для отладки
     
-    // Если уже полный URL
-    if (imagePath.startsWith('http')) return imagePath;
+    if (!imagePath) {
+        console.warn('⚠️ No image path provided');
+        return '/placeholder-project.jpg';
+    }
     
-    // Нормализуем путь: убираем лишние слеши в начале и добавляем один
-    let normalizedPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
+    if (imagePath.startsWith('http')) {
+        return imagePath;
+    }
     
-    // Возвращаем полный URL
-    return `${API_BASE_URL}${normalizedPath}`;
+    // Убираем ведущий слеш если есть, чтобы не было двойных слешей
+    const cleanPath = imagePath.replace(/^\/+/, '');
+    const fullUrl = `${API_BASE_URL}/${cleanPath}`;
+    
+    console.log('✅ Full image URL:', fullUrl);
+    return fullUrl;
+};
+
+// Добавьте функцию для проверки доступности изображения
+export const testImageUrl = async (imagePath) => {
+    const url = getImageUrl(imagePath);
+    try {
+        const response = await fetch(url, { method: 'HEAD' });
+        console.log('Image test:', {
+            url,
+            status: response.status,
+            contentType: response.headers.get('content-type')
+        });
+        return response.ok;
+    } catch (error) {
+        console.error('Image test failed:', error);
+        return false;
+    }
 };

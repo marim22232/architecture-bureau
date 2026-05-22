@@ -88,15 +88,15 @@ const ProjectsPage = () => {
 
     // Сброс всех фильтров
     const handleResetFilters = () => {
-    setFilters({
-        type: '',
-        year: '',
-        search: '',
-        status: 'built'
-    });
-    setSortBy('date_desc'); // сброс сортировки
-    setPagination(prev => ({ ...prev, page: 1 }));
-};
+        setFilters({
+            type: '',
+            year: '',
+            search: '',
+            status: 'built'
+        });
+        setSortBy('date_desc'); // сброс сортировки
+        setPagination(prev => ({ ...prev, page: 1 }));
+    };
 
     // Изменение страницы
     const handlePageChange = (newPage) => {
@@ -351,24 +351,43 @@ const ProjectsPage = () => {
 };
 
 // ========== КОМПОНЕНТ КАРТОЧКИ ПРОЕКТА ==========
+// В ProjectCard или другом компоненте
 const ProjectCard = ({ project }) => {
     const [imageLoaded, setImageLoaded] = useState(false);
+    const [imageError, setImageError] = useState(false);
+
+    const imageUrl = getImageUrl(project.main_image);
 
     return (
         <Link to={`/projects/${project.slug}`} className="project-card">
             <div className="project-image-wrapper">
-                {!imageLoaded && (
+                {!imageLoaded && !imageError && (
                     <div className="image-placeholder">
                         <Loader type="spinner" size="small" />
                     </div>
                 )}
-                <img
-    src={getImageUrl(project.main_image)}  // ← ИСПРАВЛЕНО
-    alt={project.title}
-    className={`project-image ${imageLoaded ? 'loaded' : ''}`}
-    onLoad={() => setImageLoaded(true)}
-    loading="lazy"
-/>
+
+                {imageError ? (
+                    <div className="image-error">
+                        <Icons.Image size={48} color="gray" />
+                        <Typography variant="small" color="gray">
+                            Нет изображения
+                        </Typography>
+                    </div>
+                ) : (
+                    <img
+                        src={imageUrl}
+                        alt={project.title}
+                        className={`project-image ${imageLoaded ? 'loaded' : ''}`}
+                        onLoad={() => setImageLoaded(true)}
+                        onError={(e) => {
+                            console.error('❌ Failed to load image:', imageUrl);
+                            setImageError(true);
+                            setImageLoaded(true);
+                        }}
+                        loading="lazy"
+                    />
+                )}
                 <div className="project-overlay">
                     <div className="overlay-content">
                         <Typography variant="small" color="white" className="overlay-year">
