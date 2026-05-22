@@ -1,37 +1,21 @@
 // src/utils/imageUtils.js
-
-// 🔥 Проверяем, что переменная окружения загрузилась
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://my-architecture-api.onrender.com';
-
-console.log('🌍 [imageUtils] API_BASE_URL:', API_BASE_URL);
-console.log('🌍 [imageUtils] process.env.REACT_APP_API_URL:', process.env.REACT_APP_API_URL);
+const API_BASE_URL = 'https://my-architecture-api.onrender.com';
 
 export const getImageUrl = (imagePath) => {
-    // 🔥 ЛОГИРУЕМ каждый вызов
-    console.log('🖼️ [getImageUrl] Вызов:', {
-        input: imagePath,
-        type: typeof imagePath,
-        startsWithHttp: imagePath?.startsWith('http'),
-        API_BASE_URL: API_BASE_URL
+    console.log('🔍 getImageUrl получил:', {
+        значение: imagePath,
+        тип: typeof imagePath,
+        начинается_с_http: imagePath?.startsWith('http'),
+        начинается_с_slash: imagePath?.startsWith('/'),
+        длина: imagePath?.length
     });
     
-    if (!imagePath) {
-        console.warn('⚠️ [getImageUrl] Пустой путь, возвращаем placeholder');
-        return '/placeholder-project.jpg';
-    }
+    if (!imagePath) return '/placeholder-project.jpg';
+    if (imagePath.startsWith('http')) return imagePath;
     
-    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-        console.log('✅ [getImageUrl] Уже полный URL, возвращаем как есть');
-        return imagePath;
-    }
+    const normalizedPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
+    const result = `${API_BASE_URL}${normalizedPath}`;
     
-    // Убираем ведущие слеши
-    const cleanPath = imagePath.replace(/^\/+/, '');
-    const fullUrl = `${API_BASE_URL}/${cleanPath}`;
-    
-    console.log('✅ [getImageUrl] Сгенерирован URL:', fullUrl);
-    return fullUrl;
+    console.log('✅ getImageUrl вернул:', result);
+    return result;
 };
-
-// Экспорт для проверки в консоли
-export const getApiBaseUrl = () => API_BASE_URL;
