@@ -2,56 +2,28 @@
 const API_BASE_URL = 'https://my-architecture-api.onrender.com';
 
 export const getImageUrl = (imagePath) => {
+    // 🔥 Проверка на null/undefined
+    if (!imagePath || imagePath === null || imagePath === undefined) {
+        console.warn('⚠️ getImageUrl: null путь');
+        // Вместо '/placeholder-project.jpg' используйте data URI:
+return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjAiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4=';
+    }
+    
+    // 🔥 Проверка что это строка
+    if (typeof imagePath !== 'string') {
+        console.error('❌ imagePath не строка:', typeof imagePath, imagePath);
+        // Вместо '/placeholder-project.jpg' используйте data URI:
+return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjAiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4=';
+    }
+    
     console.log('🔍 getImageUrl получил:', {
         значение: imagePath,
-        тип: typeof imagePath
+        тип: typeof imagePath,
+        начинается_с_http: imagePath?.startsWith('http'),
     });
     
-    // ✅ ОБРАБОТКА ОБЪЕКТА
-    if (imagePath && typeof imagePath === 'object') {
-        console.log('⚠️ Это объект, пытаемся извлечь URL');
-        
-        // Пробуем разные варианты:
-        const possibleUrls = [
-            imagePath.url,
-            imagePath.image_url,
-            imagePath.src,
-            imagePath.path,
-            imagePath.main_image
-        ];
-        
-        for (const url of possibleUrls) {
-            if (url && typeof url === 'string') {
-                console.log(`✅ Нашли URL в поле: ${url}`);
-                imagePath = url;
-                break;
-            }
-        }
-        
-        // Если не нашли URL
-        if (typeof imagePath !== 'string') {
-            console.error('❌ Не удалось извлечь URL из объекта:', imagePath);
-            return '/placeholder-project.jpg';
-        }
-    }
+    if (imagePath.startsWith('http')) return imagePath;
     
-    // Если всё еще не строка
-    if (typeof imagePath !== 'string') {
-        console.error('❌ imagePath не является строкой:', imagePath);
-        return '/placeholder-project.jpg';
-    }
-    
-    // Пустая строка
-    if (!imagePath || imagePath.trim() === '') {
-        return '/placeholder-project.jpg';
-    }
-    
-    // Полный URL
-    if (imagePath.startsWith('http')) {
-        return imagePath;
-    }
-    
-    // Относительный путь
     const normalizedPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
     const result = `${API_BASE_URL}${normalizedPath}`;
     

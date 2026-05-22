@@ -73,12 +73,24 @@ app.use(notFound);
 
 // Обработчик ошибок
 app.use(errorHandler);
+// CORS - расширенная настройка
+app.use(cors({
+    origin: [
+        'https://architecture-bureau-tcn4-ngfdi2za2.vercel.app',
+        'https://architecture-bureau-tcn4.vercel.app',
+        'http://localhost:3000',
+        '*'  // Для всех доменов
+    ],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'HEAD'],
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// Статические файлы с CORS
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
-    setHeaders: (res, path, stat) => {
-        // 🔥 Добавляем CORS заголовки для изображений
+    setHeaders: (res) => {
         res.set('Access-Control-Allow-Origin', '*');
-        res.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
-        res.set('Cache-Control', 'public, max-age=31536000, immutable');
+        res.set('Cache-Control', 'public, max-age=31536000');
     }
 }));
 export default app;
