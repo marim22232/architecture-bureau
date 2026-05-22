@@ -1,29 +1,37 @@
 // src/utils/imageUtils.js
-const API_BASE_URL = 'https://my-architecture-api.onrender.com';
+
+// 🔥 Проверяем, что переменная окружения загрузилась
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://my-architecture-api.onrender.com';
+
+console.log('🌍 [imageUtils] API_BASE_URL:', API_BASE_URL);
+console.log('🌍 [imageUtils] process.env.REACT_APP_API_URL:', process.env.REACT_APP_API_URL);
 
 export const getImageUrl = (imagePath) => {
-    console.log('🖼️ getImageUrl called with:', imagePath); // Для отладки
+    // 🔥 ЛОГИРУЕМ каждый вызов
+    console.log('🖼️ [getImageUrl] Вызов:', {
+        input: imagePath,
+        type: typeof imagePath,
+        startsWithHttp: imagePath?.startsWith('http'),
+        API_BASE_URL: API_BASE_URL
+    });
     
-    // Пустая заглушка
     if (!imagePath) {
-        console.warn('⚠️ No image path provided');
+        console.warn('⚠️ [getImageUrl] Пустой путь, возвращаем placeholder');
         return '/placeholder-project.jpg';
     }
     
-    // Если уже полный URL (начинается с http:// или https://)
     if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+        console.log('✅ [getImageUrl] Уже полный URL, возвращаем как есть');
         return imagePath;
     }
     
-    // Убираем ведущий слеш, чтобы не было двойных
+    // Убираем ведущие слеши
     const cleanPath = imagePath.replace(/^\/+/, '');
-    
-    // Формируем полный URL
     const fullUrl = `${API_BASE_URL}/${cleanPath}`;
     
-    console.log('✅ Generated URL:', fullUrl);
+    console.log('✅ [getImageUrl] Сгенерирован URL:', fullUrl);
     return fullUrl;
 };
 
-// Экспорт для отладки
+// Экспорт для проверки в консоли
 export const getApiBaseUrl = () => API_BASE_URL;
