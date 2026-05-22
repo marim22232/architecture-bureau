@@ -25,29 +25,29 @@ const MyProjectsModal = ({ isOpen, onClose }) => {
         }
     }, [isOpen]);
 
-    const loadProjects = async () => {
-        setIsLoading(true);
-        try {
-            const result = await profileAPI.getMyProjects();
-            if (result.success) {
-                setProjects(result.projects);
-
-                // Подсчет статистики
-                const newStats = {
-                    total: result.projects.length,
-                    built: result.projects.filter(p => p.status === 'built').length,
-                    inProgress: result.projects.filter(p => p.status === 'in_progress').length,
-                    concept: result.projects.filter(p => p.status === 'concept').length,
-                    totalArea: result.projects.reduce((sum, p) => sum + (p.area || 0), 0)
-                };
-                setStats(newStats);
-            }
-        } catch (error) {
-            console.error('Ошибка загрузки проектов:', error);
-        } finally {
-            setIsLoading(false);
+const loadProjects = async () => {
+    setIsLoading(true);
+    try {
+        const result = await profileAPI.getMyProjects();
+        console.log('📦 MyProjectsModal result:', result);
+        
+        if (result.success) {
+            console.log('📁 Проекты:', result.projects.map(p => ({
+                id: p.id,
+                title: p.title,
+                main_image: p.main_image,
+                hasImage: !!p.main_image
+            })));
+            
+            setProjects(result.projects);
+            // ... остальной код
         }
-    };
+    } catch (error) {
+        console.error('Ошибка загрузки проектов:', error);
+    } finally {
+        setIsLoading(false);
+    }
+};
 
     const getStatusText = (status) => {
         const statusMap = {
@@ -143,23 +143,50 @@ const MyProjectsModal = ({ isOpen, onClose }) => {
                                     onClick={() => setSelectedProject(project)}
                                 >
                                     <div className="project-image">
-                                        {project.main_image ? (
-                                            <img
-                                                src={getImageUrl(project.main_image)}
-                                                alt={project.title}
-                                                onError={(e) => {
-                                                    e.target.src = '/placeholder-project.jpg';
-                                                }}
-                                            />
-                                        ) : (
-                                            <div className="no-image">
-                                                <Icons.Image size={32} color="#ccc" />
-                                            </div>
-                                        )}
-                                        <div className={getStatusClass(project.status)}>
-                                            {getStatusText(project.status)}
-                                        </div>
-                                    </div>
+    {project.main_image ? (
+        <>
+            <img
+                src={getImageUrl(project.main_image)}
+                alt={project.title}
+                onLoad={() => console.log('✅ Изображение загружено:', project.title)}
+                onError={(e) => {
+                    console.error('❌ Ошибка загрузки:', {
+                        title: project.title,
+                        url: getImageUrl(project.main_image),
+                        main_image: project.main_image
+                    });
+                    // 🔥 Используем data URI вместо файла
+                    e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjAiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4=';
+                    e.target.style.display = 'block';
+                    e.target.style.width = '100%';
+                    e.target.style.height = '200px';
+                    e.target.style.objectFit = 'cover';
+                }}
+                style={{
+                    width: '100%',
+                    height: '200px',
+                    objectFit: 'cover',
+                    display: 'block'
+                }}
+            />
+        </>
+    ) : (
+        <div className="no-image" style={{
+            width: '100%',
+            height: '200px',
+            backgroundColor: '#f0f0f0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+        }}>
+            <Icons.Image size={32} color="#ccc" />
+            <span style={{ marginLeft: '8px', color: '#999' }}>Нет фото</span>
+        </div>
+    )}
+    <div className={getStatusClass(project.status)}>
+        {getStatusText(project.status)}
+    </div>
+</div>
                                     <div className="project-info">
                                         <h4 className="project-title">{project.title}</h4>
                                         <div className="project-details">
