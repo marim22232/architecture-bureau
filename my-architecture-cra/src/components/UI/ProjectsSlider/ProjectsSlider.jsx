@@ -8,7 +8,7 @@ import Typography from '../Typography/Typography.jsx';
 import { getAllProjects } from '../../../services/api';
 import MyButton from '../MyButton/MyButton.jsx';
 import './ProjectsSlider.css';
-
+import { getImageUrl } from '../../../utils/imageUtils.js';
 const ProjectsSlider = () => {
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);

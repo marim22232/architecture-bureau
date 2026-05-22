@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { profileAPI } from '../../services/api.js';
 import './MyProjects.css';
 
-import { getImageUrl } from '../../../utils/imageUtils.js';
+import { getImageUrl } from '../../utils/imageUtils.js';
 import Typography from '../../components/UI/Typography/Typography.jsx';
 import MyButton from '../../components/UI/MyButton/MyButton.jsx';
 import Icons from '../../components/UI/Icons/Icons.jsx'; // ← ВЕРНУЛ ИМПОРТ ИКОНОК
