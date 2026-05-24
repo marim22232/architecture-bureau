@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Typography from '../../UI/Typography/Typography.jsx';
 import './ServiceEditModal.css';
 
-const ServiceEditModal = ({ isOpen, service, onClose, onSave, onDelete }) => {
+const ServiceEditModal = ({ isOpen, showAlert, service, onClose, onSave, onDelete }) => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -40,48 +40,52 @@ const ServiceEditModal = ({ isOpen, service, onClose, onSave, onDelete }) => {
     setSelectedFile(e.target.files[0]);
   };
 
-  const handleSubmit = async (e) => {
+  // В handleSubmit перед отправкой
+  // В ServiceEditModal.jsx, измените handleSubmit
+const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // ✅ Проверка ID
+    if (!service || !service.id) {
+        const errorMsg = 'ID услуги не найден. Невозможно сохранить изменения.';
+        console.error('❌', errorMsg);
+        if (showAlert) showAlert(errorMsg, 'Ошибка');
+        onClose();
+        return;
+    }
+    
     setIsLoading(true);
 
     try {
-        // Создаем FormData для отправки файла
-        const submitData = new FormData();
-        submitData.append('title', formData.title);
-        submitData.append('description', formData.description);
-        submitData.append('price_range', formData.price_range || '');
-        submitData.append('price_per_sqm', formData.price_per_sqm ? parseFloat(formData.price_per_sqm) : '');
-        submitData.append('price_fixed', formData.price_fixed ? parseFloat(formData.price_fixed) : '');
-        submitData.append('icon', formData.icon || '📦');
+        // Подготовка данных
+        const serviceData = {
+            title: formData.title,
+            description: formData.description,
+            price_range: formData.price_range || null,
+            price_per_sqm: formData.price_per_sqm === '' ? null : parseFloat(formData.price_per_sqm),
+            price_fixed: formData.price_fixed === '' ? null : parseFloat(formData.price_fixed),
+            icon: formData.icon || '📦',
+            is_active: true
+        };
         
-        if (selectedFile) {
-            submitData.append('image', selectedFile);
-        }
+        console.log('📤 Отправка обновления для ID:', service.id);
+        console.log('📦 Данные:', serviceData);
         
-        // Отправляем FormData вместо JSON
-        const token = localStorage.getItem('token');
-        const response = await fetch(`/api/services/${service.id}`, {
-            method: 'PUT',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            },
-            body: submitData
+        // Вызываем onSave, который использует API
+        await onSave({
+            id: service.id,
+            ...serviceData
         });
-
-        if (response.ok) {
-            const updatedService = await response.json();
-            await onSave(updatedService);
-            onClose();
-        } else {
-            console.error('Ошибка при сохранении:', await response.text());
-        }
+        
+        onClose();
+        
     } catch (error) {
-        console.error('Ошибка при сохранении:', error);
+        console.error('❌ Ошибка:', error);
+        if (showAlert) showAlert(error.message || 'Ошибка при сохранении услуги', 'Ошибка');
     } finally {
         setIsLoading(false);
     }
 };
-
   if (!isOpen) return null;
 
   return (
@@ -91,7 +95,7 @@ const ServiceEditModal = ({ isOpen, service, onClose, onSave, onDelete }) => {
           <Typography variant="h3" weight="bold">Редактирование услуги</Typography>
           <button className="modal-close" onClick={onClose}>×</button>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="edit-form">
           <div className="form-group">
             <label>Название услуги</label>
@@ -103,7 +107,7 @@ const ServiceEditModal = ({ isOpen, service, onClose, onSave, onDelete }) => {
               required
             />
           </div>
-          
+
           <div className="form-group">
             <label>Описание</label>
             <textarea
@@ -114,7 +118,7 @@ const ServiceEditModal = ({ isOpen, service, onClose, onSave, onDelete }) => {
               required
             />
           </div>
-          
+
           <div className="form-group">
             <label>Ценовой диапазон (текст)</label>
             <input
@@ -149,7 +153,7 @@ const ServiceEditModal = ({ isOpen, service, onClose, onSave, onDelete }) => {
               step="0.01"
             />
           </div>
-          
+
           <div className="form-group">
             <label>Иконка (эмодзи)</label>
             <input
@@ -161,7 +165,7 @@ const ServiceEditModal = ({ isOpen, service, onClose, onSave, onDelete }) => {
               maxLength="2"
             />
           </div>
-          
+
           <div className="form-group">
             <label>Изображение</label>
             <input
@@ -171,7 +175,7 @@ const ServiceEditModal = ({ isOpen, service, onClose, onSave, onDelete }) => {
             />
             <small>Загрузите изображение для услуги (опционально)</small>
           </div>
-          
+
           <div className="modal-actions">
             <button type="button" className="btn-delete" onClick={() => onDelete(service.id)}>
               Удалить

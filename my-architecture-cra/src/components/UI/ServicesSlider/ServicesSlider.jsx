@@ -3,7 +3,12 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 import './ServicesSlider.css';
 import Typography from '../../UI/Typography/Typography.jsx';
-import { getServicesByCategorySlug } from '../../../services/api';
+import { 
+    getServicesByCategorySlug, 
+    updateService, 
+    deleteService, 
+    createService 
+} from '../../../services/api';
 import ServiceEditModal from './ServiceEditModal.jsx';
 import AddServiceModal from './AddServiceModal.jsx';
 import { useModal } from '../../../hooks/useModal'; // ✅ Добавить импорт
@@ -115,90 +120,81 @@ const ServicesSlider = ({ isAdmin = false, onServicesUpdate }) => {
 
   const handleSaveService = async (updatedService) => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/services/${updatedService.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(updatedService)
-      });
-
-      if (response.ok) {
-        refreshServices();
-        setIsEditModalOpen(false);
-        setEditingService(null);
-        showAlert('Услуга успешно обновлена');
-      } else {
-        const error = await response.json();
-        console.error('Ошибка при сохранении:', error);
-        showAlert('Ошибка при сохранении услуги', 'Ошибка');
-      }
+        const token = localStorage.getItem('token');
+        
+        // ✅ Проверка ID
+        if (!updatedService.id) {
+            console.error('❌ Нет ID у обновляемой услуги');
+            showAlert('Ошибка: ID услуги не найден', 'Ошибка');
+            return;
+        }
+        
+        console.log('📤 Сохранение услуги с ID:', updatedService.id);
+        
+        // Используем API функцию вместо прямого fetch
+        const result = await updateService(updatedService.id, updatedService, token);
+        
+        if (result && result.service) {
+            refreshServices();
+            setIsEditModalOpen(false);
+            setEditingService(null);
+            showAlert('Услуга успешно обновлена');
+        } else {
+            throw new Error('Не удалось обновить услугу');
+        }
     } catch (error) {
-      console.error('Ошибка:', error);
-      showAlert('Ошибка при сохранении услуги', 'Ошибка');
+        console.error('❌ Ошибка при сохранении:', error);
+        showAlert(error.message || 'Ошибка при сохранении услуги', 'Ошибка');
     }
-  };
+};
 
   const handleDeleteService = async (serviceId) => {
     setServiceToDelete(serviceId);
   };
 
-  const confirmDelete = async () => {
+const confirmDelete = async () => {
     const serviceId = serviceToDelete;
     setServiceToDelete(null);
     
+    if (!serviceId) {
+        showAlert('Ошибка: ID услуги не найден', 'Ошибка');
+        return;
+    }
+    
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/services/${serviceId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (response.ok) {
+        const token = localStorage.getItem('token');
+        await deleteService(serviceId, token);
+        
         refreshServices();
         setIsEditModalOpen(false);
         setEditingService(null);
         showAlert('Услуга удалена');
-      } else {
-        console.error('Ошибка при удалении');
-        showAlert('Ошибка при удалении услуги', 'Ошибка');
-      }
     } catch (error) {
-      console.error('Ошибка:', error);
-      showAlert('Ошибка при удалении услуги', 'Ошибка');
+        console.error('❌ Ошибка при удалении:', error);
+        showAlert(error.message || 'Ошибка при удалении услуги', 'Ошибка');
     }
-  };
+};
 
   const handleCreateService = async (newService) => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/services', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(newService)
-      });
-
-      if (response.ok) {
-        refreshServices();
-        setIsAddModalOpen(false);
-        showAlert('Услуга успешно добавлена');
-      } else {
-        const error = await response.json();
-        console.error('Ошибка при создании:', error);
-        showAlert('Ошибка при создании услуги', 'Ошибка');
-      }
+        const token = localStorage.getItem('token');
+        
+        console.log('📤 Создание новой услуги:', newService);
+        
+        const result = await createService(newService, token);
+        
+        if (result && result.service) {
+            refreshServices();
+            setIsAddModalOpen(false);
+            showAlert('Услуга успешно добавлена');
+        } else {
+            throw new Error('Не удалось создать услугу');
+        }
     } catch (error) {
-      console.error('Ошибка:', error);
-      showAlert('Ошибка при создании услуги', 'Ошибка');
+        console.error('❌ Ошибка при создании:', error);
+        showAlert(error.message || 'Ошибка при создании услуги', 'Ошибка');
     }
-  };
+};
 
 const getImageUrl = (service) => {
     const API_BASE_URL = 'https://my-architecture-api.onrender.com';

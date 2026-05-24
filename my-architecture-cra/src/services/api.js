@@ -175,69 +175,138 @@ export const getProjectsByType = async (typeId) => {
 };
 
 // ============================================
-// SERVICES API
+// SERVICES API - ИСПРАВЛЕННЫЕ ПУТИ
 // ============================================
+
+// Получить все услуги
 export const getServices = async () => {
     const response = await fetch(`${API_URL}/services`);
     return response.json();
 };
 
+// Получить популярные услуги
 export const getPopularServices = async () => {
     const response = await fetch(`${API_URL}/services/popular`);
     return response.json();
 };
 
+// Получить услуги по категории (по ID или имени)
 export const getServicesByCategory = async (category) => {
     const response = await fetch(`${API_URL}/services/category/${category}`);
     return response.json();
 };
 
+// ✅ ИСПРАВЛЕНО: правильный путь для получения услуг по slug категории
 export const getServicesByCategorySlug = async (slug) => {
+    // Путь должен совпадать с тем, что в бэкенде
+    // В вашем ServiceController есть метод getByCategorySlug
+    // Он слушает GET /api/services/categories/:slug
     const response = await fetch(`${API_URL}/services/categories/${slug}`);
-    return response.json();
-};
-// Добавьте в ваш файл api.js
-// ✅ Правильно
-export const updateService = async (id, serviceData, token) => {
-  try {
-    const response = await fetch(`${API_URL}/services/${id}`, {  // <-- используем API_URL
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(serviceData)
-    });
     
     if (!response.ok) {
-      throw new Error('Ошибка при обновлении услуги');
+        console.error(`Ошибка загрузки услуг для категории ${slug}:`, response.status);
+        return [];
     }
     
-    return await response.json();
-  } catch (error) {
-    console.error('Ошибка:', error);
-    throw error;
-  }
+    const data = await response.json();
+    console.log(`📦 Загружено услуг для ${slug}:`, Array.isArray(data) ? data.length : 0);
+    
+    // Проверяем, что возвращается массив
+    return Array.isArray(data) ? data : (data.services || []);
 };
 
-export const deleteService = async (id, token) => {
-  try {
-    const response = await fetch(`${API_URL}/services/${id}`, {  // <-- используем API_URL
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    
-    if (!response.ok) {
-      throw new Error('Ошибка при удалении услуги');
+// Обновление услуги
+export const updateService = async (id, serviceData, token) => {
+    try {
+        // ✅ Убеждаемся, что id валидный
+        if (!id || id === 'undefined' || id === 'null') {
+            throw new Error('ID услуги не указан');
+        }
+        
+        // Для FormData не нужно указывать Content-Type
+        const options = {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        };
+        
+        // Если данные не FormData, добавляем Content-Type
+        if (serviceData instanceof FormData) {
+            options.body = serviceData;
+        } else {
+            options.headers['Content-Type'] = 'application/json';
+            options.body = JSON.stringify(serviceData);
+        }
+        
+        const response = await fetch(`${API_URL}/services/${id}`, options);
+        
+        if (!response.ok) {
+            const error = await response.text();
+            throw new Error(`Ошибка при обновлении услуги: ${error}`);
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Ошибка в updateService:', error);
+        throw error;
     }
-    
-    return await response.json();
-  } catch (error) {
-    console.error('Ошибка:', error);
-    throw error;
-  }
+};
+
+// Удаление услуги
+export const deleteService = async (id, token) => {
+    try {
+        if (!id || id === 'undefined' || id === 'null') {
+            throw new Error('ID услуги не указан');
+        }
+        
+        const response = await fetch(`${API_URL}/services/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Ошибка при удалении услуги');
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Ошибка в deleteService:', error);
+        throw error;
+    }
+};
+
+// Создание услуги
+export const createService = async (serviceData, token) => {
+    try {
+        const options = {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        };
+        
+        if (serviceData instanceof FormData) {
+            options.body = serviceData;
+        } else {
+            options.headers['Content-Type'] = 'application/json';
+            options.body = JSON.stringify(serviceData);
+        }
+        
+        const response = await fetch(`${API_URL}/services`, options);
+        
+        if (!response.ok) {
+            const error = await response.text();
+            throw new Error(`Ошибка при создании услуги: ${error}`);
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Ошибка в createService:', error);
+        throw error;
+    }
 };
 
 // ============================================

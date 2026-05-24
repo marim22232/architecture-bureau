@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import Typography from '../../UI/Typography/Typography.jsx';
 import './ServiceEditModal.css';
 
-const AddServiceModal = ({ isOpen, onClose, onSave, categories }) => {
+const AddServiceModal = ({ isOpen, onClose, onSave, categories, showAlert  }) => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -29,20 +29,24 @@ const AddServiceModal = ({ isOpen, onClose, onSave, categories }) => {
     setSelectedFile(e.target.files[0]);
   };
 
-  const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
         const selectedCategory = categories.find(cat => cat.slug === formData.category_slug);
         
-        // Создаем FormData для отправки файла
         const submitData = new FormData();
         submitData.append('title', formData.title);
         submitData.append('description', formData.description);
         submitData.append('price_range', formData.price_range || '');
-        submitData.append('price_per_sqm', formData.price_per_sqm ? parseFloat(formData.price_per_sqm) : '');
-        submitData.append('price_fixed', formData.price_fixed ? parseFloat(formData.price_fixed) : '');
+        
+        // ✅ ИСПРАВЛЕНИЕ: преобразуем пустые строки в null
+        const pricePerSqm = formData.price_per_sqm === '' ? null : parseFloat(formData.price_per_sqm);
+        const priceFixed = formData.price_fixed === '' ? null : parseFloat(formData.price_fixed);
+        
+        submitData.append('price_per_sqm', pricePerSqm !== null ? pricePerSqm : '');
+        submitData.append('price_fixed', priceFixed !== null ? priceFixed : '');
         submitData.append('icon', formData.icon || '📦');
         submitData.append('category_id', selectedCategory?.id || '');
         
@@ -50,7 +54,6 @@ const AddServiceModal = ({ isOpen, onClose, onSave, categories }) => {
             submitData.append('image', selectedFile);
         }
         
-        // Отправляем FormData вместо JSON
         const token = localStorage.getItem('token');
         const response = await fetch('/api/services', {
             method: 'POST',
@@ -76,11 +79,15 @@ const AddServiceModal = ({ isOpen, onClose, onSave, categories }) => {
             });
             setSelectedFile(null);
             onClose();
+            showAlert('Услуга успешно добавлена');
         } else {
-            console.error('Ошибка при создании:', await response.text());
+            const errorText = await response.text();
+            console.error('Ошибка при создании:', errorText);
+            showAlert('Ошибка при создании услуги', 'Ошибка');
         }
     } catch (error) {
-        console.error('Ошибка при создании:', error);
+        console.error('Ошибка:', error);
+        showAlert('Ошибка при создании услуги', 'Ошибка');
     } finally {
         setIsLoading(false);
     }
